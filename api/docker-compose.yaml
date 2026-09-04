@@ -1,0 +1,66 @@
+name: openapi-generator
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: openapi-generator-postgres
+    restart: unless-stopped
+    environment:
+      postgres_user: ${postgres_user:-postgres}
+      postgres_password: ${postgres_password:-postgres}
+      postgres_db: ${postgres_db:-openapi_generator}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - frisboo-bank
+    healthcheck:
+      test: ["CMD", "pg_isready -u ${postgres_user:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8-alpine
+    container_name: openapi-generator-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - frisboo-bank
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nats:
+    image: nats:2-alpine
+    container_name: openapi-generator-nats
+    restart: unless-stopped
+    command: ["nats-server", "-js"]
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    volumes:
+      - nats_data:/data
+    networks:
+      - frisboo-bank
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  nats_data:
+
+networks:
+  frisboo-bank:
+    name: frisboo-bank

@@ -1,0 +1,82 @@
+app:
+  name: openapi-generator-service
+  logger: main
+
+loggers:
+  main:
+    type: zerolog
+    level: debug
+    prefix: openapi-generator-service
+  http-server:
+    type: zerolog
+    level: debug
+    prefix: (http-server) openapi-generator-service
+  rpc-server:
+    type: zerolog
+    level: debug
+    prefix: (rpc-server) openapi-generator-service
+  sql-client:
+    type: zerolog
+    level: debug
+    prefix: (sql-client) openapi-generator-service
+  waiter:
+    type: zerolog
+    level: debug
+    prefix: (waiter) openapi-generator-service
+  mediator:
+    type: zerolog
+    level: debug
+    prefix: (mediator) openapi-generator-service
+
+http-servers:
+  main:
+    enabled: true
+    type: echo
+    host: 0.0.0.0
+    port: 8002
+    basePath: /api
+    debug: true
+    logger: http-server
+
+rpc-servers:
+  main:
+    enabled: true
+    type: grpc
+    host: 0.0.0.0
+    port: 9002
+    debug: true
+    logger: rpc-server
+
+sql-clients:
+  main:
+    enabled: true
+    type: postgresx
+    host: localhost
+    port: 5432
+    user: postgres
+    password: postgres
+    database: openapi_generator
+    sslMode: disabled
+    logger: sql-client
+
+migration:
+  main:
+    enabled: true
+    type: goose
+    migrationsDir: db/migrations/main
+    dbClient: main
+
+caches:
+  main:
+    enabled: true
+    type: redis
+    host: localhost
+    port: 6379
+
+waiter:
+  cancelOnShutdownSignal: true
+  cleanupTimeoutMs: 30000
+  logger: waiter
+
+mediator:
+  logger: mediator

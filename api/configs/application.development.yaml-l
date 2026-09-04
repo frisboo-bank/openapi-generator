@@ -1,0 +1,64 @@
+app:
+  name: customer-logon-service
+  logger: main
+
+container:
+  type: dig
+
+http-servers:
+  instances:
+    main:
+      type: echo
+      host: 127.0.0.1
+      port: 8002
+      basePath: /api
+      debug: true
+      logger: main-http-server
+
+rpc-servers:
+  instances:
+    main:
+      type: grpc
+      host: 127.0.0.1
+      port: 9002
+      debug: true
+      logger: main-rpc-server
+
+database-clients:
+  instances:
+    customer-logon-read:
+      type: mongodb
+      host: localhost
+      port: 27018
+      user: admin
+      password: admin
+      database: customer-logon-read
+      sslMode: false
+    customer-logon-write:
+      type: postgres
+      host: localhost
+      port: 5433
+      user: admin
+      password: admin
+      database: customer-logon-write
+      sslMode: false
+
+loggers:
+  type: logrus
+  level: debug
+  instances:
+    main:
+      prefix: customer-logon-service
+    main-http-server:
+      prefix: customer-logon-service (http-server)
+    main-rpc-server:
+      prefix: customer-logon-service (rpc-server)
+
+migrations:
+  instances:
+    customer-logon-read:
+      db: customer-logon-read
+      migrationsDir: db/migrations/read
+    customer-logon-write:
+      db: customer-logon-write
+      migrationsDir: db/migrations/write
