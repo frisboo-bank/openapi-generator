@@ -31,20 +31,25 @@ NAME := $(notdir $(MODULE))
 # Backend (Go) -- every go/buf/lint tool runs against the api/ module
 # ---------------------------------------------------------------------------
 
+.PHONY: generate-backend
+generate-backend:  ## Generate enum sources (installs pinned goenums, runs go generate)
+	$(API) go install github.com/zarldev/goenums@v0.4.3
+	$(API) PATH="$$(go env GOPATH)/bin:$$PATH" go generate ./...
+
 .PHONY: run
-run:  ## Run the API server
+run: generate-backend  ## Run the API server
 	$(API) $(GO) run cmd/main.go run
 
 .PHONY: build-backend
-build-backend:  ## Build the API binary
+build-backend: generate-backend  ## Build the API binary
 	$(API) $(GO) build cmd/main.go
 
 .PHONY: test-backend
-test-backend:  ## Run go tests (race + coverage)
+test-backend: generate-backend  ## Run go tests (race + coverage)
 	$(API) $(GO) test -race -cover ./...
 
 .PHONY: bench-backend
-bench-backend:  ## Run go benchmarks
+bench-backend: generate-backend  ## Run go benchmarks
 	$(API) $(GO) test -run=XXXXXX -benchtime=10s -bench=./ || exit 1
 
 .PHONY: update-backend
@@ -69,7 +74,7 @@ lint-proto:  ## Lint protobuf sources
 	$(API) buf lint
 
 .PHONY: tidy-backend
-tidy-backend: format-proto  ## Format + tidy go sources
+tidy-backend: format-proto generate-backend  ## Format + tidy go sources
 	$(API) $(GO) fmt ./...
 	$(API) $(GO) mod tidy
 	$(API) $(GO) mod verify
@@ -79,12 +84,12 @@ tidy-backend: format-proto  ## Format + tidy go sources
 	$(API) gofumpt -l -w .
 
 .PHONY: lint-backend
-lint-backend: lint-proto  ## Run go linters (revive + golangci-lint)
+lint-backend: lint-proto generate-backend  ## Run go linters (revive + golangci-lint)
 	$(API) revive -config revive-config.toml -formatter friendly ./...
 	$(API) golangci-lint run ./...
 
 .PHONY: audit-backend
-audit-backend:  ## Run quality-control checks
+audit-backend: generate-backend  ## Run quality-control checks
 	$(API) $(GO) mod verify
 	$(API) $(GO) vet ./...
 	$(API) staticcheck -checks=all,-ST1000,-U1000 ./...
@@ -92,7 +97,7 @@ audit-backend:  ## Run quality-control checks
 	$(API) $(GO) test -race ./...
 
 .PHONY: vet-backend
-vet-backend:  ## Run go vet
+vet-backend: generate-backend  ## Run go vet
 	$(API) $(GO) vet ./...
 
 # ---------------------------------------------------------------------------

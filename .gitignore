@@ -24,3 +24,6 @@ go.sum.bak
 
 # Local assistant artifact folder
 .sisyphus/
+
+# Generated code (run `make generate-backend`)
+**/*_enums.go
