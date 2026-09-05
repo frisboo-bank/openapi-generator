@@ -25,5 +25,8 @@ go.sum.bak
 # Local assistant artifact folder
 .sisyphus/
 
+# Understand-Anything trash dirs (intermediate processing artifacts)
+.ua/.trash-*/
+
 # Generated code (run `make generate-backend`)
 **/*_enums.go
