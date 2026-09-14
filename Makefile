@@ -135,8 +135,7 @@ frontend/test:  ## Run frontend tests
 # Project-wide (root-level) targets
 # ---------------------------------------------------------------------------
 
-.PHONY: all build
-all: build  ## Build everything
+.PHONY: build
 build: backend/build frontend/build  ## Build backend + frontend
 
 .PHONY: project/install project/test project/lint project/tidy project/vet project/audit
