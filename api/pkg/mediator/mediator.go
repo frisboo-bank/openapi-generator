@@ -6,76 +6,96 @@ import (
 	"reflect"
 	"sync"
 
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
-
-	"github.com/hashicorp/go-multierror"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
 var _ contracts.Mediator = (*mediator)(nil)
 
 type mediator struct {
-	mu            sync.RWMutex
-	handlers      map[reflect.Type]func(context.Context, any) (any, error)
-	notifications map[reflect.Type][]func(context.Context, any) error
+	mu                   sync.RWMutex
+	requestHandlers      map[reflect.Type]any
+	notificationHandlers map[reflect.Type][]any
+	logger               loggercontracts.Logger
 }
 
 func NewMediator(
 	cfg *models.MediatorOptions,
-	logger loggerContracts.Logger,
+	logger loggercontracts.Logger,
 ) (contracts.Mediator, error) {
 	return &mediator{
-		handlers:      map[reflect.Type]func(context.Context, any) (any, error){},
-		notifications: map[reflect.Type][]func(context.Context, any) error{},
+		logger:               logger,
+		requestHandlers:      make(map[reflect.Type]any, 0),
+		notificationHandlers: make(map[reflect.Type][]any, 0),
 	}, nil
 }
 
-func (m *mediator) Publish(ctx context.Context, notification any) error {
-	t := reflect.TypeOf(notification)
+func (m *mediator) RegisterRequest(requestType contracts.TRequest, handler any) error {
+	validation.AssertNotNil("handler", handler)
 
-	m.mu.RLock()
-	fns, ok := m.notifications[t]
-	m.mu.RUnlock()
-
-	if !ok || len(fns) == 0 {
-		return nil
+	t := reflect.TypeOf(requestType)
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
 	}
 
-	var errs error
-	for _, fn := range fns {
-		errs = multierror.Append(errs, fn(ctx, notification))
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.requestHandlers[t]; exists {
+		return fmt.Errorf("mediator: handler already registered for request type %v", t)
 	}
+	m.requestHandlers[t] = handler
 
-	return errs
+	return nil
 }
 
-func (m *mediator) Send(ctx context.Context, request any) (any, error) {
+func (m *mediator) RegisterNotification(notificationType contracts.TNotification, handler any) error {
+	validation.AssertNotNil("handler", handler)
+
+	t := reflect.TypeOf(notificationType)
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if _, exists := m.notificationHandlers[t]; !exists {
+		m.notificationHandlers[t] = make([]any, 0)
+	}
+	m.notificationHandlers[t] = append(m.notificationHandlers[t], handler)
+
+	return nil
+}
+
+func (m *mediator) Send(ctx context.Context, request contracts.Request) (contracts.Response, error) {
+	validation.AssertNotNil("request", request)
+
+	if err := ctx.Err(); err != nil {
+		return nil, fmt.Errorf("mediator: context cancelled before send: %w", err)
+	}
+
 	t := reflect.TypeOf(request)
+	if t.Kind() == reflect.Pointer {
+		t = t.Elem()
+	}
 
 	m.mu.RLock()
-	fn, ok := m.handlers[t]
+	handlerRaw, exists := m.requestHandlers[t]
 	m.mu.RUnlock()
 
-	if !ok {
+	if !exists {
 		return nil, fmt.Errorf("mediator: no handler registered for %T", request)
 	}
 
-	return fn(ctx, request)
-}
-
-func (m *mediator) registerHandler(
-	requestType reflect.Type,
-	fn func(context.Context, any) (any, error),
-) error {
-	m.mu.Lock()
-	defer m.mu.Unlock()
-
-	if _, exists := m.handlers[requestType]; exists {
-		return fmt.Errorf("mediator: handler already registered for %v", requestType)
+	handler, ok := handlerRaw.(func(context.Context, any) (any, error))
+	if !ok {
+		return nil, fmt.Errorf("mediator: invalid handler type stored for %T", request)
 	}
 
-	m.handlers[requestType] = fn
+	return handler(ctx, request)
+}
 
-	return nil
+func (m *mediator) Publish(ctx context.Context, notification contracts.Notification) error {
+	panic("unimplemented")
 }

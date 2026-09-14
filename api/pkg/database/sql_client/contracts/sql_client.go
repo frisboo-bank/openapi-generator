@@ -6,76 +6,81 @@ import (
 
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-
-	"github.com/jmoiron/sqlx"
 )
 
 type (
-	SQLClientCore interface {
-		// Close gracefully shuts down the database connection pool.
+	SQLRow interface {
+		Scan(dest ...any) error
+		Err() error
+	}
+
+	SQLRows interface {
 		Close() error
-		// Name returns the logical name assigned to this client (e.g., "main").
-		Name() string
-		// Type returns the adapter type
-		Type() sqlclienttype.SqlClientType
-		// Ping verifies that the database is reachable.
+		ColumnTypes() ([]*sql.ColumnType, error)
+		Columns() ([]string, error)
+		Err() error
+		Next() bool
+		NextResultSet() bool
+		Scan(dest ...any) error
+	}
+
+	SQLClientCore interface {
+		Close(ctx context.Context) error
 		Ping(ctx context.Context) error
-		// Logger returns the logger.
+		Name() string
+		Type() sqlclienttype.SqlClientType
 		Logger() loggerContracts.Logger
 	}
 
 	SQLClient interface {
 		SQLClientCore
+		SQLClientAdapter
+	}
 
-		// BeginTx starts a new database transaction.
+	SQLClientAdapter interface {
+		SQLClientCore
 		BeginTx(ctx context.Context, opts *sql.TxOptions) (SQLTransaction, error)
-		// Exec executes a query without returning any rows.
 		Exec(ctx context.Context, query string, args ...any) (sql.Result, error)
-		// Query executes a query that returns rows.
-		Query(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-		// QueryRow executes a query that is expected to return at most one row.
-		QueryRow(ctx context.Context, query string, args ...any) *sql.Row
+		Query(ctx context.Context, query string, args ...any) (SQLRows, error)
+		QueryRow(ctx context.Context, query string, args ...any) SQLRow
 	}
 
 	SQLTransaction interface {
-		// Exec executes a query inside the transaction.
+		Commit(ctx context.Context) error
 		Exec(ctx context.Context, query string, args ...any) (sql.Result, error)
-		// Query executes a query that returns rows inside the transaction.
-		Query(ctx context.Context, query string, args ...any) (*sql.Rows, error)
-		// QueryRow executes a query expected to return at most one row inside the transaction.
-		QueryRow(ctx context.Context, query string, args ...any) *sql.Row
-		// Commit commits the transaction.
-		Commit() error
-		// Rollback aborts the transaction.
-		Rollback() error
+		Query(ctx context.Context, query string, args ...any) (SQLRows, error)
+		QueryRow(ctx context.Context, query string, args ...any) SQLRow
+		Rollback(ctx context.Context) error
+	}
+
+	SQLXRows interface {
+		SQLRows
+		StructScan(dest any) error
+		MapScan(dest map[string]any) error
+		SliceScan() ([]any, error)
 	}
 
 	SQLXClient interface {
 		SQLClientCore
+		SQLXClientAdapter
+	}
 
-		// BeginTxx starts a new sqlx transaction with the given options.
-		BeginTxx(ctx context.Context, opts *sql.TxOptions) (SQLXTransaction, error)
-		// Get executes a query and scans the first row into dest.
-		NamedGet(ctx context.Context, dest any, query string, args any) error
-		// NamedExec executes a named‑parameter query without returning rows.
-		NamedExec(ctx context.Context, query string, args any) (sql.Result, error)
-		// NamedQuery executes a named‑parameter query and returns the rows for scanning.
-		NamedQuery(ctx context.Context, query string, args any) (*sqlx.Rows, error)
-		// Select executes a query and scans all rows into dest (a slice pointer).
-		NamedSelect(ctx context.Context, dest any, query string, args any) error
+	SQLXClientAdapter interface {
+		SQLClientCore
+		BeginTransaction(ctx context.Context, opts *sql.TxOptions) (SQLXTransaction, error)
+		NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error)
+		NamedGet(ctx context.Context, dest any, query string, args map[string]any) error
+		NamedQuery(ctx context.Context, query string, args map[string]any) (SQLXRows, error)
+		NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error
 	}
 
 	SQLXTransaction interface {
-		// Get executes a query and scans the first row into dest inside the transaction.
-		NamedGet(ctx context.Context, dest any, query string, args any) error
-		// NamedExec executes a named‑parameter query without returning rows inside the transaction.
-		NamedExec(ctx context.Context, query string, args any) (sql.Result, error)
-		// Select executes a query and scans all rows into dest inside the transaction.
-		NamedSelect(ctx context.Context, dest any, query string, args any) error
-		// Commit commits the transaction.
-		Commit() error
-		// Rollback aborts the transaction.
-		Rollback() error
+		Commit(ctx context.Context) error
+		NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error)
+		NamedGet(ctx context.Context, dest any, query string, args map[string]any) error
+		NamedQuery(ctx context.Context, query string, args map[string]any) (SQLXRows, error)
+		NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error
+		Rollback(ctx context.Context) error
 	}
 
 	WithDBGetter interface {

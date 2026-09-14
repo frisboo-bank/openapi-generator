@@ -4,15 +4,11 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	"frisboo-bank/openapi-generator-service/pkg/cache/adapters/memory"
-	"frisboo-bank/openapi-generator-service/pkg/cache/adapters/redis"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 
 	"go.uber.org/dig"
 )
@@ -34,14 +30,7 @@ var CacheModule = module.NewMultiInstancesModule(
 			logger loggerContracts.Logger,
 			extra CacheDependencies,
 		) (contracts.Cache, error) {
-			switch cfg.Type {
-			case cachetype.CacheTypes.REDIS:
-				return redis.NewRedisAdapter(name, cfg, logger, env), nil
-			case cachetype.CacheTypes.MEMORY:
-				return memory.NewMemoryAdapter(name, cfg, logger, env)
-			default:
-				return nil, syserrors.Newf("no cache-client of type %q exists", cfg.Type)
-			}
+			return CreateCache(name, cfg, logger, env)
 		},
 		HookFn: func(name string, instance contracts.Cache) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{

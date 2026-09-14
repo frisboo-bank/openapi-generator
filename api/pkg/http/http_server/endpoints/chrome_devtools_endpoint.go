@@ -8,6 +8,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/google/uuid"
 )
@@ -29,12 +30,16 @@ type chromeDevtoolEndpoint struct {
 
 func NewChromeDevtoolEndpoint(
 	env environmentEnum.Environment,
-	log loggerContracts.Logger,
+	logger loggerContracts.Logger,
 	root contracts.RouteGroup,
 ) routing.Endpoint {
+	validation.AssertValidEnum("env", env)
+	validation.AssertNotNil("logger", logger)
+	validation.AssertNotNil("root", root)
+
 	return &chromeDevtoolEndpoint{
 		Env:    env,
-		Logger: log,
+		Logger: logger,
 		Root:   root,
 	}
 }
@@ -58,9 +63,15 @@ func (ep *chromeDevtoolEndpoint) handler() http.HandlerFunc {
 
 		workspaceUUID := uuid.New().String()
 
-		var config WorkspaceConfig
-		config.Workspace.Root = projectRoot
-		config.Workspace.UUID = workspaceUUID
+		config := &WorkspaceConfig{
+			Workspace: struct {
+				Root string `json:"root"`
+				UUID string `json:"uuid"`
+			}{
+				Root: projectRoot,
+				UUID: workspaceUUID,
+			},
+		}
 
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 

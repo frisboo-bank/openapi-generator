@@ -6,7 +6,5 @@ import (
 )
 
 func ApisModule() containerContracts.Module {
-	return container.NewModule(
-		"apis",
-	)
+	return container.NewModule("apis")
 }

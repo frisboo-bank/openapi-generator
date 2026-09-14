@@ -18,7 +18,5 @@ func NewInfrastructureConfigurator(app contracts.Application) *InfrastructureCon
 }
 
 func (ic *InfrastructureConfigurator) ConfigureInfrastructures() {
-	ic.ResolveFunc(
-		func() {},
-	)
+	ic.ResolveFunc(func() {})
 }
