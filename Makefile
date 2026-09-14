@@ -137,7 +137,7 @@ frontend/test:  ## Run frontend tests
 
 .PHONY: all build
 all: build  ## Build everything
-build: frontend/install backend/build frontend/build  ## Build backend + frontend
+build: backend/build frontend/build  ## Build backend + frontend
 
 .PHONY: project/install
 project/install: frontend/install backend/install  ## Install all dependencies
@@ -169,7 +169,7 @@ clean:  ## Remove build artifacts
 help:  ## Print this help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make [category]/target\n\n"} \
 		CAT == "" { CAT = "project"; } \
-		/^[a-zA-Z0-9_-]+:.*?##/ { \
+		/^[a-zA-Z0-9_/-]+:.*?##/ { \
 			cat = "project"; \
 			if ($$1 ~ /^backend\//) cat = "backend"; \
 			if ($$1 ~ /^frontend\//) cat = "frontend"; \
@@ -177,7 +177,7 @@ help:  ## Print this help
 				CAT = cat; \
 				printf "\n## %s\n", toupper(cat); \
 			} \
-			name = $$1; sub(/:.*$$/, "", name); \
-			print "  " name; \
+			target = $$1; sub(/:.*$$/, "", target); \
+			print "  " target; \
 		} \
 		END { printf "\n" }' $(MAKEFILE_LIST)
