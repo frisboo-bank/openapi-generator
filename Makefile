@@ -31,49 +31,49 @@ NAME := $(notdir $(MODULE))
 # ---------------------------------------------------------------------------
 
 .PHONY: backend/generate
-backend/generate:  ## Generate enum sources (installs pinned goenums, runs go generate)
+backend/generate:  ## Backend: Generate enum sources (installs pinned goenums, runs go generate)
 	$(API) go install github.com/zarldev/goenums@v0.4.3
 	$(API) PATH="$$(go env GOPATH)/bin:$$PATH" go generate ./...
 
 .PHONY: backend/run
-backend/run: backend/generate  ## Run the API server
+backend/run: backend/generate  ## Backend: Run the API server
 	$(API) $(GO) run cmd/main.go run
 
 .PHONY: backend/build
-backend/build: backend/generate  ## Build the API binary
+backend/build: backend/generate  ## Backend: Build the API binary
 	$(API) $(GO) build cmd/main.go
 
 .PHONY: backend/test
-backend/test: backend/generate  ## Run go tests (race + coverage)
+backend/test: backend/generate  ## Backend: Run go tests (race + coverage)
 	$(API) $(GO) test -race -cover ./...
 
 .PHONY: backend/bench
-backend/bench: backend/generate  ## Run go benchmarks
+backend/bench: backend/generate  ## Backend: Run go benchmarks
 	$(API) $(GO) test -run=XXXXXX -benchtime=10s -bench=./ || exit 1
 
 .PHONY: backend/update
-backend/update:  ## Bump go module dependencies
+backend/update:  ## Backend: Bump go module dependencies
 	$(API) $(GO) get -u ./...
 
 .PHONY: backend/deps-update
-backend/deps-update:  ## Update + tidy go dependencies
+backend/deps-update:  ## Backend: Update + tidy go dependencies
 	$(API) $(GO) get -u -t -v ./...
 	$(API) $(GO) mod tidy
 
 .PHONY: backend/deps-cleancache
-backend/deps-cleancache:  ## Clear the go module cache
+backend/deps-cleancache:  ## Backend: Clear the go module cache
 	$(API) $(GO) clean -modcache
 
 .PHONY: backend/format-proto
-backend/format-proto:  ## Format protobuf sources
+backend/format-proto:  ## Backend: Format protobuf sources
 	$(API) buf format -w
 
 .PHONY: backend/lint-proto
-backend/lint-proto:  ## Lint protobuf sources
+backend/lint-proto:  ## Backend: Lint protobuf sources
 	$(API) buf lint
 
 .PHONY: backend/tidy
-backend/tidy: backend/format-proto backend/generate  ## Format + tidy go sources
+backend/tidy: backend/format-proto backend/generate  ## Backend: Format + tidy go sources
 	$(API) $(GO) fmt ./...
 	$(API) $(GO) mod tidy
 	$(API) $(GO) mod verify
@@ -83,12 +83,12 @@ backend/tidy: backend/format-proto backend/generate  ## Format + tidy go sources
 	$(API) gofumpt -l -w .
 
 .PHONY: backend/lint
-backend/lint: backend/lint-proto backend/generate  ## Run go linters (revive + golangci-lint)
+backend/lint: backend/lint-proto backend/generate  ## Backend: Run go linters (revive + golangci-lint)
 	$(API) revive -config revive-config.toml -formatter friendly ./...
 	$(API) golangci-lint run ./...
 
 .PHONY: backend/audit
-backend/audit: backend/generate  ## Run quality-control checks
+backend/audit: backend/generate  ## Backend: Run quality-control checks
 	$(API) $(GO) mod verify
 	$(API) $(GO) vet ./...
 	$(API) staticcheck -checks=all,-ST1000,-U1000 ./...
@@ -96,11 +96,11 @@ backend/audit: backend/generate  ## Run quality-control checks
 	$(API) $(GO) test -race ./...
 
 .PHONY: backend/vet
-backend/vet: backend/generate  ## Run go vet
+backend/vet: backend/generate  ## Backend: Run go vet
 	$(API) $(GO) vet ./...
 
 .PHONY: backend/install
-backend/install:  ## Download go module dependencies
+backend/install:  ## Backend: Download go module dependencies
 	$(API) $(GO) mod download
 
 # ---------------------------------------------------------------------------
@@ -108,27 +108,27 @@ backend/install:  ## Download go module dependencies
 # ---------------------------------------------------------------------------
 
 .PHONY: frontend/install
-frontend/install:  ## Install frontend dependencies
+frontend/install:  ## Frontend: Install frontend dependencies
 	$(FRONT) $(PNPM) install
 
 .PHONY: frontend/build
-frontend/build:  ## Build the frontend
+frontend/build:  ## Frontend: Build the frontend
 	$(FRONT) $(PNPM) run build
 
 .PHONY: frontend/dev
-frontend/dev:  ## Start the frontend dev server
+frontend/dev:  ## Frontend: Start the frontend dev server
 	$(FRONT) $(PNPM) run dev
 
 .PHONY: frontend/preview
-frontend/preview:  ## Preview the frontend build
+frontend/preview:  ## Frontend: Preview the frontend build
 	$(FRONT) $(PNPM) run preview
 
 .PHONY: frontend/lint
-frontend/lint:  ## Lint the frontend
+frontend/lint:  ## Frontend: Lint the frontend
 	$(FRONT) $(PNPM) run lint
 
 .PHONY: frontend/test
-frontend/test:  ## Run frontend tests
+frontend/test:  ## Frontend: Run frontend tests
 	$(FRONT) $(PNPM) run test
 
 # ---------------------------------------------------------------------------
@@ -136,28 +136,28 @@ frontend/test:  ## Run frontend tests
 # ---------------------------------------------------------------------------
 
 .PHONY: build
-build: backend/build frontend/build  ## Build backend + frontend
+build: backend/build frontend/build  ## Project: Build backend + frontend
 
-.PHONY: project/install project/test project/lint project/tidy project/vet project/audit
-project/install: frontend/install backend/install  ## Install all dependencies
+.PHONY: project/install
+project/install: frontend/install backend/install  ## Project: Install all dependencies
 
 .PHONY: project/test
-project/test: backend/test frontend/test  ## Run all tests
+project/test: backend/test frontend/test  ## Project: Run all tests
 
 .PHONY: project/lint
-project/lint: backend/lint frontend/lint  ## Lint backend + frontend
+project/lint: backend/lint frontend/lint  ## Project: Lint backend + frontend
 
 .PHONY: project/tidy
-project/tidy: backend/tidy  ## Format + tidy go sources
+project/tidy: backend/tidy  ## Project: Format + tidy go sources
 
 .PHONY: project/vet
-project/vet: backend/vet  ## Run go vet (alias for backend/vet)
+project/vet: backend/vet  ## Project: Run go vet (alias for backend/vet)
 
 .PHONY: project/audit
-project/audit: backend/audit  ## Run all quality-control checks
+project/audit: backend/audit  ## Project: Run all quality-control checks
 
 .PHONY: clean
-clean:  ## Remove build artifacts
+clean:  ## Project: Remove build artifacts
 	rm -rf $(API_DIR)/main $(FRONTEND_DIR)/dist $(FRONTEND_DIR)/build
 
 # ---------------------------------------------------------------------------
@@ -165,18 +165,21 @@ clean:  ## Remove build artifacts
 # ---------------------------------------------------------------------------
 
 .PHONY: help
-help:  ## Print this help
-	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make [category]/target\n\n"} \
-		CAT == "" { CAT = "project"; } \
-		/^[^[:space:]][^:]*:.*?##/ { \
-			cat = "project"; \
-			if ($$1 ~ /^backend\//) cat = "backend"; \
-			if ($$1 ~ /^frontend\//) cat = "frontend"; \
-			if (cat != CAT) { \
-				CAT = cat; \
-				printf "\n## %s\n", toupper(cat); \
+help:  ## General: Print this help menu
+	@awk 'BEGIN {FS = ":.*## "; printf "\033[1;34mUsage:\033[0m\n  make \033[36m<target>\033[0m\n"} \
+		/^[a-zA-Z0-9_\/-]+:.*?## / { \
+			desc = $$2; \
+			if (match(desc, /^[A-Za-z0-9_ ]+:/)) { \
+				cat = substr(desc, 1, RLENGTH - 1); \
+				text = substr(desc, RLENGTH + 2); \
+			} else { \
+				cat = "General"; \
+				text = desc; \
 			} \
-			target = $$1; sub(/:.*$$/, "", target); \
-			print "  " target; \
+			if (cat != current_cat) { \
+				current_cat = cat; \
+				printf "\n\033[1;35m## %s\033[0m\n", toupper(cat); \
+			} \
+			printf "  \033[36m%-25s\033[0m %s\n", $$1, text; \
 		} \
 		END { printf "\n" }' $(MAKEFILE_LIST)
