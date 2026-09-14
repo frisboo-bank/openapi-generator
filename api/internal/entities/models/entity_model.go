@@ -1,14 +1,18 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Entity struct {
-	EntityID    string     `db:"id"           json:"id"`
-	Slug        string     `db:"slug"         json:"slug"`
-	Name        string     `db:"name"         json:"name"`
-	Description *string    `db:"description"  json:"description,omitempty"`
-	VersionLock int32      `db:"version_lock" json:"version_lock"`
-	HiddenAt    *time.Time `db:"hidden_at"    json:"hidden_at"`
-	CreatedAt   time.Time  `db:"created_at"   json:"created_at"`
-	UpdatedAt   time.Time  `db:"updated_at"   json:"updated_at"`
+	EntityID    uuid.UUID  `db:"id"`
+	Slug        string     `db:"slug"         query:"filter,order,search"`
+	Name        string     `db:"name"         query:"order,search"`
+	Description string     `db:"description"  query:"order,search"`
+	VersionLock int64      `db:"version_lock"`
+	HiddenAt    *time.Time `db:"hidden_at"    query:"filter"`
+	CreatedAt   *time.Time `db:"created_at"   query:"filter,order"`
+	UpdatedAt   *time.Time `db:"updated_at"   query:"filter,order"`
 }

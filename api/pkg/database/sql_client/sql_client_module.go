@@ -17,17 +17,17 @@ import (
 
 type SQLClientDependencies struct {
 	dig.In
-	Logger  loggercontracts.Logger   `optional:"true"`
-	Tracer  tracercontracts.Tracer   `optional:"true"`
-	Metrics metricscontracts.Metrics `optional:"true"`
+	Logger  loggercontracts.Logger
+	Tracer  tracercontracts.Tracer
+	Metrics metricscontracts.Metrics
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
 		Name:      "sql-client",
 		ConfigKey: "sql-clients",
-		ProviderFn: func(name string, cfg *models.SQLClientOptions, env environmentEnum.Environment, logger loggercontracts.Logger, extra SQLClientDependencies) (contracts.SQLClientCore, error) {
-			return CreateSQLClient(name, cfg, logger, extra.Tracer, extra.Metrics)
+		ProviderFn: func(name string, cfg *models.SQLClientOptions, env environmentEnum.Environment, extra SQLClientDependencies) (contracts.SQLClientCore, error) {
+			return CreateSQLClient(name, cfg, extra.Logger, extra.Tracer, extra.Metrics)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{
