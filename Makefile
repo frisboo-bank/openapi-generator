@@ -168,7 +168,7 @@ clean:  ## Remove build artifacts
 help:  ## Print this help
 	@awk 'BEGIN {FS = ":.*##"; printf "Usage: make [category]/target\n\n"} \
 		CAT == "" { CAT = "project"; } \
-		/^[/a-zA-Z0-9_][^:]*:.*?##/ { \
+		/^[^[:space:]][^:]*:.*?##/ { \
 			cat = "project"; \
 			if ($$1 ~ /^backend\//) cat = "backend"; \
 			if ($$1 ~ /^frontend\//) cat = "frontend"; \
