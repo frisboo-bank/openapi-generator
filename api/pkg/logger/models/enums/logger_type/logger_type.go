@@ -6,7 +6,6 @@ type (
 
 const (
 	unknown loggerType = iota
-	logrus
 	noop
 	zerolog
 )

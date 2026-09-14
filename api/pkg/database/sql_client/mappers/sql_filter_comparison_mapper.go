@@ -11,14 +11,14 @@ func FilterComparisonToSQLOperator(f filtercomparisonEnum.FilterComparison) (str
 	case filtercomparisonEnum.FilterComparisons.EQUAL:
 		return "=", nil
 	case filtercomparisonEnum.FilterComparisons.NOTEQUAL:
-		return "<>", nil
+		return "!=", nil
 	case filtercomparisonEnum.FilterComparisons.GREATER:
 		return ">", nil
 	case filtercomparisonEnum.FilterComparisons.GREATEROREQUAL:
 		return ">=", nil
-	case filtercomparisonEnum.FilterComparisons.LOWER:
+	case filtercomparisonEnum.FilterComparisons.LESS:
 		return "<", nil
-	case filtercomparisonEnum.FilterComparisons.LOWEROREQUAL:
+	case filtercomparisonEnum.FilterComparisons.LESSOREQUAL:
 		return "<=", nil
 	case filtercomparisonEnum.FilterComparisons.IN:
 		return "IN", nil

@@ -9,6 +9,10 @@ import (
 
 type (
 	Migration interface {
+		MigrationAdapter
+	}
+
+	MigrationAdapter interface {
 		Up(ctx context.Context, version uint) error
 		Down(ctx context.Context, version uint) error
 		Reset(ctx context.Context) error

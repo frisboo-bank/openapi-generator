@@ -11,8 +11,8 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-func PaginationEnumsDecodeHook() mapstructure.DecodeHookFunc {
-	return func(f reflect.Type, t reflect.Type, data any) (any, error) {
+func QueryEnumsDecodeHook() mapstructure.DecodeHookFunc {
+	return func(f, t reflect.Type, data any) (any, error) {
 		switch t {
 		case reflect.TypeFor[filtercomparisonEnum.FilterComparison]():
 			return filtercomparisonEnum.ParseFilterComparison(data)

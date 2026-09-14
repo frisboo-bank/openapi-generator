@@ -5,6 +5,9 @@ import (
 	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
 	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
 	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/validation/validators"
+
+	vendorvalidation "github.com/go-ozzo/ozzo-validation"
 )
 
 var _ configContracts.Configurable = (*LoggerOptions)(nil)
@@ -28,8 +31,23 @@ func (l *LoggerOptions) GetLogger() string {
 }
 
 func (l *LoggerOptions) SetDefaults() {
+	if l.Level == loglevel.LogLevels.UNKNOWN {
+		l.Level = loglevel.LogLevels.INFOLEVEL
+	}
+	if l.Encoding == encodingtype.EncodingTypes.UNKNOWN {
+		l.Encoding = encodingtype.EncodingTypes.JSON
+	}
+	if l.CallDepth < 0 {
+		l.CallDepth = 0
+	}
 }
 
 func (l *LoggerOptions) Validate() error {
-	return nil
+	return vendorvalidation.ValidateStruct(
+		l,
+		vendorvalidation.Field(&l.Type, vendorvalidation.Required, validators.ValidEnum()),
+		vendorvalidation.Field(&l.CallDepth, vendorvalidation.Min(0)),
+		vendorvalidation.Field(&l.Encoding, vendorvalidation.Required, validators.ValidEnum()),
+		vendorvalidation.Field(&l.Level, vendorvalidation.Required, validators.ValidEnum()),
+	)
 }

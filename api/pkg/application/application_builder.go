@@ -35,7 +35,7 @@ func NewApplicationBuilder(
 	env environmentEnum.Environment,
 ) contracts.ApplicationBuilder {
 	validation.AssertNotNil("configLoader", configLoader)
-	validation.AssertNotNil("env", env)
+	validation.AssertValidEnum("env", env)
 
 	return &applicationBuilder{
 		container:    dig.New(),

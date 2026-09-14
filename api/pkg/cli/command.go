@@ -61,7 +61,12 @@ func (c *command) Commands() []contracts.Command {
 	return c.commands
 }
 
-func (c *command) Run(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error {
+func (c *command) Run(
+	configLoader configContracts.ConfigLoader,
+	env environmentEnum.Environment,
+	cmd *cobra.Command,
+	args []string,
+) error {
 	if len(c.commands) > 0 && c.bootstrap == nil {
 		var subCmds []string
 		for _, subCmd := range c.commands {

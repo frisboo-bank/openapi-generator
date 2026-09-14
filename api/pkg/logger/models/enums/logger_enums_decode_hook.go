@@ -26,8 +26,9 @@ func LoggerEnumsDecodeHook() mapstructure.DecodeHookFunc {
 			if !ok {
 				return nil, fmt.Errorf("expected string for log level, got %T", data)
 			}
-			data = strings.TrimSuffix(strings.ToLower(str), "level")
-			return loglevel.ParseLogLevel(fmt.Sprintf("%sLevel", data))
+			normalized := strings.ToLower(strings.TrimSpace(str))
+			normalized = strings.TrimSuffix(normalized, "level")
+			return loglevel.ParseLogLevel(normalized + "Level")
 		case reflect.TypeFor[loggertype.LoggerType]():
 			return loggertype.ParseLoggerType(data)
 		}

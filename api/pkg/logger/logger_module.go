@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"log"
+	"fmt"
 
 	configLoaderContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/container"
@@ -9,15 +9,13 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/logger/models"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
-func LoggerModule(
-	env environmentEnum.Environment,
-	configLoader configLoaderContracts.ConfigLoader,
-) containerContracts.Module {
+func LoggerModule(env environmentEnum.Environment, configLoader configLoaderContracts.ConfigLoader) containerContracts.Module {
 	var cfgMap map[string]*models.LoggerOptions
 	if err := configLoader.LoadKey(env, &cfgMap, "loggers"); err != nil {
-		log.Fatalf("Failed to build logger module with error: %v", err)
+		panic(fmt.Sprintf("failed to load logger config: %v", err))
 	}
 
 	mod := container.NewModule(
@@ -27,12 +25,14 @@ func LoggerModule(
 		}),
 	)
 
-	loggersMap := make(map[string]contracts.Logger)
+	loggersMap := make(map[string]contracts.Logger, len(cfgMap))
 
 	for name, cfg := range cfgMap {
-		logger, err := NewLogger(name, cfg, env)
+		validation.AssertNotNil("cfg", cfg)
+
+		logger, err := CreateLogger(name, cfg, env)
 		if err != nil {
-			log.Fatalf("Failed to build logger module when creating logger %q: %v", name, err)
+			panic(fmt.Sprintf("failed to create logger %q: %v", name, err))
 		}
 
 		mod.AddProvider(containerContracts.Provider{
