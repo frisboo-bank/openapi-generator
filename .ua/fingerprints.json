@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
-  "gitCommitHash": "1efee29d974886fccf012d000499ae9ad902f288",
-  "generatedAt": "2026-09-04T18:49:12.432Z",
+  "gitCommitHash": "9eb08730967af331c6a353a15afa58d66f0417c2",
+  "generatedAt": "2026-09-05T08:40:49.701Z",
   "files": {
     ".ua/.understandignore": {
       "filePath": ".ua/.understandignore",
@@ -15,12 +15,12 @@
     },
     "Makefile": {
       "filePath": "Makefile",
-      "contentHash": "23471c0d983a077b4ce84f959d229c8f9d8eec1a9e3ce21bfa79bde17e156bdb",
+      "contentHash": "72c7f3f3cebe958f0d82fb9f60026a7aaf36e4839d1abfee854a711d6101a408",
       "functions": [],
       "classes": [],
       "imports": [],
       "exports": [],
-      "totalLines": 160,
+      "totalLines": 165,
       "hasStructuralAnalysis": true
     },
     "README.md": {
@@ -2810,7 +2810,7 @@
     },
     "api/pkg/cache/models/enums/cache_type/cachetypes_enums.go": {
       "filePath": "api/pkg/cache/models/enums/cache_type/cachetypes_enums.go",
-      "contentHash": "c47f7e089d8ac0e11b11349437b3baeaa617b9cea8ae21287c9676241ed43753",
+      "contentHash": "e87040c2682b151a7136fb02bf94c3749f48daf3b602220591fcab6b6ee76abb",
       "functions": [
         {
           "name": "allSlice",
@@ -4564,7 +4564,7 @@
     },
     "api/pkg/database/migration/models/enums/migration_type/migrationtypes_enums.go": {
       "filePath": "api/pkg/database/migration/models/enums/migration_type/migrationtypes_enums.go",
-      "contentHash": "3bb65dfcf614da371e23d534ff02a783b4050ec7351635991f7a6f6134a04317",
+      "contentHash": "b3657ba63f2cbcbb3cf0eee77f6e2292914a604516211c5e3b8e8b17aedda935",
       "functions": [
         {
           "name": "allSlice",
@@ -5820,7 +5820,7 @@
     },
     "api/pkg/database/sql_client/models/enums/sql_client_ssl_mode/sqlclientsslmodes_enums.go": {
       "filePath": "api/pkg/database/sql_client/models/enums/sql_client_ssl_mode/sqlclientsslmodes_enums.go",
-      "contentHash": "e022c3302de2d81ec8baa89015452ae9282be084f77600f96ed7e00068ebe024",
+      "contentHash": "8f5b6317b425cba4fee0cb2f5d273d09dcfef3eb0120d4d3219c349c5efaee66",
       "functions": [
         {
           "name": "allSlice",
@@ -6102,7 +6102,7 @@
     },
     "api/pkg/database/sql_client/models/enums/sql_client_type/sqlclienttypes_enums.go": {
       "filePath": "api/pkg/database/sql_client/models/enums/sql_client_type/sqlclienttypes_enums.go",
-      "contentHash": "7f227823729a6eb347814209f0710014de65f10e6342e100b809de3765db5bdb",
+      "contentHash": "98e6715c50bfc7f9d984a1646bd0ed939ecf4a54f79488293ffdc497d9de90ec",
       "functions": [
         {
           "name": "allSlice",
@@ -7060,7 +7060,7 @@
     },
     "api/pkg/environment/models/enums/environment/environments_enums.go": {
       "filePath": "api/pkg/environment/models/enums/environment/environments_enums.go",
-      "contentHash": "bdf1cd720c2c8a761cade79f4844ba42c546172312fc8bbd9356ca8981116e12",
+      "contentHash": "fc2bc88fb059bf96d75889570d1515c8aa2dbbdd07d0420282b34fc3618fbe16",
       "functions": [
         {
           "name": "allSlice",
@@ -8283,7 +8283,7 @@
     },
     "api/pkg/http/http_server/models/enums/http_server_type/httpservertypes_enums.go": {
       "filePath": "api/pkg/http/http_server/models/enums/http_server_type/httpservertypes_enums.go",
-      "contentHash": "2c7de62dd9aef397aec7d1249dfb7651329426c3daae4b1c75890e780e9f976c",
+      "contentHash": "4bac8cad4e66119f65b97950c4fc8804abcfb343cac8109906b63de4535fcfe5",
       "functions": [
         {
           "name": "allSlice",
@@ -9474,7 +9474,7 @@
     },
     "api/pkg/logger/models/enums/encoding_type/encodingtypes_enums.go": {
       "filePath": "api/pkg/logger/models/enums/encoding_type/encodingtypes_enums.go",
-      "contentHash": "9788e59a7872c3113b93810df185a06b8eb7ed27bb946aae78b64ae62495eaac",
+      "contentHash": "4dbc694311650ff134d49590b794cdd0979c43605c52e1d0ad8ee3127088965e",
       "functions": [
         {
           "name": "allSlice",
@@ -9754,7 +9754,7 @@
     },
     "api/pkg/logger/models/enums/log_level/loglevels_enums.go": {
       "filePath": "api/pkg/logger/models/enums/log_level/loglevels_enums.go",
-      "contentHash": "f13bebb94cfee1b92bc835de22b2c4094c7bec2a2b95d1db3b6c02b060cb02a5",
+      "contentHash": "193166c50c79245ac58ab6400795576edadc19b71954cfac020068a09925c825",
       "functions": [
         {
           "name": "allSlice",
@@ -10102,7 +10102,7 @@
     },
     "api/pkg/logger/models/enums/logger_type/loggertypes_enums.go": {
       "filePath": "api/pkg/logger/models/enums/logger_type/loggertypes_enums.go",
-      "contentHash": "037e427839b90238eb8fba47f183d7f3dfa7f52acea82094841bf0d531a97794",
+      "contentHash": "ace01acb6fdc23cedc052d0c0a2c6f1193c9fc8a1067d733dd60df415266f26a",
       "functions": [
         {
           "name": "allSlice",
@@ -10976,7 +10976,7 @@
     },
     "api/pkg/query/models/enums/filter_comparison/filtercomparisons_enums.go": {
       "filePath": "api/pkg/query/models/enums/filter_comparison/filtercomparisons_enums.go",
-      "contentHash": "cd6997945bfb972d6ea13ce107849580e2e55183348e6cc01dc33fd8dbca1ffc",
+      "contentHash": "3f201b0c2149f1b7e4f100888e3582b5a6302310f34cc5370f971e16adb27264",
       "functions": [
         {
           "name": "allSlice",
@@ -11271,7 +11271,7 @@
     },
     "api/pkg/query/models/enums/logical_operator/logicaloperators_enums.go": {
       "filePath": "api/pkg/query/models/enums/logical_operator/logicaloperators_enums.go",
-      "contentHash": "eda7b2970792248147676385d1c34746e8b634d96d61c1462212a740b5638d3a",
+      "contentHash": "7cfb053085802e7af092ec94c1bdf0cab64d01b9838f2ee41241491e1be8cbca",
       "functions": [
         {
           "name": "allSlice",
@@ -11551,7 +11551,7 @@
     },
     "api/pkg/query/models/enums/order_direction/orderdirections_enums.go": {
       "filePath": "api/pkg/query/models/enums/order_direction/orderdirections_enums.go",
-      "contentHash": "5377c9c6bd7ab808fe86a9cd34f812b71a7f8f5a5a653e3764042a8fc911118a",
+      "contentHash": "8ad3281a398522a122e7b0a557d8654b75bd47010247064fd7f47688773ed353",
       "functions": [
         {
           "name": "allSlice",
@@ -11888,7 +11888,7 @@
     },
     "api/pkg/query/models/enums/search_condition/searchconditions_enums.go": {
       "filePath": "api/pkg/query/models/enums/search_condition/searchconditions_enums.go",
-      "contentHash": "93103c176c53dd1f49eb9add3e7ae76c9c1dae5dcd4be97a680c3f77a2fb4221",
+      "contentHash": "f8a4ca53f16f65900105e6ea59cdd1d03b86fb47a605310db3593703136769a5",
       "functions": [
         {
           "name": "allSlice",
@@ -13289,7 +13289,7 @@
     },
     "api/pkg/rpc/rpc_server/models/enums/rpc_server_type/rpcservertypes_enums.go": {
       "filePath": "api/pkg/rpc/rpc_server/models/enums/rpc_server_type/rpcservertypes_enums.go",
-      "contentHash": "053b1c56e67c093a9e01cabd54ff891d9cb9c7e35f347808ed24f681a6ae1ff9",
+      "contentHash": "ec7c44c6a000f2259b3da722cc82e93ca73f59eed4ba62ef35216aaf68b6bf4a",
       "functions": [
         {
           "name": "allSlice",
@@ -14277,7 +14277,7 @@
     },
     "api/pkg/validation/testdata/enums/test_enum/testenums_enums.go": {
       "filePath": "api/pkg/validation/testdata/enums/test_enum/testenums_enums.go",
-      "contentHash": "b89d127a663bfa561db96bf512f758e882535c570c9026fd80d47391d2ae3f6a",
+      "contentHash": "fe38cdcb08f85a092788c06e1f88c8af39bde6d7e296674179655e4534300958",
       "functions": [
         {
           "name": "allSlice",
