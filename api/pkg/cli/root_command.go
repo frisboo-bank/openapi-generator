@@ -37,7 +37,8 @@ func NewRootCommand(cfg *RootCommandOptions) contracts.RootCommand {
 	rootCmd.PersistentFlags().String("configPath", "configs", "Path to configuration directory")
 	rootCmd.PersistentFlags().String("configName", "application", "Configuration file name (without extension)")
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")
-	rootCmd.PersistentFlags().String("environment", "development", "Environment (development, testing, preprod, production)")
+	rootCmd.PersistentFlags().
+		String("environment", "", "Environment (development, testing, preprod, production)")
 	rootCmd.PersistentFlags().String("envPrefix", "APP_", "Prefix for environment variables")
 
 	c := &rootCommand{

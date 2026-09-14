@@ -1,18 +1,25 @@
 package contracts
 
-import "time"
+import (
+	"time"
+
+	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+)
 
 type (
 	Fields map[string]any
 
 	Logger interface {
+		LoggerAdapter
+	}
+
+	LoggerAdapter interface {
 		Debug(args ...any)
 		Debugf(template string, args ...any)
 		Debugw(msg string, fields Fields)
 		Info(args ...any)
 		Infof(template string, args ...any)
 		Infow(msg string, fields Fields)
-		Name() string
 		Warn(args ...any)
 		Warnf(template string, args ...any)
 		WarnMsg(msg string, err error)
@@ -38,5 +45,7 @@ type (
 			metaData map[string][]string,
 			err error,
 		)
+		Name() string
+		Type() loggertype.LoggerType
 	}
 )

@@ -3,16 +3,16 @@ package cli
 import (
 	"fmt"
 
-	cacheEnums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
+	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/cli/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/config"
-	migrationEnums "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums"
-	sqlclientEnums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
-	environmentEnums "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	httpServerEnums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
-	loggerEnums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
-	paginationEnums "frisboo-bank/openapi-generator-service/pkg/query/models/enums"
-	rpcServerEnums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
+	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums"
+	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
+	environmentenums "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
+	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
+	paginationenums "frisboo-bank/openapi-generator-service/pkg/query/models/enums"
+	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -50,7 +50,7 @@ func toCobraCommand(cmd contracts.Command) *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("get envPrefix: %w", err)
 			}
-			env, err := environmentEnums.ParseEnvironment(envStr)
+			env, err := environmentenums.ParseEnvironment(envStr)
 			if err != nil {
 				return fmt.Errorf("parse environment: %w", err)
 			}
@@ -62,14 +62,14 @@ func toCobraCommand(cmd contracts.Command) *cobra.Command {
 				EnvKeyReplacer: map[string]string{},
 				EnvPrefix:      envPrefix,
 				DecodeHookFuncs: []mapstructure.DecodeHookFunc{
-					cacheEnums.CacheEnumsDecodeHook(),
-					environmentEnums.EnvironmentEnumsDecodeHook(),
-					httpServerEnums.HTTPServerEnumsDecodeHook(),
-					loggerEnums.LoggerEnumsDecodeHook(),
-					migrationEnums.MigrationEnumsDecodeHook(),
-					paginationEnums.PaginationEnumsDecodeHook(),
-					rpcServerEnums.RPCServerEnumsDecodeHook(),
-					sqlclientEnums.SQLClientEnumsDecodeHook(),
+					cacheenums.CacheEnumsDecodeHook(),
+					environmentenums.EnvironmentEnumsDecodeHook(),
+					httpserverenums.HTTPServerEnumsDecodeHook(),
+					loggerenums.LoggerEnumsDecodeHook(),
+					migrationenums.MigrationEnumsDecodeHook(),
+					paginationenums.QueryEnumsDecodeHook(),
+					rpcserverenums.RPCServerEnumsDecodeHook(),
+					sqlclientenums.SQLClientEnumsDecodeHook(),
 				},
 			}, viper.New())
 			if err != nil {

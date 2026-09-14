@@ -13,5 +13,10 @@ type Command interface {
 	Long() string
 	Commands() []Command
 	Prepare(cmd *cobra.Command)
-	Run(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error
+	Run(
+		configLoader configContracts.ConfigLoader,
+		env environmentEnum.Environment,
+		cmd *cobra.Command,
+		args []string,
+	) error
 }

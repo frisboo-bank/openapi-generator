@@ -1,11 +1,11 @@
 package models
 
 import (
-	"fmt"
-	"strings"
-
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums/migration_type"
+	"frisboo-bank/openapi-generator-service/pkg/validation/validators"
+
+	vendorvalidation "github.com/go-ozzo/ozzo-validation"
 )
 
 var _ configContracts.Configurable = (*MigrationOptions)(nil)
@@ -30,15 +30,10 @@ func (c *MigrationOptions) Validate() error {
 	if !c.IsEnabled {
 		return nil
 	}
-	if !c.Type.IsValid() {
-		return fmt.Errorf("invalid migration type")
-	}
-	if strings.TrimSpace(c.MigrationsDir) == "" {
-		return fmt.Errorf("migrationDir is required")
-	}
-	if strings.TrimSpace(c.DBClient) == "" {
-		return fmt.Errorf("dbClient is required")
-	}
-
-	return nil
+	return vendorvalidation.ValidateStruct(
+		c,
+		vendorvalidation.Field(&c.Type, vendorvalidation.Required, validators.ValidEnum()),
+		vendorvalidation.Field(&c.MigrationsDir, vendorvalidation.Required),
+		vendorvalidation.Field(&c.DBClient, vendorvalidation.Required),
+	)
 }

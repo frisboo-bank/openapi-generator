@@ -16,7 +16,6 @@ func FormatCode(err error) string {
 	return s
 }
 
-// FormatStack returns formatted stack(s).
 func FormatStack(err error) string {
 	if err == nil {
 		return ""

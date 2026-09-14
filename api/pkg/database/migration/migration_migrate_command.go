@@ -6,12 +6,12 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/application"
 	"frisboo-bank/openapi-generator-service/pkg/cli"
-	cliContracts "frisboo-bank/openapi-generator-service/pkg/cli/contracts"
-	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	clicontracts "frisboo-bank/openapi-generator-service/pkg/cli/contracts"
+	configcontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	sqlclient "frisboo-bank/openapi-generator-service/pkg/database/sql_client"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 
 	"github.com/spf13/cobra"
 )
@@ -20,7 +20,7 @@ type MigrationMigrateCommandOptions struct {
 	Long string
 }
 
-func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts.Command {
+func NewMigrationMigrateCommand(cfg *MigrationMigrateCommandOptions) clicontracts.Command {
 	upCmd := cli.NewCommand(cli.CommandOptions{
 		Use:   "up [name]",
 		Short: "Upgrade database version",
@@ -28,7 +28,7 @@ func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts
 			cmd.Args = cobra.ExactArgs(1)
 			cmd.Flags().Uint("version", 0, "Migration version")
 		},
-		Bootstrap: func(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error {
+		Bootstrap: func(configLoader configcontracts.ConfigLoader, env environmentenum.Environment, cmd *cobra.Command, args []string) error {
 			version, err := cmd.Flags().GetUint("version")
 			if err != nil {
 				return err
@@ -47,7 +47,7 @@ func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts
 			cmd.Args = cobra.ExactArgs(1)
 			cmd.Flags().Uint("version", 0, "Migration version")
 		},
-		Bootstrap: func(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error {
+		Bootstrap: func(configLoader configcontracts.ConfigLoader, env environmentenum.Environment, cmd *cobra.Command, args []string) error {
 			version, err := cmd.Flags().GetUint("version")
 			if err != nil {
 				return err
@@ -65,7 +65,7 @@ func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts
 		Prepare: func(cmd *cobra.Command) {
 			cmd.Args = cobra.ExactArgs(1)
 		},
-		Bootstrap: func(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error {
+		Bootstrap: func(configLoader configcontracts.ConfigLoader, env environmentenum.Environment, cmd *cobra.Command, args []string) error {
 			return executeMigration(configLoader, env, args[0], func(migration contracts.Migration) error {
 				return migration.Reset(context.Background())
 			})
@@ -76,7 +76,7 @@ func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts
 		Use:   "migrate",
 		Short: "Run the db migrations",
 		Long:  cfg.Long,
-		Commands: []cliContracts.Command{
+		Commands: []clicontracts.Command{
 			upCmd,
 			downCmd,
 			resetCmd,
@@ -85,8 +85,8 @@ func NewMigrationMigrateCommand(cfg MigrationMigrateCommandOptions) cliContracts
 }
 
 func executeMigration(
-	configLoader configContracts.ConfigLoader,
-	env environmentEnum.Environment,
+	configLoader configcontracts.ConfigLoader,
+	env environmentenum.Environment,
 	migrationName string,
 	cb func(migration contracts.Migration) error,
 ) error {

@@ -1,25 +1,30 @@
 package contracts
 
-import "context"
+import (
+	"context"
+
+	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
+)
 
 type (
-	Request      any
-	Command      Request
-	Query        Request
-	Notification any
+	TRequest      = any
+	Request       = any
+	Response      = any
+	TNotification = any
+	Notification  = any
 
-	Handler[TRequest Request, TResponse any] interface {
-		Handle(ctx context.Context, request TRequest) (TResponse, error)
+	RequestHandler[TRequest Request, TResponse Response] interface {
+		Handle(ctx context.Context, request TRequest) (TResponse, applicationerrorcontracts.AppError)
 	}
 
 	NotificationHandler[TNotification Notification] interface {
-		Handle(ctx context.Context, notification TNotification) error
+		Handle(ctx context.Context, notification TNotification) applicationerrorcontracts.AppError
 	}
 
-	Unit struct{}
-
 	Mediator interface {
-		Send(ctx context.Context, request any) (any, error)
-		Publish(ctx context.Context, notification any) error
+		Send(ctx context.Context, request Request) (Response, error)
+		Publish(ctx context.Context, notification Notification) error
+		RegisterRequest(requestType TRequest, handler any) error
+		RegisterNotification(notificationType TNotification, handler any) error
 	}
 )

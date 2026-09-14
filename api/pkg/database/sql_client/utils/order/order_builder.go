@@ -5,26 +5,22 @@ import (
 	"strings"
 
 	"frisboo-bank/openapi-generator-service/pkg/query"
+	orderdirection "frisboo-bank/openapi-generator-service/pkg/query/models/enums/order_direction"
 )
 
-func BuildOrderByClause(orders *query.QueryOrders) (string, error) {
-	if orders.IsEmpty() {
+func BuildOrderByClause(orders []query.Order) (string, error) {
+	if len(orders) == 0 {
 		return "", nil
 	}
 
-	orderModels := orders.GetOrders()
-	parts := make([]string, 0, len(orderModels))
+	parts := make([]string, len(orders))
 
-	for i, m := range orderModels {
-		if m == nil {
-			return "", fmt.Errorf("order model at index %d is nil", i)
+	for i, o := range orders {
+		direction := "ASC"
+		if o.Direction == orderdirection.OrderDirections.DESC {
+			direction = "DESC"
 		}
-
-		parts = append(parts, m.Field+" "+m.Direction.String())
-	}
-
-	if len(parts) == 0 {
-		return "", nil
+		parts[i] = fmt.Sprintf("%s %s", o.Field, direction)
 	}
 
 	return "ORDER BY " + strings.Join(parts, ", "), nil
