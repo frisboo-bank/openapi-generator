@@ -139,7 +139,7 @@ frontend/test:  ## Run frontend tests
 all: build  ## Build everything
 build: backend/build frontend/build  ## Build backend + frontend
 
-.PHONY: project/install
+.PHONY: project/install project/test project/lint project/tidy project/vet project/audit
 project/install: frontend/install backend/install  ## Install all dependencies
 
 .PHONY: project/test
