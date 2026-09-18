@@ -1,12 +1,11 @@
 package dtos
 
 import (
-	"frisboo-bank/openapi-generator-service/internal/entities/dtos"
+	"frisboo-bank/openapi-generator-service/internal/entities/models"
 	"frisboo-bank/openapi-generator-service/pkg/query"
 )
 
 type ListEntitiesResponseDto struct {
-	Items      []*dtos.EntityDto
+	Entities   []*models.Entity
 	Pagination *query.Pagination
-	TotalItems int64
 }

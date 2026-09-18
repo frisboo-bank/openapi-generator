@@ -6,6 +6,7 @@ charset = utf-8
 end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
+indent_size = 2
 
 [*.go]
 indent_style = tab
@@ -15,23 +16,18 @@ indent_style = tab
 
 [*.{yaml,yml}]
 indent_style = space
-indent_size = 2
 
 [*.proto]
 indent_style = space
-indent_size = 2
 
 [*.{ts,tsx,js,jsx,mjs,cjs}]
 indent_style = space
-indent_size = 2
 
 [*.{css,scss,sass,less,html,json}]
 indent_style = space
-indent_size = 2
 
 [*.sql]
 indent_style = space
-indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
@@ -41,4 +37,3 @@ indent_style = space
 
 [*.toml]
 indent_style = space
-indent_size = 2

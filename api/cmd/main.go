@@ -36,7 +36,7 @@ func main() {
 					return bootstrap.Run()
 				},
 			}),
-			migration.NewMigrationMigrateCommand(migration.MigrationMigrateCommandOptions{}),
+			migration.NewMigrationMigrateCommand(&migration.MigrationMigrateCommandOptions{}),
 		},
 	})
 

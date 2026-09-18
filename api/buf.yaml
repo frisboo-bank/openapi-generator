@@ -1,12 +1,16 @@
-# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
 version: v2
 modules:
-  - path: ./api/proto
-deps:
-  - buf.build/bufbuild/protovalidate
+  - path: internal/shared/grpc/proto
+  - path: pkg/rpc/rpc_server/resources/grpc/proto
+  - path: internal/shared/grpc/vendors
 lint:
   use:
     - STANDARD
+  ignore:
+    - internal/shared/grpc/vendors
 breaking:
   use:
     - FILE
+  ignore:
+    - internal/shared/grpc/vendors
+    - pkg/rpc/rpc_server/resources/grpc/proto
