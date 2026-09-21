@@ -82,6 +82,13 @@ mediator:
   logger: mediator
 
 metrics:
-  logger: mediator
+  main:
+    enabled: true
+    type: open_telemetry
+    logger: mediator
 
 tracer:
+  main:
+    enabled: true
+    type: open_telemetry
+    logger: mediator
