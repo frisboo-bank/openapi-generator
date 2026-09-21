@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package query.v1;
+
+option go_package = "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/resources/grpc/gen/query/v1;queryv1";
+
+message PaginationRequest {
+  string cursor = 1;
+  int32 limit = 2;
+}
+
+message PaginationResponse {
+  string next_cursor = 1;
+  string prev_cursor = 2;
+}

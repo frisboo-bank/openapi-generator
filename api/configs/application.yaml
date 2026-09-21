@@ -80,3 +80,8 @@ waiter:
 
 mediator:
   logger: mediator
+
+metrics:
+  logger: mediator
+
+tracer:

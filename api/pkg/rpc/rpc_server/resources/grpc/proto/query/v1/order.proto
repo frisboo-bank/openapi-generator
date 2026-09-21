@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package query.v1;
+
+option go_package = "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/resources/grpc/gen/query/v1;queryv1";
+
+enum OrderDirection {
+  ORDER_DIRECTION_UNSPECIFIED = 0;
+  ORDER_DIRECTION_ASC = 1;
+  ORDER_DIRECTION_DESC = 2;
+}
+
+message QueryOrder {
+  string field = 1;
+  OrderDirection direction = 2;
+}
+
+message QueryOrders {
+  repeated QueryOrder orders = 1;
+}

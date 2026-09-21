@@ -1,0 +1,618 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Entity Service",
+    "description": "Manages entity resources.",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "EntityService"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/entities": {
+      "post": {
+        "summary": "List and search entities",
+        "operationId": "listEntities",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ListEntitiesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ListEntitiesRequestBody"
+            }
+          }
+        ],
+        "tags": [
+          "Entities"
+        ],
+        "security": [
+          {
+            "saml": []
+          }
+        ]
+      }
+    },
+    "/entity": {
+      "post": {
+        "summary": "Create a new entity",
+        "operationId": "createEntity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1CreateEntityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1CreateEntityRequestBody"
+            }
+          }
+        ],
+        "tags": [
+          "Entities"
+        ],
+        "security": [
+          {
+            "saml": []
+          }
+        ]
+      }
+    },
+    "/entity/{slug}": {
+      "get": {
+        "summary": "Get entity by slug",
+        "operationId": "getEntityBySlug",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1GetEntityBySlugResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "includeHidden",
+            "in": "query",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "tags": [
+          "Entities"
+        ],
+        "security": [
+          {
+            "saml": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete an entity",
+        "operationId": "deleteEntity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1DeleteEntityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "versionLock",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Entities"
+        ],
+        "security": [
+          {
+            "saml": []
+          }
+        ]
+      },
+      "patch": {
+        "summary": "Update an entity",
+        "operationId": "updateEntity",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1UpdateEntityResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1UpdateEntityRequestBody"
+            }
+          },
+          {
+            "name": "versionLock",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "Entities"
+        ],
+        "security": [
+          {
+            "saml": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1CreateEntityRequestBody": {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/definitions/v1CreateEntityRequestPayload"
+        }
+      }
+    },
+    "v1CreateEntityRequestPayload": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "v1CreateEntityResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/v1CreateEntityResponseData"
+        }
+      }
+    },
+    "v1CreateEntityResponseData": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "$ref": "#/definitions/v1Entity"
+        }
+      }
+    },
+    "v1DeleteEntityResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/v1DeleteEntityResponseData"
+        }
+      }
+    },
+    "v1DeleteEntityResponseData": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "$ref": "#/definitions/v1Entity"
+        },
+        "deletedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "wasPermanent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1Entity": {
+      "type": "object",
+      "properties": {
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "versionLock": {
+          "type": "string",
+          "format": "int64"
+        },
+        "hiddenAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1FilterComparison": {
+      "type": "string",
+      "enum": [
+        "FILTER_COMPARISON_UNSPECIFIED",
+        "FILTER_COMPARISON_EQUAL",
+        "FILTER_COMPARISON_NOT_EQUAL",
+        "FILTER_COMPARISON_GREATER",
+        "FILTER_COMPARISON_GREATER_OR_EQUAL",
+        "FILTER_COMPARISON_LESS",
+        "FILTER_COMPARISON_LESS_OR_EQUAL",
+        "FILTER_COMPARISON_IN",
+        "FILTER_COMPARISON_BETWEEN",
+        "FILTER_COMPARISON_IS_NULL",
+        "FILTER_COMPARISON_IS_NOT_NULL",
+        "FILTER_COMPARISON_IS_EMPTY",
+        "FILTER_COMPARISON_IS_NOT_EMPTY",
+        "FILTER_COMPARISON_IS_TRUE",
+        "FILTER_COMPARISON_IS_FALSE",
+        "FILTER_COMPARISON_IS_NOT_TRUE",
+        "FILTER_COMPARISON_IS_NOT_FALSE",
+        "FILTER_COMPARISON_IS_UNKNOWN"
+      ],
+      "default": "FILTER_COMPARISON_UNSPECIFIED"
+    },
+    "v1GetEntityBySlugResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/v1GetEntityBySlugResponseData"
+        }
+      }
+    },
+    "v1GetEntityBySlugResponseData": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "$ref": "#/definitions/v1Entity"
+        }
+      }
+    },
+    "v1ListEntitiesRequestBody": {
+      "type": "object",
+      "properties": {
+        "pagination": {
+          "$ref": "#/definitions/v1PaginationRequest"
+        },
+        "filters": {
+          "$ref": "#/definitions/v1QueryFilters"
+        },
+        "orders": {
+          "$ref": "#/definitions/v1QueryOrders"
+        },
+        "searches": {
+          "$ref": "#/definitions/v1QuerySearches"
+        }
+      }
+    },
+    "v1ListEntitiesResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/v1ListEntitiesResponseData"
+        }
+      }
+    },
+    "v1ListEntitiesResponseData": {
+      "type": "object",
+      "properties": {
+        "entities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1Entity"
+          }
+        },
+        "pagination": {
+          "$ref": "#/definitions/v1PaginationResponse"
+        }
+      }
+    },
+    "v1LogicalOperator": {
+      "type": "string",
+      "enum": [
+        "LOGICAL_OPERATOR_UNSPECIFIED",
+        "LOGICAL_OPERATOR_AND",
+        "LOGICAL_OPERATOR_OR"
+      ],
+      "default": "LOGICAL_OPERATOR_UNSPECIFIED"
+    },
+    "v1OrderDirection": {
+      "type": "string",
+      "enum": [
+        "ORDER_DIRECTION_UNSPECIFIED",
+        "ORDER_DIRECTION_ASC",
+        "ORDER_DIRECTION_DESC"
+      ],
+      "default": "ORDER_DIRECTION_UNSPECIFIED"
+    },
+    "v1PaginationRequest": {
+      "type": "object",
+      "properties": {
+        "cursor": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "v1PaginationResponse": {
+      "type": "object",
+      "properties": {
+        "nextCursor": {
+          "type": "string"
+        },
+        "prevCursor": {
+          "type": "string"
+        }
+      }
+    },
+    "v1QueryFilter": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "comparison": {
+          "$ref": "#/definitions/v1FilterComparison"
+        }
+      }
+    },
+    "v1QueryFilters": {
+      "type": "object",
+      "properties": {
+        "filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1QueryFilter"
+          }
+        }
+      }
+    },
+    "v1QueryOrder": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "direction": {
+          "$ref": "#/definitions/v1OrderDirection"
+        }
+      }
+    },
+    "v1QueryOrders": {
+      "type": "object",
+      "properties": {
+        "orders": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1QueryOrder"
+          }
+        }
+      }
+    },
+    "v1QuerySearch": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        },
+        "condition": {
+          "$ref": "#/definitions/v1SearchCondition"
+        }
+      }
+    },
+    "v1QuerySearches": {
+      "type": "object",
+      "properties": {
+        "operator": {
+          "$ref": "#/definitions/v1LogicalOperator"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1QuerySearch"
+          }
+        },
+        "groups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/v1QuerySearches"
+          }
+        }
+      }
+    },
+    "v1SearchCondition": {
+      "type": "string",
+      "enum": [
+        "SEARCH_CONDITION_UNSPECIFIED",
+        "SEARCH_CONDITION_CONTAINS",
+        "SEARCH_CONDITION_STARTS_WITH",
+        "SEARCH_CONDITION_ENDS_WITH",
+        "SEARCH_CONDITION_EQUALS"
+      ],
+      "default": "SEARCH_CONDITION_UNSPECIFIED"
+    },
+    "v1UpdateEntityRequestBody": {
+      "type": "object",
+      "properties": {
+        "payload": {
+          "$ref": "#/definitions/v1UpdateEntityRequestPayload"
+        },
+        "updateMask": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UpdateEntityRequestPayload": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "v1UpdateEntityResponse": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "$ref": "#/definitions/v1UpdateEntityResponseData"
+        }
+      }
+    },
+    "v1UpdateEntityResponseData": {
+      "type": "object",
+      "properties": {
+        "entity": {
+          "$ref": "#/definitions/v1Entity"
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "saml": {
+      "type": "apiKey",
+      "name": "X-SAML-Assertion",
+      "in": "header"
+    }
+  }
+}

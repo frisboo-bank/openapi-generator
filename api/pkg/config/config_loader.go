@@ -125,8 +125,6 @@ func (c *configLoader) HasKey(env environmentEnum.Environment, key string) (bool
 	return c.keyExists(key), nil
 }
 
-// Internal Helpers
-
 func (c *configLoader) ensureLoaded(env environmentEnum.Environment) error {
 	c.loadOnce.Do(func() {
 		c.loadErr = c.doLoad(env)
