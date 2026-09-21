@@ -13,6 +13,8 @@ import (
 	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
 	paginationenums "frisboo-bank/openapi-generator-service/pkg/query/models/enums"
 	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
+	metricsenums "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums"
+	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -66,10 +68,12 @@ func toCobraCommand(cmd contracts.Command) *cobra.Command {
 					environmentenums.EnvironmentEnumsDecodeHook(),
 					httpserverenums.HTTPServerEnumsDecodeHook(),
 					loggerenums.LoggerEnumsDecodeHook(),
+					metricsenums.MetricsEnumsDecodeHook(),
 					migrationenums.MigrationEnumsDecodeHook(),
 					paginationenums.QueryEnumsDecodeHook(),
 					rpcserverenums.RPCServerEnumsDecodeHook(),
 					sqlclientenums.SQLClientEnumsDecodeHook(),
+					tracerenums.TracerEnumsDecodeHook(),
 				},
 			}, viper.New())
 			if err != nil {

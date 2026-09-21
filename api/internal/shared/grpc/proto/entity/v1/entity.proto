@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package entity.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "frisboo-bank/openapi-generator-service/internal/shared/grpc/gen/entity/v1;entityv1";
+
+message Entity {
+  string slug = 1;
+  string name = 2;
+  optional string description = 3;
+  int64 version_lock = 4;
+  google.protobuf.Timestamp deleted_at = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}

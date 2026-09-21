@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package query.v1;
+
+option go_package = "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/resources/grpc/gen/query/v1;queryv1";
+
+enum SearchCondition {
+  SEARCH_CONDITION_UNSPECIFIED = 0;
+  SEARCH_CONDITION_CONTAINS = 1;
+  SEARCH_CONDITION_STARTS_WITH = 2;
+  SEARCH_CONDITION_ENDS_WITH = 3;
+  SEARCH_CONDITION_EQUALS = 4;
+}
+
+enum LogicalOperator {
+  LOGICAL_OPERATOR_UNSPECIFIED = 0;
+  LOGICAL_OPERATOR_AND = 1;
+  LOGICAL_OPERATOR_OR = 2;
+}
+
+message QuerySearch {
+  string field = 1;
+  string value = 2;
+  SearchCondition condition = 3;
+}
+
+message QuerySearches {
+  LogicalOperator operator = 1;
+  repeated QuerySearch conditions = 2;
+  repeated QuerySearches groups = 3;
+}

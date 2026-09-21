@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package query.v1;
+
+option go_package = "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/resources/grpc/gen/query/v1;queryv1";
+
+enum FilterComparison {
+  FILTER_COMPARISON_UNSPECIFIED = 0;
+  FILTER_COMPARISON_EQUAL = 1;
+  FILTER_COMPARISON_NOT_EQUAL = 2;
+  FILTER_COMPARISON_GREATER = 3;
+  FILTER_COMPARISON_GREATER_OR_EQUAL = 4;
+  FILTER_COMPARISON_LESS = 5;
+  FILTER_COMPARISON_LESS_OR_EQUAL = 6;
+  FILTER_COMPARISON_IN = 7;
+  FILTER_COMPARISON_BETWEEN = 8;
+  FILTER_COMPARISON_IS_NULL = 9;
+  FILTER_COMPARISON_IS_NOT_NULL = 10;
+  FILTER_COMPARISON_IS_EMPTY = 11;
+  FILTER_COMPARISON_IS_NOT_EMPTY = 12;
+  FILTER_COMPARISON_IS_TRUE = 13;
+  FILTER_COMPARISON_IS_FALSE = 14;
+  FILTER_COMPARISON_IS_NOT_TRUE = 15;
+  FILTER_COMPARISON_IS_NOT_FALSE = 16;
+  FILTER_COMPARISON_IS_UNKNOWN = 17;
+}
+
+message QueryFilter {
+  string field = 1;
+  repeated string values = 2;
+  FilterComparison comparison = 3;
+}
+
+message QueryFilters {
+  repeated QueryFilter filters = 1;
+}

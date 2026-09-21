@@ -1,0 +1,24 @@
+# 2026/06/02 11:01:38.349215 [TestQueryFilters/filters_included_not_allowed_field_should_fail_validation] [rapid] draw filters: []*query.QueryFilter{(*query.QueryFilter)(nil), (*query.QueryFilter)(nil)}
+# 2026/06/02 11:01:38.349272 [TestQueryFilters/filters_included_not_allowed_field_should_fail_validation] [rapid] draw badIdx: 0
+# 
+v0.4.8#11040047351599394557
+0x0
+0x5555555555555
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x5555555555555
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
+0x0
