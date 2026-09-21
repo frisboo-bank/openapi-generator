@@ -35,7 +35,11 @@ func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkr
 
 	ctx := context.Background()
 
-	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithInsecure())
+	opts := []otlptracehttp.Option{otlptracehttp.WithInsecure()}
+	if cfg.Endpoint != "" {
+		opts = append(opts, otlptracehttp.WithEndpoint(cfg.Endpoint))
+	}
+	exporter, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

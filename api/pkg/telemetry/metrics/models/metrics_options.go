@@ -11,6 +11,10 @@ type MetricsOptions struct {
 	IsEnabled bool                    `mapstructure:"enabled"`
 	Type      metricstype.MetricsType `mapstructure:"type"`
 
+	// OTLP exporter
+	Endpoint string `mapstructure:"endpoint"`
+	Insecure bool   `mapstructure:"insecure"`
+
 	// dependencies
 	Logger string `mapstructure:"logger"`
 }

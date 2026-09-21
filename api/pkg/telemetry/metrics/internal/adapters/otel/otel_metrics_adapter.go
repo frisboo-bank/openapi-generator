@@ -40,7 +40,11 @@ func NewOtelMetricsAdapter(name string, cfg *models.MetricsOptions, resource *sd
 
 	ctx := context.Background()
 
-	exporter, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithInsecure())
+	opts := []otlpmetrichttp.Option{otlpmetrichttp.WithInsecure()}
+	if cfg.Endpoint != "" {
+		opts = append(opts, otlpmetrichttp.WithEndpoint(cfg.Endpoint))
+	}
+	exporter, err := otlpmetrichttp.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

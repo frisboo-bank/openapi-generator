@@ -85,10 +85,14 @@ metrics:
   main:
     enabled: true
     type: open_telemetry
+    endpoint: localhost:4318
+    insecure: true
     logger: mediator
 
 tracer:
   main:
     enabled: true
     type: open_telemetry
+    endpoint: localhost:4318
+    insecure: true
     logger: mediator
