@@ -47,7 +47,7 @@ go run ./cmd/main.go
 ## Observability (Local Dev Stack)
 
 The local OTel stack lives in `api/docker-compose.yaml` and `api/resources/configs/`.
-It covers all three signals: traces (Jaeger), metrics (Prometheus), logs (Loki).
+It covers all three signals: traces (Tempo), metrics (Prometheus), logs (Loki).
 
 ### Default stack
 
@@ -56,7 +56,7 @@ cd api
 docker compose up
 ```
 
-Services: postgres, redis, nats, otel-collector, jaeger, prometheus, loki.
+Services: postgres, redis, nats, otel-collector, tempo, prometheus, loki.
 
 ### ⚠️ Local vs. prod differences
 
@@ -68,6 +68,9 @@ Services: postgres, redis, nats, otel-collector, jaeger, prometheus, loki.
 - **Local Tempo/Loki run in monolithic mode with filesystem storage.** Prod runs
   distributed with S3/GCS. Trace routing, compaction, and multi-tenant isolation
   are not replicated locally.
+- **Tempo uses multi-tenant mode** with `X-Scope-OrgID` headers. The collector
+  sets `dev-tenant-1` on all trace and log exports. Prod uses the same header
+  propagation pattern.
 
 ### Optional parity profiles
 
@@ -89,7 +92,7 @@ cd api
 ./test-persistent-queue.sh 100000
 ```
 
-Blasts the collector with a bounded burst of logs while restarting Loki, then
+Blasts the collector with a bounded burst of logs while restarting Tempo, then
 asserts the delivered count matches the sent count (delta = 0). Without this
 script the persistent queue is just YAML — this is the only way to prove
 backpressure, disk buffering, and flushing actually work.

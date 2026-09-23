@@ -68,12 +68,18 @@ services:
       resources:
         limits:
           memory: 512M
-  jaeger:
-    image: jaegertracing/jaeger
-    container_name: openapi-generator-jaeger
+  tempo:
+    image: grafana/tempo:latest
+    container_name: openapi-generator-tempo
     restart: unless-stopped
+    command: ["-config.file=/etc/tempo-config.yaml"]
     ports:
-      - "16686:16686"
+      - "3200:3200"
+      - "4317:4317"
+      - "4318:4318"
+      - "9090:9090"
+    volumes:
+      - ./resources/configs/tempo-config.yaml:/etc/tempo-config.yaml
     networks:
       - frisboo-bank
   prometheus:
@@ -125,7 +131,7 @@ services:
       - metrics-parity
     command: ["-config.file=/etc/mimir/mimir-config.yaml", "-target=all"]
     ports:
-      - "9009:9009"
+      - "9009:9090"
     networks:
       - frisboo-bank
 networks:

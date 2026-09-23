@@ -16,8 +16,8 @@ receivers:
         endpoint: 0.0.0.0:4318
 
 exporters:
-  jaeger:
-    endpoint: jaeger:4317
+  otlphttp/tempo:
+    endpoint: http://tempo:4318
     tls:
       insecure: true
     retry_on_failure:
@@ -33,7 +33,7 @@ exporters:
     # 0.0.0.0 lets Prometheus scrape the collector at otel-collector:8889.
     endpoint: 0.0.0.0:8889
     namespace: openapi-generator
-  loki:
+  otlphttp/loki:
     endpoint: http://loki:3100/otlp
     headers:
       X-Scope-OrgID: "dev-tenant-1"
@@ -84,7 +84,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, resource/environment, batch]
-      exporters: [jaeger]
+      exporters: [otlphttp/tempo]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource/environment, batch]
@@ -92,4 +92,4 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource/environment, batch]
-      exporters: [loki]
+      exporters: [otlphttp/loki]
