@@ -84,13 +84,13 @@ metrics:
   main:
     enabled: true
     type: open_telemetry
-    endpoint: 0.0.0.0:4317
+    endpoint: 127.0.0.1:4318
     insecure: true
     logger: metrics
 tracer:
   main:
     enabled: true
     type: open_telemetry
-    endpoint: 0.0.0.0:4317
+    endpoint: 127.0.0.1:4318
     insecure: true
     logger: tracer
