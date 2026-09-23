@@ -5,29 +5,44 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-extensions:
-  health_check:
-processors:
-  memory_limiter:
-    check_interval: 1s
-    limit_mib: 512
-  batch: {}
 exporters:
-  otlp:
+  jaeger:
     endpoint: jaeger:4317
     tls:
       insecure: true
     retry_on_failure:
       enabled: true
+    sending_queue:
+      enabled: true
+      queue_size: 1000
   prometheus:
-    endpoint: 0.0.0.0:8889
+    endpoint: prometheus:8889
+  loki:
+    endpoint: loki:3100
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
+  zpages:
+    endpoint: 0.0.0.0:55679
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 4000
+  batch: {}
 service:
+  extensions: [health_check, pprof, zpages]
   pipelines:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp]
+      exporters: [jaeger]
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [loki]
