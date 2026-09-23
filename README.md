@@ -23,7 +23,7 @@ docker compose up
 
 Services: postgres, redis, nats, otel-collector, tempo, prometheus, loki.
 
-### Local vs. prod differences
+### ⚠️ Local vs. prod differences
 
 - **Traces are 100% sampled locally.** Prod uses tail sampling (~10% retention).
   Do not build volume, cost, or cardinality assumptions on local trace data.

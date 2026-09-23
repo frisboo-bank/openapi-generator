@@ -67,6 +67,7 @@ docker compose run --rm --profile load-test telemetrygen \
     --otlp-http \
     --otlp-endpoint "${COLLECTOR_HTTP}" \
     --otlp-insecure \
+    --service openapi-generator \
     --duration 60s &
 TELEMETRYGEN_PID=$!
 
