@@ -53,6 +53,7 @@ services:
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./resources/configs/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+      - otelcol-file-storage:/var/lib/otelcol/file_storage
     ports:
       - "4317:4317"
       - "4318:4318"
@@ -63,6 +64,10 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:13133/"]
       interval: 10s
       retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 512M
   jaeger:
     image: jaegertracing/jaeger
     container_name: openapi-generator-jaeger
@@ -92,6 +97,40 @@ services:
       - ./resources/configs/loki-config.yml:/etc/loki/loki-config.yml
     networks:
       - frisboo-bank
+  telemetrygen:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:latest
+    profiles:
+      - load-test
+    networks:
+      - frisboo-bank
+  minio:
+    image: minio/minio
+    container_name: openapi-generator-minio
+    restart: unless-stopped
+    profiles:
+      - storage-parity
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    networks:
+      - frisboo-bank
+  mimir:
+    image: grafana/mimir
+    container_name: openapi-generator-mimir
+    restart: unless-stopped
+    profiles:
+      - metrics-parity
+    command: ["-config.file=/etc/mimir/mimir-config.yaml", "-target=all"]
+    ports:
+      - "9009:9009"
+    networks:
+      - frisboo-bank
 networks:
   frisboo-bank:
     name: frisboo-bank
+volumes:
+  otelcol-file-storage:
+  minio-data:
