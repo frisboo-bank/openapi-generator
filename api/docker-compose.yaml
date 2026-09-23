@@ -131,7 +131,7 @@ services:
       - metrics-parity
     command: ["-config.file=/etc/mimir/mimir-config.yaml", "-target=all"]
     ports:
-      - "9009:9090"
+      - "9090:9090"
     networks:
       - frisboo-bank
 networks:
