@@ -2,12 +2,12 @@ package otel
 
 import (
 	"context"
-
-	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
+
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -35,7 +35,12 @@ func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkr
 
 	ctx := context.Background()
 
-	exporter, err := otlptracehttp.New(ctx)
+	opts := []otlptracehttp.Option{otlptracehttp.WithEndpoint(cfg.Endpoint)}
+	if cfg.Insecure {
+		opts = append(opts, otlptracehttp.WithInsecure())
+	}
+
+	exporter, err := otlptracehttp.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

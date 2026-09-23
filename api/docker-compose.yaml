@@ -1,5 +1,4 @@
 name: openapi-generator
-
 services:
   postgres:
     image: postgres:18-alpine
@@ -18,7 +17,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   redis:
     image: redis:8-alpine
     container_name: openapi-generator-redis
@@ -33,7 +31,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   nats:
     image: nats:2-alpine
     container_name: openapi-generator-nats
@@ -49,7 +46,36 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    container_name: openapi-generator-otel-collector
+    restart: unless-stopped
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./resources/configs/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    networks:
+      - frisboo-bank
+  jaeger:
+    image: jaegertracing/jaeger
+    container_name: openapi-generator-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"
+    networks:
+      - frisboo-bank
+  prometheus:
+    image: prom/prometheus
+    container_name: openapi-generator-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./resources/configs/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - frisboo-bank
 networks:
   frisboo-bank:
     name: frisboo-bank

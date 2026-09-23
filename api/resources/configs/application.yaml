@@ -1,7 +1,6 @@
 app:
   name: openapi-generator-service
   logger: main
-
 loggers:
   main:
     type: zerolog
@@ -27,7 +26,14 @@ loggers:
     type: zerolog
     level: debug
     prefix: (mediator) openapi-generator-service
-
+  metrics:
+    type: zerolog
+    level: debug
+    prefix: (telemetry) openapi-generator-service
+  tracer:
+    type: zerolog
+    level: debug
+    prefix: (telemetry) openapi-generator-service
 http-servers:
   main:
     enabled: true
@@ -37,7 +43,6 @@ http-servers:
     basePath: /api
     debug: true
     logger: http-server
-
 rpc-servers:
   main:
     enabled: true
@@ -46,7 +51,6 @@ rpc-servers:
     port: 9002
     debug: true
     logger: rpc-server
-
 sql-clients:
   main:
     enabled: true
@@ -58,37 +62,35 @@ sql-clients:
     database: openapi_generator
     sslMode: disabled
     logger: sql-client
-
 migration:
   main:
     enabled: true
     type: goose
     migrationsDir: db/migrations/main
     dbClient: main
-
 caches:
   main:
     enabled: true
     type: redis
     host: localhost
     port: 6379
-
 waiter:
   cancelOnShutdownSignal: true
   cleanupTimeoutMs: 30000
   logger: waiter
-
 mediator:
   logger: mediator
-
 metrics:
   main:
     enabled: true
     type: open_telemetry
-    logger: mediator
-
+    endpoint: 0.0.0.0:4317
+    insecure: true
+    logger: metrics
 tracer:
   main:
     enabled: true
     type: open_telemetry
-    logger: mediator
+    endpoint: 0.0.0.0:4317
+    insecure: true
+    logger: tracer
