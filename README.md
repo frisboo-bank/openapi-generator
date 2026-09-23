@@ -1,43 +1,8 @@
-# OpenAPI Generator
+# OpenAPI Generator Service
 
-A tool for generating OpenAPI specifications from frisboo-core-banking APIs.
+Internal use only.
 
-## Structure
-
-- `api/` - Go backend (OpenAPI generator service)
-- `frontend/` - React/TypeScript frontend application (Rsbuild)
-
-## Build
-
-The root `Makefile` is the single build entry point for the whole repo
-(Go backend in `api/`, React/TypeScript frontend in `frontend/`).
-
-```bash
-make help        # list all available targets
-make install     # install all dependencies (frontend + go modules)
-make build       # build backend + frontend
-make test        # run all tests
-make lint        # lint backend + frontend
-```
-
-Per-sub-project commands:
-
-```bash
-make run            # run the API server (backend)
-make dev-frontend   # start the frontend dev server
-```
-
-## Getting Started
-
-### Frontend
-
-```bash
-cd frontend
-pnpm install
-pnpm run dev
-```
-
-### Backend (Go)
+## Backend (Go)
 
 ```bash
 cd api
@@ -58,7 +23,7 @@ docker compose up
 
 Services: postgres, redis, nats, otel-collector, tempo, prometheus, loki.
 
-### ⚠️ Local vs. prod differences
+### Local vs. prod differences
 
 - **Traces are 100% sampled locally.** Prod uses tail sampling (~10% retention).
   Do not build volume, cost, or cardinality assumptions on local trace data.
@@ -81,6 +46,16 @@ docker compose --profile storage-parity up
 # Mimir remote-write testing (cardinality limits, remote-write rejection)
 docker compose --profile metrics-parity up
 ```
+
+- **Mimir is push-only.** The collector's `prometheus` exporter pushes to
+  `http://mimir:9009/api/v1/write`; Mimir is not a Prometheus scrape target.
+  `prometheus.yml` scrapes the collector itself (`otel-collector:8889`).
+- **No container healthcheck on otel-collector.** The distroless image has no
+  `curl`/`wget`. The `health_check` extension at port `13133` is the collector's
+  own readiness signal — rely on it (or `docker compose ps`) instead of a
+  Docker healthcheck.
+- **Image versions are pinned** to avoid breaking changes. The otel-collector
+  uses `otel/opentelemetry-collector-contrib:0.100.0`; bump deliberately.
 
 `telemetrygen` is included under the `load-test` profile — it is a test tool,
 not a service, so it is not started by default.

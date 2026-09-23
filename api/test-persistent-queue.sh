@@ -17,6 +17,7 @@ set -euo pipefail
 
 NUM_LOGS="${1:-100000}"
 LOKI_BASE="http://loki:3100"
+LOKI_QUERY="${LOKI_BASE}/loki/api/v1/query"
 LOKI_READY="${LOKI_BASE}/ready"
 TEMPO_BASE="http://tempo:3200"
 TEMPO_READY="${TEMPO_BASE}/ready"
@@ -40,10 +41,20 @@ for i in $(seq 1 30); do
 done
 
 # 2. Record pre-restart baseline log count.
+#    Uses the instant query endpoint (not query_range) — query_range returns
+#    values as [[timestamp, "value"], ...] pairs, which broke float() parsing.
+#    The instant query returns a single [timestamp, "value"] pair.
 echo "[2/5] Recording pre-restart baseline..."
-BASELINE=$(curl -s "${LOKI_BASE}/loki/api/v1/query_range" \
-  --data-urlencode 'query=count_over_time({job="openapi-generator"}[1m])' \
-  --data-urlencode 'step=1m' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(sum(float(v) for v in d['data']['result'][0]['values']))" 2>/dev/null || echo "0")
+BASELINE=$(curl -s "${LOKI_QUERY}" \
+  --data-urlencode 'query=count_over_time({service_name="openapi-generator"}[1m])' \
+  2>/dev/null | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+try:
+    print(int(float(d['data']['result'][0]['value'][1])))
+except (KeyError, IndexError, ValueError):
+    print(0)
+" 2>/dev/null || echo "0")
 echo "      Baseline log count: ${BASELINE}"
 
 # 3. Blast the collector with a bounded burst while restarting Loki AND Tempo.
@@ -56,7 +67,7 @@ docker compose run --rm --profile load-test telemetrygen \
     --otlp-http \
     --otlp-endpoint "${COLLECTOR_HTTP}" \
     --otlp-insecure \
-    --service openapi-generator &
+    --duration 60s &
 TELEMETRYGEN_PID=$!
 
 # Give telemetrygen a moment to start, then restart both backends.
@@ -93,9 +104,16 @@ sleep 10
 
 # 5. Assert delta = 0.
 echo "[5/5] Asserting delivery..."
-AFTER=$(curl -s "${LOKI_BASE}/loki/api/v1/query_range" \
-  --data-urlencode 'query=count_over_time({job="openapi-generator"}[1h])' \
-  --data-urlencode 'step=1h' 2>/dev/null | python3 -c "import sys,json; d=json.load(sys.stdin); print(sum(float(v) for v in d['data']['result'][0]['values']))" 2>/dev/null || echo "0")
+AFTER=$(curl -s "${LOKI_QUERY}" \
+  --data-urlencode 'query=count_over_time({service_name="openapi-generator"}[1h])' \
+  2>/dev/null | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+try:
+    print(int(float(d['data']['result'][0]['value'][1])))
+except (KeyError, IndexError, ValueError):
+    print(0)
+" 2>/dev/null || echo "0")
 echo "      Delivered: ${AFTER} (baseline ${BASELINE}, sent ${NUM_LOGS})"
 DELTA=$(python3 -c "print(int(${AFTER}) - int(${BASELINE}) - ${NUM_LOGS})" 2>/dev/null || echo "unknown")
 echo "      Delta (delivered - baseline - sent): ${DELTA}"

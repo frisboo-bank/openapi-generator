@@ -60,8 +60,12 @@ extensions:
 processors:
   memory_limiter:
     check_interval: 1s
-    limit_mib: 512
-    spike_limit_mib: 128
+    # ⚠️  Keep limit_mib + spike_limit_mib below the container's 512M hard
+    #     limit. The collector reserves memory for queues, batch, and
+    #     exporters on top of these limits, so 512/128 OOMs in practice.
+    #     Prod raises both; local stays conservative.
+    limit_mib: 400
+    spike_limit_mib: 100
   batch:
     send_batch_size: 1000
     timeout: 5s

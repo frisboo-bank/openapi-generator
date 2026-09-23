@@ -47,7 +47,7 @@ services:
       timeout: 5s
       retries: 5
   otel-collector:
-    image: otel/opentelemetry-collector-contrib
+    image: otel/opentelemetry-collector-contrib:0.100.0
     container_name: openapi-generator-otel-collector
     restart: unless-stopped
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -60,10 +60,6 @@ services:
       - "13133:13133"
     networks:
       - frisboo-bank
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:13133/"]
-      interval: 10s
-      retries: 3
     deploy:
       resources:
         limits:
@@ -80,6 +76,7 @@ services:
       - "9090:9090"
     volumes:
       - ./resources/configs/tempo-config.yaml:/etc/tempo-config.yaml
+      - tempo-traces:/var/tempo/traces
     networks:
       - frisboo-bank
   prometheus:
@@ -96,11 +93,12 @@ services:
     image: grafana/loki
     container_name: openapi-generator-loki
     restart: unless-stopped
-    command: ["-config.file=/etc/loki/loki-config.yml"]
+    command: ["-config.file=/etc/loki/loki-config.yaml"]
     ports:
       - "3100:3100"
     volumes:
-      - ./resources/configs/loki-config.yml:/etc/loki/loki-config.yml
+      - ./resources/configs/loki-config.yaml:/etc/loki/loki-config.yaml
+      - loki-data:/tmp/loki
     networks:
       - frisboo-bank
   telemetrygen:
@@ -132,6 +130,9 @@ services:
     command: ["-config.file=/etc/mimir/mimir-config.yaml", "-target=all"]
     ports:
       - "9009:9090"
+    volumes:
+      - ./resources/configs/mimir-config.yaml:/etc/mimir/mimir-config.yaml
+      - mimir-data:/var/lib/mimir
     networks:
       - frisboo-bank
 networks:
@@ -140,3 +141,6 @@ networks:
 volumes:
   otelcol-file-storage:
   minio-data:
+  tempo-traces:
+  loki-data:
+  mimir-data:
