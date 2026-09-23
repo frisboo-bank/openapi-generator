@@ -5,7 +5,8 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-extensions: [health_check]
+extensions:
+  health_check:
 processors:
   memory_limiter:
     check_interval: 1s
