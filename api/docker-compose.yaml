@@ -56,8 +56,13 @@ services:
     ports:
       - "4317:4317"
       - "4318:4318"
+      - "13133:13133"
     networks:
       - frisboo-bank
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:13133/"]
+      interval: 10s
+      retries: 3
   jaeger:
     image: jaegertracing/jaeger
     container_name: openapi-generator-jaeger
@@ -74,6 +79,17 @@ services:
       - "9090:9090"
     volumes:
       - ./resources/configs/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - frisboo-bank
+  loki:
+    image: grafana/loki
+    container_name: openapi-generator-loki
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/loki-config.yml"]
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./resources/configs/loki-config.yml:/etc/loki/loki-config.yml
     networks:
       - frisboo-bank
 networks:
