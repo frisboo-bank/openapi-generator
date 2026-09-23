@@ -83,18 +83,18 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./resources/configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./resources/configs/prometheus.yaml:/etc/prometheus/prometheus.yaml
     networks:
       - frisboo-bank
   loki:
     image: grafana/loki
     container_name: openapi-generator-loki
     restart: unless-stopped
-    command: ["-config.file=/etc/loki/loki-config.yml"]
+    command: ["-config.file=/etc/loki/loki-config.yaml"]
     ports:
       - "3100:3100"
     volumes:
-      - ./resources/configs/loki-config.yml:/etc/loki/loki-config.yml
+      - ./resources/configs/loki-config.yaml:/etc/loki/loki-config.yaml
     networks:
       - frisboo-bank
   telemetrygen:

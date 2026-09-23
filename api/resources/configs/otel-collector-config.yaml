@@ -1,12 +1,3 @@
-# OTel Collector — local dev stack
-#
-# ⚠️  Local traces are 100% sampled. Prod uses tail sampling (~10% retention).
-#     Do not build volume, cost, or cardinality assumptions on local trace data.
-#
-# ⚠️  PII redaction is NOT enabled locally (see commented-out stanza below).
-#     Prod enables transform/redact-pii; uncomment locally to test redaction.
-#
-# Queue parameters mirror prod otel-collector-config.yaml — keep in sync.
 receivers:
   otlp:
     protocols:
@@ -14,7 +5,6 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-
 exporters:
   jaeger:
     endpoint: jaeger:4317
@@ -29,8 +19,6 @@ exporters:
       num_consumers: 2
       timeout: 5s
   prometheus:
-    # endpoint is a BIND target, not a push destination.
-    # 0.0.0.0 lets Prometheus scrape the collector at otel-collector:8889.
     endpoint: 0.0.0.0:8889
     namespace: openapi-generator
   loki:
@@ -45,7 +33,6 @@ exporters:
       queue_size: 1000
       num_consumers: 2
       timeout: 5s
-
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -56,7 +43,6 @@ extensions:
   file_storage:
     directory: /var/lib/otelcol/file_storage
     timeout: 1s
-
 processors:
   memory_limiter:
     check_interval: 1s
@@ -70,14 +56,13 @@ processors:
       - key: deployment.environment
         value: "local-dev"
         action: upsert
-  # Enabled in prod. Uncomment locally to test redaction behavior.
-  # transform/redact-pii:
-  #   error_mode: ignore
-  #   log_statements:
-  #     - context: log
-  #       statements:
-  #         - replace_all_patterns(attributes, "value", "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", "REDACTED_EMAIL")
-
+        transform/redact-pii:
+          error_mode: ignore
+          log_statements:
+            - context: log
+              statements:
+                - set(attributes["user.email"], "REDACTED_EMAIL")
+                - set(attributes["user.phone"], "REDACTED_PHONE")
 service:
   extensions: [health_check, pprof, zpages, file_storage]
   pipelines:
