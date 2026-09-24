@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-
 	"frisboo-bank/openapi-generator-service/pkg/cli/contracts"
 
 	"github.com/spf13/cobra"
@@ -34,11 +33,10 @@ func NewRootCommand(cfg *RootCommandOptions) contracts.RootCommand {
 		Short: cfg.Short,
 	}
 
-	rootCmd.PersistentFlags().String("configPath", "configs", "Path to configuration directory")
+	rootCmd.PersistentFlags().String("configPath", "resources/configs", "Path to configuration directory")
 	rootCmd.PersistentFlags().String("configName", "application", "Configuration file name (without extension)")
 	rootCmd.PersistentFlags().Bool("debug", false, "Enable debug mode")
-	rootCmd.PersistentFlags().
-		String("environment", "", "Environment (development, testing, preprod, production)")
+	rootCmd.PersistentFlags().String("environment", "", "Environment (development, testing, preprod, production)")
 	rootCmd.PersistentFlags().String("envPrefix", "APP_", "Prefix for environment variables")
 
 	c := &rootCommand{

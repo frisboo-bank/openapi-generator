@@ -3,16 +3,16 @@ package otel
 import (
 	"context"
 	"fmt"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"sync"
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
 	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
-	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"go.opentelemetry.io/otel"
 
@@ -40,7 +40,12 @@ func NewOtelMetricsAdapter(name string, cfg *models.MetricsOptions, resource *sd
 
 	ctx := context.Background()
 
-	exporter, err := otlpmetrichttp.New(ctx)
+	opts := []otlpmetrichttp.Option{otlpmetrichttp.WithEndpoint(cfg.Endpoint)}
+	if cfg.Insecure {
+		opts = append(opts, otlpmetrichttp.WithInsecure())
+	}
+
+	exporter, err := otlpmetrichttp.New(ctx, opts...)
 	if err != nil {
 		return nil, err
 	}

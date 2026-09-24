@@ -97,5 +97,5 @@ func (m *mediator) Send(ctx context.Context, request contracts.Request) (contrac
 }
 
 func (m *mediator) Publish(ctx context.Context, notification contracts.Notification) error {
-	panic("unimplemented")
+	panic("Publish is unimplemented")
 }

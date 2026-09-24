@@ -11,6 +11,10 @@ type TracerOptions struct {
 	IsEnabled bool                  `mapstructure:"enabled"`
 	Type      tracertype.TracerType `mapstructure:"type"`
 
+	// OpenTelemetry
+	Endpoint string `mapstructure:"endpoint"`
+	Insecure bool   `mapstructure:"insecure"`
+
 	// dependencies
 	Logger string `mapstructure:"logger"`
 }
