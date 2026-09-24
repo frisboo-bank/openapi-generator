@@ -5,7 +5,6 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-
 exporters:
   otlphttp/tempo:
     endpoint: http://tempo:4318
@@ -18,10 +17,8 @@ exporters:
       storage: file_storage
       queue_size: 1000
       num_consumers: 2
-      timeout: 5s
+      # timeout: 5s
   prometheus:
-    # endpoint is a BIND target, not a push destination.
-    # 0.0.0.0 lets Prometheus scrape the collector at otel-collector:8889.
     endpoint: 0.0.0.0:8889
     namespace: openapi-generator
   otlphttp/loki:
@@ -35,8 +32,7 @@ exporters:
       storage: file_storage
       queue_size: 1000
       num_consumers: 2
-      timeout: 5s
-
+      # timeout: 5s
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -47,14 +43,9 @@ extensions:
   file_storage:
     directory: /var/lib/otelcol/file_storage
     timeout: 1s
-
 processors:
   memory_limiter:
     check_interval: 1s
-    # ⚠️  Keep limit_mib + spike_limit_mib below the container's 512M hard
-    #     limit. The collector reserves memory for queues, batch, and
-    #     exporters on top of these limits, so 512/128 OOMs in practice.
-    #     Prod raises both; local stays conservative.
     limit_mib: 400
     spike_limit_mib: 100
   batch:
@@ -74,7 +65,6 @@ processors:
         statements:
           - set(attributes["user.email"], "REDACTED_EMAIL")
           - set(attributes["user.phone"], "REDACTED_PHONE")
-
 service:
   extensions: [health_check, pprof, zpages, file_storage]
   pipelines:
