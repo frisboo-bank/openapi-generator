@@ -8,6 +8,8 @@ receivers:
 exporters:
   otlphttp/tempo:
     endpoint: http://tempo:4318
+    headers:
+      X-Scope-OrgID: "dev-tenant-1"
     tls:
       insecure: true
     retry_on_failure:
@@ -17,10 +19,13 @@ exporters:
       storage: file_storage
       queue_size: 1000
       num_consumers: 2
-      # timeout: 5s
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: openapi-generator
+  prometheusremotewrite/mimir:
+    endpoint: http://mimir:8080/api/v1/push
+    headers:
+      X-Scope-OrgID: "dev-tenant-1"
   otlphttp/loki:
     endpoint: http://loki:3100/otlp
     headers:
@@ -32,7 +37,6 @@ exporters:
       storage: file_storage
       queue_size: 1000
       num_consumers: 2
-      # timeout: 5s
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -54,10 +58,9 @@ processors:
   resource/environment:
     attributes:
       - key: deployment.environment
-        value: "local-dev"
+        value: "${env:APP_ENV}"
         action: upsert
-  # Enabled locally to test redaction behavior. Prod uses the same pattern
-  # with additional fields (see prod otel-collector-config.yaml).
+  # PII redaction is enabled locally, same pattern as prod.
   transform/redact-pii:
     error_mode: ignore
     log_statements:
@@ -75,7 +78,7 @@ service:
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, resource/environment, batch]
-      exporters: [prometheus]
+      exporters: [prometheus, prometheusremotewrite/mimir]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource/environment, batch, transform/redact-pii]

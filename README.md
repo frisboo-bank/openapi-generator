@@ -12,7 +12,7 @@ go run ./cmd/main.go
 ## Observability (Local Dev Stack)
 
 The local OTel stack lives in `api/docker-compose.yaml` and `api/resources/configs/`.
-It covers all three signals: traces (Tempo), metrics (Prometheus), logs (Loki).
+It covers all three signals: traces (Tempo), metrics (Prometheus + Mimir), logs (Loki).
 
 ### Default stack
 
@@ -21,56 +21,60 @@ cd api
 docker compose up
 ```
 
-Services: postgres, redis, nats, otel-collector, tempo, prometheus, loki.
+Services: postgres, redis, nats, otel-collector, tempo, prometheus, loki, mimir.
 
-### ⚠️ Local vs. prod differences
+Signal flow:
+
+- **Traces**: app -> otel-collector (OTLP) -> Tempo (multi-tenant, `X-Scope-OrgID: dev-tenant-1`).
+- **Metrics**: app -> otel-collector (OTLP) -> Prometheus (pull, `otel-collector:8889`)
+  and Mimir (remote-write push, `http://mimir:8080/api/v1/push`).
+- **Logs**: app -> otel-collector (OTLP) -> Loki, with PII redaction (`transform/redact-pii`).
+
+### Local vs. prod differences
 
 - **Traces are 100% sampled locally.** Prod uses tail sampling (~10% retention).
-  Do not build volume, cost, or cardinality assumptions on local trace data.
-- **PII redaction is NOT enabled locally.** Prod enables `transform/redact-pii`
-  (see the commented-out stanza in `otel-collector-config.yaml`). Uncomment it
-  locally to test redaction behavior.
-- **Local Tempo/Loki run in monolithic mode with filesystem storage.** Prod runs
-  distributed with S3/GCS. Trace routing, compaction, and multi-tenant isolation
-  are not replicated locally.
-- **Tempo uses multi-tenant mode** with `X-Scope-OrgID` headers. The collector
-  sets `dev-tenant-1` on all trace and log exports. Prod uses the same header
-  propagation pattern.
+- **PII redaction IS enabled locally** using the same `transform/redact-pii` processor
+  as prod (redacting `user.email` / `user.phone`). Prod adds more fields.
+- **Tempo/Loki/Mimir run in monolithic mode with filesystem storage.** Prod runs
+  distributed with S3/GCS. Trace routing, compaction, and multi-tenant isolation are
+  not fully replicated locally.
+- **Tempo runs multi-tenant** (`multitenancy_enabled: true`); the collector sets
+  `X-Scope-OrgID: dev-tenant-1` on trace and log exports, matching prod header
+  propagation.
 
-### Optional parity profiles
+### Image versions
+
+Pinned to avoid silent breaking changes:
+
+- `otel/opentelemetry-collector-contrib:0.161.0`
+- `grafana/tempo:3.0.3`
+- `grafana/loki:3.7.8`
+- `grafana/mimir:3.2.1`
+- `prom/prometheus:v3.14.0`
+- `ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:0.161.0`
+
+Bump deliberately.
+
+### Running the app against the stack
+
+The app runs on the host (`go run ./cmd/main.go`) and sends OTLP to
+`127.0.0.1:4318` (the collector's host-mapped HTTP port). When the app itself is
+containerized, set the endpoint to the collector service via environment:
 
 ```bash
-# S3-backed Loki testing (bucket naming, auth, path-style access, retries)
-docker compose --profile storage-parity up
-
-# Mimir remote-write testing (cardinality limits, remote-write rejection)
-docker compose --profile metrics-parity up
+APP_METRICS_MAIN_ENDPOINT=otel-collector:4318 \
+APP_TRACER_MAIN_ENDPOINT=otel-collector:4318 \
+  go run ./cmd/main.go
 ```
 
-- **Mimir is push-only.** The collector's `prometheus` exporter pushes to
-  `http://mimir:9009/api/v1/write`; Mimir is not a Prometheus scrape target.
-  `prometheus.yml` scrapes the collector itself (`otel-collector:8889`).
-- **No container healthcheck on otel-collector.** The distroless image has no
-  `curl`/`wget`. The `health_check` extension at port `13133` is the collector's
-  own readiness signal — rely on it (or `docker compose ps`) instead of a
-  Docker healthcheck.
-- **Image versions are pinned** to avoid breaking changes. The otel-collector
-  uses `otel/opentelemetry-collector-contrib:0.100.0`; bump deliberately.
+### No container healthcheck on otel-collector
+
+The distroless image has no `curl`/`wget`. The `health_check` extension at port
+`13133` is the collector's own readiness signal — rely on it (or `docker compose ps`)
+instead of a Docker healthcheck.
 
 `telemetrygen` is included under the `load-test` profile — it is a test tool,
 not a service, so it is not started by default.
-
-### Verifying the persistent queue
-
-```bash
-cd api
-./test-persistent-queue.sh 100000
-```
-
-Blasts the collector with a bounded burst of logs while restarting Tempo, then
-asserts the delivered count matches the sent count (delta = 0). Without this
-script the persistent queue is just YAML — this is the only way to prove
-backpressure, disk buffering, and flushing actually work.
 
 ## License
 

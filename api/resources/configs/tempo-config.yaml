@@ -1,28 +1,25 @@
+multitenancy_enabled: true
+
 server:
   http_listen_port: 3200
-  grpc_listen_port: 9090
+  grpc_listen_port: 9095
+
 distributor:
-  otlp:
-    grpc:
-      endpoint: 0.0.0.0:4317
-    http:
-      endpoint: 0.0.0.0:4318
-compactor:
-  compaction:
-    compaction_window: 24h
-    blocks_retention_period: 48h
-ingester:
-  lifecycler:
-    ring:
-      replication_factor: 1
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
 storage:
   trace:
-    backend: filesystem
-    filesystem:
-      path: /var/tempo/traces
-overrides:
-  defaults:
-    tenants:
-      mode: multi_tenant
-    metrics_generator:
-      enabled: false
+    backend: local
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+usage_report:
+  reporting_enabled: false
