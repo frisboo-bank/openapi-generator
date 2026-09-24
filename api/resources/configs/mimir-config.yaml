@@ -1,13 +1,3 @@
-# Mimir — local dev stack (monolithic, filesystem storage)
-#
-# ⚠️  Local Mimir runs in monolithic mode with filesystem storage.
-#     Prod runs distributed with S3/GCS. Compactor, store-gateway,
-#     and multi-tenant isolation are not replicated locally.
-#
-# OTLP ingestion is native in Mimir v2.x. The prometheus exporter
-# in otel-collector-config.yaml pushes to http://mimir:9009/api/v1/write.
-# The prometheus.yml scrape target is otel-collector:8889 (the collector
-# itself), not Mimir — Mimir is a push destination, not a scrape target.
 common:
   storage:
     backend: filesystem
@@ -16,34 +6,28 @@ common:
   ring:
     kvstore:
       store: inmemory
-
 limits:
   per_tenant:
     max_series_per_metric: 5000
     max_series_per_tenant: 10000
-
 ingester:
   ring:
     replication_factor: 1
   lifecycler:
     ring:
       replication_factor: 1
-
 compactor:
   data_dir: /var/lib/mimir/compactor
-
 store_gateway:
   storage:
     backend: filesystem
     filesystem:
       directory: /var/lib/mimir/store
-
 query_range:
   storage:
     backend: filesystem
     filesystem:
       directory: /var/lib/mimir/query
-
 schema:
   configs:
     - from: 2024-01-01
@@ -51,7 +35,5 @@ schema:
       object_store: filesystem
       schema: v13
       hash: 1
-
-# Disable anonymous usage reporting.
 analytics:
   reporting_enabled: false

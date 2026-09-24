@@ -98,10 +98,7 @@ services:
       - "3100:3100"
     volumes:
       - ./resources/configs/loki-config.yaml:/etc/loki/loki-config.yaml
-<<<<<<< HEAD
       - loki-data:/tmp/loki
-=======
->>>>>>> origin/push-tltpqklvynwz
     networks:
       - frisboo-bank
   telemetrygen:
@@ -144,9 +141,6 @@ networks:
 volumes:
   otelcol-file-storage:
   minio-data:
-<<<<<<< HEAD
   tempo-traces:
   loki-data:
   mimir-data:
-=======
->>>>>>> origin/push-tltpqklvynwz
