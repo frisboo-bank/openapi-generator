@@ -1,25 +1,17 @@
-# Mimir 3.2.1 single-binary (target=all), filesystem storage for local dev.
-# Prod parity notes: filesystem backend mirrors a single-node prod layout;
-# in real prod swap backend to S3 and pin the X-Scope-OrgID tenant via multitenancy.
 multitenancy_enabled: true
-
 blocks_storage:
   backend: filesystem
   filesystem:
     dir: /var/lib/mimir/blocks
   tsdb:
     dir: /var/lib/mimir/tsdb
-
 ingester:
   ring:
     replication_factor: 1
-
 compactor:
   data_dir: /var/lib/mimir/compactor
-
 limits:
   max_global_series_per_metric: 5000
   max_global_series_per_user: 10000
-
 usage_stats:
   enabled: false
