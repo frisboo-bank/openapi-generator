@@ -1,8 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
 scrape_configs:
-  - job_name: 'otel-collector'
+  - job_name: 'prometheus'
     static_configs:
-      - targets: ['otel-collector:8889']
-        labels:
-          job: otel-collector
-          cluster: local
-          service_name: openapi-generator
+      - targets: ['localhost:9090']
+  - job_name: 'tempo'
+    static_configs:
+      - targets: ['tempo:3200']
+  - job_name: 'vulture'
+    static_configs:
+      - targets: ['vulture:8080']
