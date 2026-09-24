@@ -1,9 +1,7 @@
 multitenancy_enabled: true
-
 server:
   http_listen_port: 3200
   grpc_listen_port: 9095
-
 distributor:
   receivers:
     otlp:
@@ -12,7 +10,6 @@ distributor:
           endpoint: 0.0.0.0:4317
         http:
           endpoint: 0.0.0.0:4318
-
 storage:
   trace:
     backend: local
@@ -20,6 +17,5 @@ storage:
       path: /var/tempo/wal
     local:
       path: /var/tempo/blocks
-
 usage_report:
   reporting_enabled: false

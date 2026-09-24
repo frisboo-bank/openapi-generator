@@ -60,7 +60,6 @@ processors:
       - key: deployment.environment
         value: "${env:APP_ENV}"
         action: upsert
-  # PII redaction is enabled locally, same pattern as prod.
   transform/redact-pii:
     error_mode: ignore
     log_statements:
