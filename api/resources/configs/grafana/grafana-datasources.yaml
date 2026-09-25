@@ -18,6 +18,12 @@ datasources:
       streamingEnabled:
         search: true
         metrics: true
+      tracesToLogs:
+        datasourceUid: loki
+        tags: ['service.name']
+      tracesToMetrics:
+        datasourceUid: prometheus
+        tags: ['service.name']
   - name: Tempo (no streaming)
     type: tempo
     access: proxy
@@ -33,12 +39,29 @@ datasources:
       httpMethod: GET
       serviceMap:
         datasourceUid: prometheus
+      tracesToLogs:
+        datasourceUid: loki
+        tags: ['service.name']
+      tracesToMetrics:
+        datasourceUid: prometheus
+        tags: ['service.name']
   - name: Prometheus
     type: prometheus
     uid: prometheus
     access: proxy
     orgId: 1
     url: http://prometheus:9090
+    basicAuth: false
+    isDefault: false
+    version: 1
+    editable: false
+    jsonData:
+      httpMethod: GET
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
     basicAuth: false
     isDefault: false
     version: 1
