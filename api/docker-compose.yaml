@@ -115,6 +115,18 @@ services:
       - "9090:9090"
     networks:
       - frisboo-bank
+  loki:
+    image: grafana/loki
+    container_name: openapi-generator-loki
+    restart: unless-stopped
+    command: -config.file=/etc/loki.yaml
+    volumes:
+      - ./resources/configs/loki.yaml:/etc/loki.yaml
+      - loki-data:/var/loki
+    ports:
+      - "3100:3100"
+    networks:
+      - frisboo-bank
   grafana:
     image: grafana/grafana
     container_name: openapi-generator-grafana

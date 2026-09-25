@@ -2,19 +2,66 @@ otelcol.receiver.otlp "otlp_receiver" {
   grpc { endpoint = "0.0.0.0:4317" }
   http { endpoint = "0.0.0.0:4318" }
   output {
-    traces  = [otelcol.exporter.otlp.grafanacloud.input]
+    traces  = [otelcol.processor.batch.default.input]
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.transform.redact_pii.input]
+  }
+}
+
+otelcol.processor.memory_limiter "default" {
+  check_interval  = "1s"
+  limit_mib       = 400
+  spike_limit_mib = 100
+  output {
+    traces  = [otelcol.processor.batch.default.input]
+    metrics = [otelcol.processor.batch.default.input]
+    logs    = [otelcol.processor.transform.redact_pii.input]
+  }
+}
+
+otelcol.processor.transform "redact_pii" {
+  error_mode = "ignore"
+  log_statements {
+    context = "log"
+    statements = [
+      `set(attributes["user.email"], "REDACTED_EMAIL")`,
+      `set(attributes["user.phone"], "REDACTED_PHONE")`,
+    ]
+  }
+  output {
+    logs = [otelcol.processor.batch.default.input]
+  }
+}
+
+otelcol.processor.batch "default" {
+  send_batch_size = 1000
+  timeout         = "5s"
+  output {
+    traces  = [otelcol.exporter.otlp.tempo.input]
     metrics = [otelcol.exporter.prometheus.default.input]
     logs    = [otelcol.exporter.loki.default.input]
   }
 }
 
-otelcol.exporter.otlp "grafanacloud" {
+otelcol.exporter.otlp "tempo" {
   client {
     endpoint = env("ALLOY_OTLP_UPSTREAM")
     tls {
-			insecure = true
-		}
+      insecure = true
+    }
+    retry_on_failure {
+      enabled = true
+    }
+    sending_queue {
+      enabled       = true
+      queue_size    = 1000
+      num_consumers = 2
+    }
   }
+}
+
+otelcol.exporter.prometheus "default" {
+  forward_to = [prometheus.remote_write.default.receiver]
 }
 
 prometheus.remote_write "default" {
@@ -23,18 +70,12 @@ prometheus.remote_write "default" {
   }
 }
 
+otelcol.exporter.loki "default" {
+  forward_to = [loki.write.default.receiver]
+}
+
 loki.write "default" {
   endpoint {
     url = "http://loki:3100/loki/api/v1/push"
   }
 }
-
-otelcol.exporter.prometheus "default" {
-  forward_to = [prometheus.remote_write.default.receiver]
-}
-
-
-otelcol.exporter.loki "default" {
-  forward_to = [loki.write.default.receiver]
-}
-
