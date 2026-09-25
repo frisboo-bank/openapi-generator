@@ -58,14 +58,18 @@ services:
       - tempo-data:/var/tempo
     ports:
       - "3200:3200"
-      - "4317:4317"
-      - "4318:4318"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3200/ready"]
+      interval: 10s
+      retries: 5
     networks:
       - frisboo-bank
   vulture:
     image: grafana/tempo-vulture
     container_name: openapi-generator-vulture
     restart: unless-stopped
+    profiles:
+      - trace-verification
     command: ["-prometheus-listen-address=:8080", "-tempo-query-url=http://tempo:3200", "-tempo-push-url=http://tempo:4317"]
     networks:
       - frisboo-bank
@@ -86,22 +90,16 @@ services:
       - ./resources/configs/config.alloy:/etc/alloy/config.alloy
     ports:
       - "12345:12345"
-      - "4319:4317"
+      - "4317:4317"
+      - "4318:4318"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12345/-/healthz"]
+      interval: 10s
+      retries: 5
     networks:
       - frisboo-bank
     depends_on:
       - tempo
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing
-    container_name: openapi-generator-k6-tracing
-    restart: unless-stopped
-    environment:
-      - ENDPOINT=alloy:4317
-    depends_on:
-      - alloy
-      - tempo
-    networks:
-      - frisboo-bank
   prometheus:
     image: prom/prometheus
     container_name: openapi-generator-prometheus
@@ -139,80 +137,4 @@ networks:
     name: frisboo-bank
 volumes:
   tempo-data:
-# otelcol-file-storage:
-# tempo-traces:
-# loki-data:
-# mimir-data:
-
-# otel-collector:
-#   image: otel/opentelemetry-collector-contrib:0.161.0
-#   container_name: openapi-generator-otel-collector
-#   restart: unless-stopped
-#   command: ["--config=/etc/otel-collector-config.yaml"]
-#   environment:
-#     APP_ENV: ${APP_ENV:-local-dev}
-#   volumes:
-#     - ./resources/configs/otel-collector-config.yaml:/etc/otel-collector-config.yaml
-#     - otelcol-file-storage:/var/lib/otelcol/file_storage
-#   ports:
-#     - "4317:4317"
-#     - "4318:4318"
-#     - "13133:13133"
-#   networks:
-#     - frisboo-bank
-#   deploy:
-#     resources:
-#       limits:
-#         memory: 512M
-# tempo:
-#   image: grafana/tempo:3.0.3
-#   container_name: openapi-generator-tempo
-#   restart: unless-stopped
-#   command: "-target=all -config.file=/etc/tempo-config.yaml"
-#   ports:
-#     - "3200:3200"
-#   volumes:
-#     - ./resources/configs/tempo-config.yaml:/etc/tempo-config.yaml
-#     - tempo-traces:/var/tempo
-#   networks:
-#     - frisboo-bank
-# prometheus:
-#   image: prom/prometheus:v3.14.0
-#   container_name: openapi-generator-prometheus
-#   restart: unless-stopped
-#   ports:
-#     - "9090:9090"
-#   volumes:
-#     - ./resources/configs/prometheus.yaml:/etc/prometheus/prometheus.yaml
-#   networks:
-#     - frisboo-bank
-# loki:
-#   image: grafana/loki:3.7.8
-#   container_name: openapi-generator-loki
-#   restart: unless-stopped
-#   command: ["-config.file=/etc/loki/loki-config.yaml"]
-#   ports:
-#     - "3100:3100"
-#   volumes:
-#     - ./resources/configs/loki-config.yaml:/etc/loki/loki-config.yaml
-#     - loki-data:/tmp/loki
-#   networks:
-#     - frisboo-bank
-# mimir:
-#   image: grafana/mimir:3.2.1
-#   container_name: openapi-generator-mimir
-#   restart: unless-stopped
-#   command: ["-config.file=/etc/mimir/mimir-config.yaml", "-target=all"]
-#   ports:
-#     - "9009:8080"
-#   volumes:
-#     - ./resources/configs/mimir-config.yaml:/etc/mimir/mimir-config.yaml
-#     - mimir-data:/var/lib/mimir
-#   networks:
-#     - frisboo-bank
-# telemetrygen:
-#   image: ghcr.io/open-telemetry/opentelemetry-collector-contrib/telemetrygen:0.161.0
-#   profiles:
-#     - load-test
-#   networks:
-#     - frisboo-bank
+  loki-data:
