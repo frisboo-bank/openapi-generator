@@ -54,7 +54,7 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
     volumes:
-      - ./resources/configs/tempo.yaml:/etc/tempo.yaml
+      - ./resources/telemetry/tempo.yaml:/etc/tempo.yaml
       - tempo-data:/var/tempo
     ports:
       - "3200:3200"
@@ -87,7 +87,7 @@ services:
     environment:
       - ALLOY_OTLP_UPSTREAM=tempo:4317
     volumes:
-      - ./resources/configs/config.alloy:/etc/alloy/config.alloy
+      - ./resources/telemetry/config.alloy:/etc/alloy/config.alloy
     ports:
       - "12345:12345"
       - "4317:4317"
@@ -110,7 +110,7 @@ services:
       - --enable-feature=exemplar-storage
       - --enable-feature=native-histograms
     volumes:
-      - ./resources/configs/prometheus.yaml:/etc/prometheus.yaml
+      - ./resources/telemetry/prometheus.yaml:/etc/prometheus.yaml
     ports:
       - "9090:9090"
     networks:
@@ -121,7 +121,7 @@ services:
     restart: unless-stopped
     command: -config.file=/etc/loki.yaml
     volumes:
-      - ./resources/configs/loki.yaml:/etc/loki.yaml
+      - ./resources/telemetry/loki.yaml:/etc/loki.yaml
       - loki-data:/var/loki
     ports:
       - "3100:3100"
@@ -132,9 +132,9 @@ services:
     container_name: openapi-generator-grafana
     restart: unless-stopped
     volumes:
-      - ./resources/configs/grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
-      - ./resources/configs/grafana/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
-      - ./resources/configs/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./resources/telemetry/grafana/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./resources/telemetry/grafana/grafana-dashboards.yaml:/etc/grafana/provisioning/dashboards/dashboards.yaml
+      - ./resources/telemetry/grafana/dashboards:/var/lib/grafana/dashboards
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
