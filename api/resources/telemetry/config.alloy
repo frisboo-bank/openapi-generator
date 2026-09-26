@@ -2,9 +2,9 @@ otelcol.receiver.otlp "otlp_receiver" {
   grpc { endpoint = "0.0.0.0:4317" }
   http { endpoint = "0.0.0.0:4318" }
   output {
-    traces  = [otelcol.processor.batch.default.input]
-    metrics = [otelcol.processor.batch.default.input]
-    logs    = [otelcol.processor.transform.redact_pii.input]
+    traces  = [otelcol.processor.memory_limiter.default.input]
+    metrics = [otelcol.processor.memory_limiter.default.input]
+    logs    = [otelcol.processor.memory_limiter.default.input]
   }
 }
 
