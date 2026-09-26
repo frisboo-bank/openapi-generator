@@ -50,7 +50,7 @@ services:
     image: grafana/tempo
     container_name: openapi-generator-tempo
     restart: unless-stopped
-    command: "-target=all -config.file=/etc/tempo.yaml"
+    command: ["-target=all", "-config.file=/etc/tempo.yaml"]
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://alloy:4318
     volumes:
@@ -93,7 +93,7 @@ services:
       - "4317:4317"
       - "4318:4318"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12345/-/healthz"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:12345/-/healthy"]
       interval: 10s
       retries: 5
     networks:
@@ -119,7 +119,7 @@ services:
     image: grafana/loki
     container_name: openapi-generator-loki
     restart: unless-stopped
-    command: -config.file=/etc/loki.yaml
+    command: ["-config.file=/etc/loki.yaml"]
     volumes:
       - ./resources/telemetry/loki.yaml:/etc/loki.yaml
       - loki-data:/var/loki
