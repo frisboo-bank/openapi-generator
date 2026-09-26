@@ -10,7 +10,7 @@ datasources:
     version: 1
     editable: false
     apiVersion: 1
-    uuid: tempo-streaming-enabled
+    uid: tempo-streaming-enabled
     jsonData:
       httpMethod: "GET"
       serviceMap:
