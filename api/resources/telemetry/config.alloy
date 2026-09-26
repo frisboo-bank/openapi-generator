@@ -1,6 +1,7 @@
 otelcol.receiver.otlp "otlp_receiver" {
   grpc { endpoint = "0.0.0.0:4317" }
   http { endpoint = "0.0.0.0:4318" }
+
   output {
     traces  = [otelcol.processor.memory_limiter.default.input]
     metrics = [otelcol.processor.memory_limiter.default.input]
@@ -9,9 +10,10 @@ otelcol.receiver.otlp "otlp_receiver" {
 }
 
 otelcol.processor.memory_limiter "default" {
-  check_interval  = "1s"
-  limit_mib       = 400
-  spike_limit_mib = 100
+  check_interval = "1s"
+  limit          = "400MiB"
+  spike_limit    = "100MiB"
+
   output {
     traces  = [otelcol.processor.batch.default.input]
     metrics = [otelcol.processor.batch.default.input]
@@ -21,6 +23,7 @@ otelcol.processor.memory_limiter "default" {
 
 otelcol.processor.transform "redact_pii" {
   error_mode = "ignore"
+
   log_statements {
     context = "log"
     statements = [
@@ -28,6 +31,7 @@ otelcol.processor.transform "redact_pii" {
       `set(attributes["user.phone"], "REDACTED_PHONE")`,
     ]
   }
+
   output {
     logs = [otelcol.processor.batch.default.input]
   }
@@ -36,6 +40,7 @@ otelcol.processor.transform "redact_pii" {
 otelcol.processor.batch "default" {
   send_batch_size = 1000
   timeout         = "5s"
+
   output {
     traces  = [otelcol.exporter.otlp.tempo.input]
     metrics = [otelcol.exporter.prometheus.default.input]
@@ -44,18 +49,16 @@ otelcol.processor.batch "default" {
 }
 
 otelcol.exporter.otlp "tempo" {
+  sending_queue {
+    queue_size    = 1000
+    num_consumers = 2
+  }
+
   client {
-    endpoint = env("ALLOY_OTLP_UPSTREAM")
+    endpoint = coalesce(sys.env("ALLOY_OTLP_UPSTREAM"), "tempo:4317")
+
     tls {
       insecure = true
-    }
-    retry_on_failure {
-      enabled = true
-    }
-    sending_queue {
-      enabled       = true
-      queue_size    = 1000
-      num_consumers = 2
     }
   }
 }
