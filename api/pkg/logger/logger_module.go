@@ -9,10 +9,13 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/logger/models"
+	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
 func LoggerModule(env environmentEnum.Environment, configLoader configLoaderContracts.ConfigLoader) containerContracts.Module {
+	configLoader.RegisterDecodeHookFunc(loggerenums.LoggerEnumsDecodeHook())
+
 	var cfgMap map[string]*models.LoggerOptions
 	if err := configLoader.LoadKey(env, &cfgMap, "loggers"); err != nil {
 		panic(fmt.Sprintf("failed to load logger config: %v", err))

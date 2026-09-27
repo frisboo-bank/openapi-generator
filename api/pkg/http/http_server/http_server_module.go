@@ -11,8 +11,10 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
+	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
@@ -24,6 +26,9 @@ var HTTPServerModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.HTTPServerOptions, contracts.HTTPServer, HTTPServerDependencies]{
 		Name:      "http-server",
 		ConfigKey: "http-servers",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
+			httpserverenums.HTTPServerEnumsDecodeHook(),
+		},
 		ProviderFn: func(
 			name string,
 			cfg *models.HTTPServerOptions,

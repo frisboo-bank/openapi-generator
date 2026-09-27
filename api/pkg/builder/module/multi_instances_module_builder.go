@@ -11,6 +11,7 @@ import (
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
@@ -19,10 +20,11 @@ type MultiInstancesModuleOptions[
 	Instance any,
 	Extra any,
 ] struct {
-	Name       string
-	ConfigKey  string
-	ProviderFn func(name string, cfg Config, env environmentEnum.Environment, logger loggerContracts.Logger, extra Extra) (Instance, error)
-	HookFn     func(name string, instance Instance) containerContracts.HookResolveResult
+	Name             string
+	ConfigKey        string
+	ConfigDecodeHook []mapstructure.DecodeHookFunc
+	ProviderFn       func(name string, cfg Config, env environmentEnum.Environment, logger loggerContracts.Logger, extra Extra) (Instance, error)
+	HookFn           func(name string, instance Instance) containerContracts.HookResolveResult
 }
 
 type MultiInstancesModuleResponse = func(
@@ -30,7 +32,7 @@ type MultiInstancesModuleResponse = func(
 	configLoader configContracts.ConfigLoader,
 ) containerContracts.Module
 
-func NewMultiInstancesModule[Config configContracts.Configurable, Instance any, Extra any](
+func NewMultiInstancesModule[Config configContracts.Configurable, Instance, Extra any](
 	opts MultiInstancesModuleOptions[Config, Instance, Extra],
 ) MultiInstancesModuleResponse {
 	validation.AssertNotEmpty("name", opts.Name)
@@ -46,6 +48,10 @@ func NewMultiInstancesModule[Config configContracts.Configurable, Instance any, 
 
 		type ConfigsMapType = map[string]Config
 		type InstancesMapType = map[string]Instance
+
+		if configDecodeHook := opts.ConfigDecodeHook; len(configDecodeHook) > 0 {
+			configLoader.RegisterDecodeHookFunc(configDecodeHook...)
+		}
 
 		var cfgMap ConfigsMapType
 		if err := configLoader.LoadKey(env, &cfgMap, opts.ConfigKey); err != nil {

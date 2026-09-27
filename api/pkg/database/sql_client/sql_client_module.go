@@ -2,22 +2,25 @@ package sqlclient
 
 import (
 	"context"
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
 type SQLClientDependencies struct {
 	dig.In
-	Tracer  tracercontracts.Tracer  `name:"tracer:main"`
+	Tracer  tracercontracts.Tracer   `name:"tracer:main"`
 	Metrics metricscontracts.Metrics `name:"metrics:main"`
 }
 
@@ -25,7 +28,10 @@ var SQLClientModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
 		Name:      "sql-client",
 		ConfigKey: "sql-clients",
-		ProviderFn: func(name string, cfg *models.SQLClientOptions, env environmentEnum.Environment, logger loggercontracts.Logger, extra SQLClientDependencies) (contracts.SQLClientCore, error) {
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
+			sqlclientenums.SQLClientEnumsDecodeHook(),
+		},
+		ProviderFn: func(name string, cfg *models.SQLClientOptions, env environmentenum.Environment, logger loggercontracts.Logger, extra SQLClientDependencies) (contracts.SQLClientCore, error) {
 			return CreateSQLClient(name, cfg, logger, extra.Tracer, extra.Metrics)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {

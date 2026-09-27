@@ -5,11 +5,13 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models"
+	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
@@ -21,10 +23,13 @@ var RPCServerModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.RPCServerOptions, contracts.RPCServer, RPCServerDependencies]{
 		Name:      "rpc-server",
 		ConfigKey: "rpc-servers",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
+			rpcserverenums.RPCServerEnumsDecodeHook(),
+		},
 		ProviderFn: func(
 			name string,
 			cfg *models.RPCServerOptions,
-			env environmentEnum.Environment,
+			env environmentenum.Environment,
 			logger loggerContracts.Logger,
 			extra RPCServerDependencies,
 		) (contracts.RPCServer, error) {
