@@ -47,7 +47,7 @@ func NewApplicationBuilder(
 func (a *applicationBuilder) Build() (contracts.Application, error) {
 	coreModule := container.NewModule(
 		"core",
-		environment.EnvironmentModule(a.environment),
+		environment.EnvironmentModule(a.environment, a.configLoader),
 		config.ConfigModule(a.configLoader),
 		logger.LoggerModule(a.environment, a.configLoader),
 		waiter.WaiterModule(a.environment, a.configLoader),
@@ -67,15 +67,10 @@ func (a *applicationBuilder) Build() (contracts.Application, error) {
 		}),
 	)
 
-	coreModule.
-		AddProvider(a.providers...).
-		AddDecorator(a.decorators...).
+	coreModule.AddProvider(a.providers...).AddDecorator(a.decorators...).
 		AddModule(a.modules...)
 
-	return NewApplication(
-		a.container,
-		coreModule,
-	)
+	return NewApplication(a.container, coreModule)
 }
 
 func (a *applicationBuilder) ConfigLoader() configContracts.ConfigLoader {

@@ -18,8 +18,8 @@ type TracerModuleDependencies struct {
 
 var TracerModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.TracerOptions, contracts.Tracer, TracerModuleDependencies]{
-		Name:      "tracer",
-		ConfigKey: "tracer",
+		Name:      "telemetry.tracer",
+		ConfigKey: "telemetry.tracer",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
 			tracerenums.TracerEnumsDecodeHook(),
 		},

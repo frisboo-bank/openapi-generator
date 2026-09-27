@@ -80,17 +80,18 @@ waiter:
   logger: waiter
 mediator:
   logger: mediator
-metrics:
-  main:
-    enabled: true
-    type: open_telemetry
-    endpoint: 127.0.0.1:4318
-    insecure: true
-    logger: metrics
-tracer:
-  main:
-    enabled: true
-    type: open_telemetry
-    endpoint: 127.0.0.1:4318
-    insecure: true
-    logger: tracer
+telemetry:
+  metrics:
+    main:
+      enabled: true
+      type: open_telemetry
+      endpoint: 127.0.0.1:4318
+      insecure: true
+      logger: metrics
+  tracer:
+    main:
+      enabled: true
+      type: open_telemetry
+      endpoint: 127.0.0.1:4318
+      insecure: true
+      logger: tracer

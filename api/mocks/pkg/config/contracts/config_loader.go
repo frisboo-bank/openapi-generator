@@ -8,6 +8,7 @@ import (
 	environment "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	reflect "reflect"
 
+	mapstructure "github.com/go-viper/mapstructure/v2"
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -75,4 +76,20 @@ func (m *MockConfigLoader) LoadKey(env environment.Environment, cfg any, key str
 func (mr *MockConfigLoaderMockRecorder) LoadKey(env, cfg, key interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LoadKey", reflect.TypeOf((*MockConfigLoader)(nil).LoadKey), env, cfg, key)
+}
+
+// RegisterDecodeHookFunc mocks base method.
+func (m *MockConfigLoader) RegisterDecodeHookFunc(f ...mapstructure.DecodeHookFunc) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{}
+	for _, a := range f {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "RegisterDecodeHookFunc", varargs...)
+}
+
+// RegisterDecodeHookFunc indicates an expected call of RegisterDecodeHookFunc.
+func (mr *MockConfigLoaderMockRecorder) RegisterDecodeHookFunc(f ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RegisterDecodeHookFunc", reflect.TypeOf((*MockConfigLoader)(nil).RegisterDecodeHookFunc), f...)
 }
