@@ -6,7 +6,9 @@ import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
+	metricsenums "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
@@ -18,6 +20,9 @@ var MetricsModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.MetricsOptions, contracts.Metrics, MetricsModuleDependencies]{
 		Name:      "metrics",
 		ConfigKey: "metrics",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
+			metricsenums.MetricsEnumsDecodeHook(),
+		},
 		ProviderFn: func(name string, cfg *models.MetricsOptions, _ environmentEnum.Environment, logger loggercontracts.Logger, _ MetricsModuleDependencies) (contracts.Metrics, error) {
 			return CreateMetrics(name, cfg, logger)
 		},

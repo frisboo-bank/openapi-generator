@@ -125,7 +125,7 @@ func (c *configLoader) HasKey(env environmentEnum.Environment, key string) (bool
 func (c *configLoader) RegisterDecodeHookFunc(f ...mapstructure.DecodeHookFunc) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.decodeHookFuncs = append(c.decodeHookFuncs, f)
+	c.decodeHookFuncs = append(c.decodeHookFuncs, f...)
 }
 
 func (c *configLoader) ensureLoaded(env environmentEnum.Environment) error {
@@ -156,8 +156,13 @@ func (c *configLoader) doLoad(env environmentEnum.Environment) error {
 }
 
 func (c *configLoader) unmarshal(key string, target any) error {
+	hooks := []mapstructure.DecodeHookFunc{
+		mapstructure.StringToTimeDurationHookFunc(),
+	}
+	hooks = append(hooks, c.decodeHookFuncs...)
+
 	opts := []viper.DecoderConfigOption{
-		viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(c.decodeHookFuncs...)),
+		viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(hooks...)),
 	}
 
 	if key == "" {
