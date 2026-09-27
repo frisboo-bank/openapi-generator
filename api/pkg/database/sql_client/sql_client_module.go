@@ -20,8 +20,9 @@ import (
 
 type SQLClientDependencies struct {
 	dig.In
-	Tracer  tracercontracts.Tracer   `name:"tracer:main"`
-	Metrics metricscontracts.Metrics `name:"metrics:main"`
+	Tracer  tracercontracts.Tracer   `name:"telemetry.tracer:main"`
+	Metrics metricscontracts.Metrics `name:"telemetry.metrics:main"`
+	// Log     logcontracts.Log         `name:"telemetry.log:main"`
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
