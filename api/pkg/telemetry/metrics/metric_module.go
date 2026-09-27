@@ -2,7 +2,7 @@ package metrics
 
 import (
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
@@ -18,12 +18,12 @@ type MetricsModuleDependencies struct {
 
 var MetricsModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.MetricsOptions, contracts.Metrics, MetricsModuleDependencies]{
-		Name:      "metrics",
-		ConfigKey: "metrics",
+		Name:      "telemetry.metrics",
+		ConfigKey: "telemetry.metrics",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
 			metricsenums.MetricsEnumsDecodeHook(),
 		},
-		ProviderFn: func(name string, cfg *models.MetricsOptions, _ environmentEnum.Environment, logger loggercontracts.Logger, _ MetricsModuleDependencies) (contracts.Metrics, error) {
+		ProviderFn: func(name string, cfg *models.MetricsOptions, _ environmentenum.Environment, logger loggercontracts.Logger, _ MetricsModuleDependencies) (contracts.Metrics, error) {
 			return CreateMetrics(name, cfg, logger)
 		},
 	},
