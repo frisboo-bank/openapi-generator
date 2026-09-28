@@ -3,16 +3,20 @@ package sql
 import (
 	"context"
 	"database/sql"
+	"time"
+
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	"time"
 
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 )
 
-var _ contracts.SQLClient = (*sqlClientTelemetry)(nil)
+var (
+	_ contracts.SQLClient    = (*sqlClientTelemetry)(nil)
+	_ contracts.WithDBGetter = (*sqlClientTelemetry)(nil)
+)
 
 type sqlClientTelemetry struct {
 	delegate contracts.SQLClient
@@ -108,6 +112,13 @@ func (s *sqlClientTelemetry) QueryRow(ctx context.Context, query string, args ..
 
 	row := s.delegate.QueryRow(ctx, query, args...)
 	return wrapSQLRowForTelemetry(row, span)
+}
+
+func (s *sqlClientTelemetry) DB() *sql.DB {
+	if getter, ok := s.delegate.(contracts.WithDBGetter); ok {
+		return getter.DB()
+	}
+	return nil
 }
 
 func (s *sqlClientTelemetry) Logger() loggercontracts.Logger    { return s.delegate.Logger() }

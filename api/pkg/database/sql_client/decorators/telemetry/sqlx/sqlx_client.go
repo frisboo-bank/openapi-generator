@@ -5,20 +5,26 @@ import (
 	"database/sql"
 	"time"
 
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
+	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 )
 
-var _ contracts.SQLXClient = (*sqlxClientTelemetry)(nil)
+var (
+	_ contracts.SQLXClient   = (*sqlxClientTelemetry)(nil)
+	_ contracts.WithDBGetter = (*sqlxClientTelemetry)(nil)
+)
 
 type sqlxClientTelemetry struct {
-	contracts.SQLXClient
-	name    string
-	tracer  tracercontracts.Tracer
-	metrics metricscontracts.Metrics
+	delegate contracts.SQLXClient
+	name     string
+	tracer   tracercontracts.Tracer
+	metrics  metricscontracts.Metrics
 }
 
 func WrapSQLXClientForTelemetry(name string, delegate contracts.SQLXClient, tracer tracercontracts.Tracer, metrics metricscontracts.Metrics) contracts.SQLXClient {
@@ -27,10 +33,10 @@ func WrapSQLXClientForTelemetry(name string, delegate contracts.SQLXClient, trac
 	validation.AssertNotNil("metrics", metrics)
 
 	return &sqlxClientTelemetry{
-		SQLXClient: delegate,
-		name:       name,
-		tracer:     tracer,
-		metrics:    metrics,
+		delegate: delegate,
+		name:     name,
+		tracer:   tracer,
+		metrics:  metrics,
 	}
 }
 
@@ -39,7 +45,7 @@ func (s *sqlxClientTelemetry) BeginTransaction(ctx context.Context, opts *sql.Tx
 	ctx, span := s.tracer.Start(ctx, "sqlx.begin_transaction")
 	defer span.End()
 
-	tx, err := s.SQLXClient.BeginTransaction(ctx, opts)
+	tx, err := s.delegate.BeginTransaction(ctx, opts)
 	if err != nil {
 		span.RecordError(err)
 		s.metrics.RecordDuration("sql.operation", time.Since(start), "client", s.name, "op", "begin_transaction", "error", true)
@@ -55,7 +61,7 @@ func (s *sqlxClientTelemetry) Close(ctx context.Context) error {
 	_, span := s.tracer.Start(context.Background(), "sqlx.close")
 	defer span.End()
 
-	err := s.SQLXClient.Close(ctx)
+	err := s.delegate.Close(ctx)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -69,7 +75,7 @@ func (s *sqlxClientTelemetry) NamedExec(ctx context.Context, query string, args 
 	ctx, span := s.tracer.Start(ctx, "sqlx.named_exec")
 	defer span.End()
 
-	res, err := s.SQLXClient.NamedExec(ctx, query, args)
+	res, err := s.delegate.NamedExec(ctx, query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -83,7 +89,7 @@ func (s *sqlxClientTelemetry) NamedGet(ctx context.Context, dest any, query stri
 	ctx, span := s.tracer.Start(ctx, "sqlx.named_get")
 	defer span.End()
 
-	err := s.SQLXClient.NamedGet(ctx, dest, query, args)
+	err := s.delegate.NamedGet(ctx, dest, query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -96,7 +102,7 @@ func (s *sqlxClientTelemetry) NamedQuery(ctx context.Context, query string, args
 	start := time.Now()
 	ctx, span := s.tracer.Start(ctx, "sqlx.named_query")
 
-	res, err := s.SQLXClient.NamedQuery(ctx, query, args)
+	res, err := s.delegate.NamedQuery(ctx, query, args)
 	if err != nil {
 		span.RecordError(err)
 		s.metrics.RecordDuration("sql.operation", time.Since(start), "client", s.name, "op", "named_query", "error", true)
@@ -115,7 +121,7 @@ func (s *sqlxClientTelemetry) NamedSelect(ctx context.Context, dest any, query s
 	ctx, span := s.tracer.Start(ctx, "sqlx.named_select")
 	defer span.End()
 
-	err := s.SQLXClient.NamedSelect(ctx, dest, query, args)
+	err := s.delegate.NamedSelect(ctx, dest, query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -129,7 +135,7 @@ func (s *sqlxClientTelemetry) Ping(ctx context.Context) error {
 	ctx, span := s.tracer.Start(ctx, "sqlx.ping")
 	defer span.End()
 
-	err := s.SQLXClient.Ping(ctx)
+	err := s.delegate.Ping(ctx)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -137,3 +143,14 @@ func (s *sqlxClientTelemetry) Ping(ctx context.Context) error {
 	s.metrics.RecordDuration("sql.operation", time.Since(start), "client", s.name, "op", "ping", "error", err != nil)
 	return err
 }
+
+func (s *sqlxClientTelemetry) DB() *sql.DB {
+	if getter, ok := s.delegate.(contracts.WithDBGetter); ok {
+		return getter.DB()
+	}
+	return nil
+}
+
+func (s *sqlxClientTelemetry) Logger() loggercontracts.Logger    { return s.delegate.Logger() }
+func (s *sqlxClientTelemetry) Name() string                      { return s.delegate.Name() }
+func (s *sqlxClientTelemetry) Type() sqlclienttype.SqlClientType { return s.delegate.Type() }
