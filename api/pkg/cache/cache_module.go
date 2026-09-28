@@ -6,10 +6,12 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/models"
+	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
@@ -23,6 +25,9 @@ var CacheModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.CacheOptions, contracts.Cache, CacheDependencies]{
 		Name:      "cache",
 		ConfigKey: "caches",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
+			cacheenums.CacheEnumsDecodeHook(),
+		},
 		ProviderFn: func(
 			name string,
 			cfg *models.CacheOptions,
@@ -38,8 +43,7 @@ var CacheModule = module.NewMultiInstancesModule(
 				Wait: func(ctx context.Context) error {
 					go func() {
 						if err := instance.Ping(ctx); err != nil {
-							instance.Logger().
-								Fatalf("cache-client %q failed to access backend with error: %v", instance.Name(), err)
+							instance.Logger().Fatalf("cache-client %q failed to access backend with error: %v", instance.Name(), err)
 						}
 					}()
 

@@ -19,27 +19,24 @@ import (
 var _ contracts.ConfigLoader = (*configLoader)(nil)
 
 type ConfigLoaderOptions struct {
-	ConfigName      string
-	ConfigPath      string
-	Debug           bool
-	EnvKeyReplacer  map[string]string
-	EnvPrefix       string
-	DecodeHookFuncs []mapstructure.DecodeHookFunc
+	ConfigName     string
+	ConfigPath     string
+	Debug          bool
+	EnvKeyReplacer map[string]string
+	EnvPrefix      string
 }
 
 type configLoader struct {
-	basePath string
-	config   ConfigLoaderOptions
-	loadErr  error
-	loadOnce sync.Once
-	mu       sync.RWMutex
-	viper    *viper.Viper
+	basePath        string
+	config          ConfigLoaderOptions
+	loadErr         error
+	loadOnce        sync.Once
+	mu              sync.RWMutex
+	viper           *viper.Viper
+	decodeHookFuncs []mapstructure.DecodeHookFunc
 }
 
-func NewConfigLoader(
-	cfg ConfigLoaderOptions,
-	vi *viper.Viper,
-) (contracts.ConfigLoader, error) {
+func NewConfigLoader(cfg ConfigLoaderOptions, vi *viper.Viper) (contracts.ConfigLoader, error) {
 	if vi == nil {
 		return nil, fmt.Errorf("viper instance cannot be nil")
 	}
@@ -125,6 +122,12 @@ func (c *configLoader) HasKey(env environmentEnum.Environment, key string) (bool
 	return c.keyExists(key), nil
 }
 
+func (c *configLoader) RegisterDecodeHookFunc(f ...mapstructure.DecodeHookFunc) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.decodeHookFuncs = append(c.decodeHookFuncs, f...)
+}
+
 func (c *configLoader) ensureLoaded(env environmentEnum.Environment) error {
 	c.loadOnce.Do(func() {
 		c.loadErr = c.doLoad(env)
@@ -156,7 +159,7 @@ func (c *configLoader) unmarshal(key string, target any) error {
 	hooks := []mapstructure.DecodeHookFunc{
 		mapstructure.StringToTimeDurationHookFunc(),
 	}
-	hooks = append(hooks, c.config.DecodeHookFuncs...)
+	hooks = append(hooks, c.decodeHookFuncs...)
 
 	opts := []viper.DecoderConfigOption{
 		viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(hooks...)),

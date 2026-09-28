@@ -1,14 +1,16 @@
 package environment
 
 import (
+	configloadercontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/container"
-	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 )
 
-func EnvironmentModule(env environmentEnum.Environment) containerContracts.Module {
+func EnvironmentModule(env environmentenum.Environment, configLoader configloadercontracts.ConfigLoader) containercontracts.Module {
+	configLoader.RegisterDecodeHookFunc(environmentenum.EnvironmentEnumsDecodeHook())
 	return container.NewModule(
 		"environment",
-		container.Provider(func() environmentEnum.Environment { return env }),
+		container.Provider(func() environmentenum.Environment { return env }),
 	)
 }

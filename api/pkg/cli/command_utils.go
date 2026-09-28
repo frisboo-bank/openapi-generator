@@ -3,21 +3,11 @@ package cli
 import (
 	"fmt"
 
-	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/cli/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/config"
-	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums"
-	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
 	environmentenums "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
-	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
-	paginationenums "frisboo-bank/openapi-generator-service/pkg/query/models/enums"
-	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
-	metricsenums "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums"
-	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
-	"github.com/go-viper/mapstructure/v2"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -63,18 +53,6 @@ func toCobraCommand(cmd contracts.Command) *cobra.Command {
 				Debug:          debug,
 				EnvKeyReplacer: map[string]string{},
 				EnvPrefix:      envPrefix,
-				DecodeHookFuncs: []mapstructure.DecodeHookFunc{
-					cacheenums.CacheEnumsDecodeHook(),
-					environmentenums.EnvironmentEnumsDecodeHook(),
-					httpserverenums.HTTPServerEnumsDecodeHook(),
-					loggerenums.LoggerEnumsDecodeHook(),
-					metricsenums.MetricsEnumsDecodeHook(),
-					migrationenums.MigrationEnumsDecodeHook(),
-					paginationenums.QueryEnumsDecodeHook(),
-					rpcserverenums.RPCServerEnumsDecodeHook(),
-					sqlclientenums.SQLClientEnumsDecodeHook(),
-					tracerenums.TracerEnumsDecodeHook(),
-				},
 			}, viper.New())
 			if err != nil {
 				return fmt.Errorf("command run failed with error: %w", err)
