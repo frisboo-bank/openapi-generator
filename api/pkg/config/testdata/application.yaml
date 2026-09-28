@@ -1,0 +1,4 @@
+app:
+  name: test-service
+  timeout: 5s
+  color: red

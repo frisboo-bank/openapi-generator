@@ -167,17 +167,27 @@ func (c *configLoader) unmarshal(key string, target any) error {
 
 	if key == "" {
 		if err := c.viper.UnmarshalExact(target, opts...); err != nil {
-			return syserrors.Wrap(err, "failed to unmarshal root")
+			return fmt.Errorf("failed to unmarshal root with error: %w", err)
 		}
 		return nil
 	}
 
-	sub := c.viper.Sub(key)
-	if sub == nil || len(sub.AllSettings()) == 0 {
+	if sub := c.viper.Sub(key); sub != nil {
+		if len(sub.AllSettings()) == 0 {
+			return syserrors.Newf("required key %s not found", key)
+		}
+
+		if err := sub.UnmarshalExact(target, opts...); err != nil {
+			return fmt.Errorf("failed to unmarshal key %s with error: %w", key, err)
+		}
+		return nil
+	}
+
+	if !c.viper.IsSet(key) {
 		return syserrors.Newf("required key %s not found", key)
 	}
 
-	if err := sub.UnmarshalExact(target, opts...); err != nil {
+	if err := c.viper.UnmarshalKey(key, target, opts...); err != nil {
 		return fmt.Errorf("failed to unmarshal key %s with error: %w", key, err)
 	}
 

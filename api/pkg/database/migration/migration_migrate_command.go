@@ -12,6 +12,8 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	sqlclient "frisboo-bank/openapi-generator-service/pkg/database/sql_client"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
 
 	"github.com/spf13/cobra"
 )
@@ -73,14 +75,10 @@ func NewMigrationMigrateCommand(cfg *MigrationMigrateCommandOptions) clicontract
 	})
 
 	return cli.NewCommand(cli.CommandOptions{
-		Use:   "migrate",
-		Short: "Run the db migrations",
-		Long:  cfg.Long,
-		Commands: []clicontracts.Command{
-			upCmd,
-			downCmd,
-			resetCmd,
-		},
+		Use:      "migrate",
+		Short:    "Run the db migrations",
+		Long:     cfg.Long,
+		Commands: []clicontracts.Command{upCmd, downCmd, resetCmd},
 	})
 }
 
@@ -93,6 +91,8 @@ func executeMigration(
 	mod := container.NewModule(
 		"migration-runner",
 		sqlclient.SQLClientModule(env, configLoader),
+		metrics.MetricsModule(env, configLoader),
+		tracer.TracerModule(env, configLoader),
 		MigrationModule(env, configLoader),
 	)
 
