@@ -18,7 +18,7 @@ import (
 
 const (
 	defaultPostgresImage    = "postgres:alpine"
-	defaultPostgresDbName   = "testdb"
+	defaultPostgresDBName   = "testdb"
 	defaultPostgresUsername = "postgres"
 	defaultPostgresPassword = "postgres"
 )
@@ -45,7 +45,7 @@ func NewPostgresTestContainer(opts PostgresTestContainerOptions) *PostgresTestCo
 		opts.Image = defaultPostgresImage
 	}
 	if opts.DBName == "" {
-		opts.DBName = defaultPostgresDbName
+		opts.DBName = defaultPostgresDBName
 	}
 	if opts.Username == "" {
 		opts.Username = defaultPostgresUsername
