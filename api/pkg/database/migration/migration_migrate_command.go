@@ -135,14 +135,17 @@ func executeMigration(
 		return fmt.Errorf("migration failed with error: %w", err)
 	}
 
+	var resolveErr error
 	app.ResolveFunc(func(migrations map[string]contracts.Migration) error {
 		migration, ok := migrations[migrationName]
 		if !ok {
-			return fmt.Errorf("migration %q not found", migrationName)
+			resolveErr = fmt.Errorf("migration %q not found", migrationName)
+			return nil
 		}
 
-		return cb(migration)
+		resolveErr = cb(migration)
+		return nil
 	})
 
-	return nil
+	return resolveErr
 }
