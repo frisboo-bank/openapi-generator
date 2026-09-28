@@ -24,12 +24,7 @@ type gooseAdapter struct {
 	logger        loggerContracts.Logger
 }
 
-func NewGooseAdapter(
-	name string,
-	cfg *models.MigrationOptions,
-	database *sql.DB,
-	logger loggerContracts.Logger,
-) (contracts.MigrationAdapter, error) {
+func NewGooseAdapter(name string, cfg *models.MigrationOptions, database *sql.DB, logger loggerContracts.Logger) (contracts.MigrationAdapter, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("database", database)
