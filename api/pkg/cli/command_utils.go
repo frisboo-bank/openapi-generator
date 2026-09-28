@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"os"
 
 	"frisboo-bank/openapi-generator-service/pkg/cli/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/config"
@@ -55,10 +56,15 @@ func toCobraCommand(cmd contracts.Command) *cobra.Command {
 				EnvPrefix:      envPrefix,
 			}, viper.New())
 			if err != nil {
-				return fmt.Errorf("command run failed with error: %w", err)
+				fmt.Fprintf(os.Stderr, "command run failed with error: %v\n", err)
+				return nil
 			}
 
-			return cmd.Run(cfgLoader, env, cobraCmd, args)
+			if err := cmd.Run(cfgLoader, env, cobraCmd, args); err != nil {
+				fmt.Fprintf(os.Stderr, "command run failed with error: %v\n", err)
+			}
+
+			return nil
 		},
 	}
 

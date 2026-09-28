@@ -27,8 +27,8 @@ type SQLClientDependencies struct {
 
 var SQLClientModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
-		Name:      "sql-client",
-		ConfigKey: "sql-clients",
+		Name:      "database.sql-client",
+		ConfigKey: "database.sql-clients",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
 			sqlclientenums.SQLClientEnumsDecodeHook(),
 		},

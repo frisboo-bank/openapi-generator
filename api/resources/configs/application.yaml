@@ -51,23 +51,24 @@ rpc-servers:
     port: 9002
     debug: true
     logger: rpc-server
-sql-clients:
-  main:
-    enabled: true
-    type: postgresx
-    host: localhost
-    port: 5432
-    user: postgres
-    password: postgres
-    database: openapi_generator
-    sslMode: disabled
-    logger: sql-client
-migration:
-  main:
-    enabled: true
-    type: goose
-    migrationsDir: db/migrations/main
-    dbClient: main
+database:
+  sql-clients:
+    main:
+      enabled: true
+      type: postgresx
+      host: localhost
+      port: 5432
+      user: postgres
+      password: postgres
+      database: openapi_generator
+      sslMode: disabled
+      logger: sql-client
+  migration:
+    main:
+      enabled: true
+      type: goose
+      migrationsDir: db/migrations/main
+      dbClient: main
 caches:
   main:
     enabled: true

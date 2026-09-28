@@ -18,8 +18,8 @@ type MigrationDependencies struct {
 
 var MigrationModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.MigrationOptions, contracts.Migration, MigrationDependencies]{
-		Name:      "migration",
-		ConfigKey: "migration",
+		Name:      "database.migration",
+		ConfigKey: "database.migration",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
 			migrationenums.MigrationEnumsDecodeHook(),
 		},
