@@ -74,11 +74,42 @@ func NewMigrationMigrateCommand(cfg *MigrationMigrateCommandOptions) clicontract
 		},
 	})
 
+	statusCmd := cli.NewCommand(cli.CommandOptions{
+		Use:   "status [name]",
+		Short: "Show migration status",
+		Prepare: func(cmd *cobra.Command) {
+			cmd.Args = cobra.ExactArgs(1)
+		},
+		Bootstrap: func(configLoader configcontracts.ConfigLoader, env environmentenum.Environment, cmd *cobra.Command, args []string) error {
+			return executeMigration(configLoader, env, args[0], func(migration contracts.Migration) error {
+				return migration.Status(context.Background())
+			})
+		},
+	})
+
+	currentCmd := cli.NewCommand(cli.CommandOptions{
+		Use:   "current [name]",
+		Short: "Show current migration version",
+		Prepare: func(cmd *cobra.Command) {
+			cmd.Args = cobra.ExactArgs(1)
+		},
+		Bootstrap: func(configLoader configcontracts.ConfigLoader, env environmentenum.Environment, cmd *cobra.Command, args []string) error {
+			return executeMigration(configLoader, env, args[0], func(migration contracts.Migration) error {
+				version, err := migration.CurrentVersion(context.Background())
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Current migration version: %d\n", version)
+				return nil
+			})
+		},
+	})
+
 	return cli.NewCommand(cli.CommandOptions{
 		Use:      "migrate",
 		Short:    "Run the db migrations",
 		Long:     cfg.Long,
-		Commands: []clicontracts.Command{upCmd, downCmd, resetCmd},
+		Commands: []clicontracts.Command{upCmd, downCmd, resetCmd, statusCmd, currentCmd},
 	})
 }
 

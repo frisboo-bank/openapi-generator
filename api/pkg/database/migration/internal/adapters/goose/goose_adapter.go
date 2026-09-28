@@ -57,6 +57,14 @@ func (g *gooseAdapter) Reset(ctx context.Context) error {
 	return vGoose.ResetContext(ctx, g.db, g.migrationsDir)
 }
 
+func (g *gooseAdapter) Status(ctx context.Context) error {
+	return vGoose.StatusContext(ctx, g.db, g.migrationsDir)
+}
+
+func (g *gooseAdapter) CurrentVersion(ctx context.Context) (int64, error) {
+	return vGoose.EnsureDBVersionContext(ctx, g.db)
+}
+
 func (g *gooseAdapter) Name() string                      { return g.name }
 func (g *gooseAdapter) Type() migrationtype.MigrationType { return migrationtype.MigrationTypes.GOOSE }
 func (g *gooseAdapter) Logger() loggerContracts.Logger    { return g.logger }
