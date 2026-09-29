@@ -9,7 +9,6 @@ import (
 	"frisboo-bank/openapi-generator-service/internal/entities/features/create_entity/dtos"
 	"frisboo-bank/openapi-generator-service/internal/entities/models"
 	applicationerror "frisboo-bank/openapi-generator-service/pkg/application_error"
-	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	mediatorcontracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -29,7 +28,7 @@ func NewCreateEntityHandler(repository contracts.EntityRepository, logger logger
 	}
 }
 
-func (c *CreateEntityHandler) Handle(ctx context.Context, request *CreateEntityQuery) (response *dtos.CreateEntityResponseDto, err applicationerrorcontracts.AppError) {
+func (c *CreateEntityHandler) Handle(ctx context.Context, request *CreateEntityQuery) (response *dtos.CreateEntityResponseDto, err error) {
 	validation.AssertNotNil("request", request)
 
 	tx, txErr := c.repo.BeginTx(ctx)

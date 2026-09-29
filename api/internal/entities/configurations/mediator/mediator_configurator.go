@@ -12,11 +12,7 @@ import (
 	mediatorcontracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 )
 
-func ConfigureEntitiesMediator(
-	mediatorInstance mediatorcontracts.Mediator,
-	entitiesRepository contracts.EntityRepository,
-	logger loggercontracts.Logger,
-) error {
+func ConfigureEntitiesMediator(mediatorInstance mediatorcontracts.Mediator, entitiesRepository contracts.EntityRepository, logger loggercontracts.Logger) error {
 	if err := mediator.RegisterRequest(
 		mediatorInstance,
 		createentityqueries.NewCreateEntityHandler(entitiesRepository, logger),

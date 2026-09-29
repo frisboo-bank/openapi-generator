@@ -1,10 +1,6 @@
 package contracts
 
-import (
-	"context"
-
-	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
-)
+import "context"
 
 type (
 	TRequest      = any
@@ -14,11 +10,11 @@ type (
 	Notification  = any
 
 	RequestHandler[TRequest Request, TResponse Response] interface {
-		Handle(ctx context.Context, request TRequest) (TResponse, applicationerrorcontracts.AppError)
+		Handle(ctx context.Context, request TRequest) (TResponse, error)
 	}
 
 	NotificationHandler[TNotification Notification] interface {
-		Handle(ctx context.Context, notification TNotification) applicationerrorcontracts.AppError
+		Handle(ctx context.Context, notification TNotification) error
 	}
 
 	Mediator interface {

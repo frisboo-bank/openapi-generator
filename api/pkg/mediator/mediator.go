@@ -21,10 +21,7 @@ type mediator struct {
 	logger               loggercontracts.Logger
 }
 
-func NewMediator(
-	cfg *models.MediatorOptions,
-	logger loggercontracts.Logger,
-) (contracts.Mediator, error) {
+func NewMediator(cfg *models.MediatorOptions, logger loggercontracts.Logger) (contracts.Mediator, error) {
 	return &mediator{
 		logger:               logger,
 		requestHandlers:      make(map[reflect.Type]any, 0),

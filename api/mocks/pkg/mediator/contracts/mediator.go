@@ -6,8 +6,7 @@ package mocks
 
 import (
 	context "context"
-	contracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
-	contracts0 "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
+	contracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -37,11 +36,11 @@ func (m *MockRequestHandler) EXPECT() *MockRequestHandlerMockRecorder {
 }
 
 // Handle mocks base method.
-func (m *MockRequestHandler) Handle(ctx context.Context, request contracts0.TRequest) (contracts0.TResponse, contracts.AppError) {
+func (m *MockRequestHandler) Handle(ctx context.Context, request contracts.TRequest) (contracts.TResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Handle", ctx, request)
-	ret0, _ := ret[0].(contracts0.TResponse)
-	ret1, _ := ret[1].(contracts.AppError)
+	ret0, _ := ret[0].(contracts.TResponse)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -75,10 +74,10 @@ func (m *MockNotificationHandler) EXPECT() *MockNotificationHandlerMockRecorder 
 }
 
 // Handle mocks base method.
-func (m *MockNotificationHandler) Handle(ctx context.Context, notification contracts0.TNotification) contracts.AppError {
+func (m *MockNotificationHandler) Handle(ctx context.Context, notification contracts.TNotification) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Handle", ctx, notification)
-	ret0, _ := ret[0].(contracts.AppError)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
@@ -112,7 +111,7 @@ func (m *MockMediator) EXPECT() *MockMediatorMockRecorder {
 }
 
 // Publish mocks base method.
-func (m *MockMediator) Publish(ctx context.Context, notification contracts0.Notification) error {
+func (m *MockMediator) Publish(ctx context.Context, notification contracts.Notification) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Publish", ctx, notification)
 	ret0, _ := ret[0].(error)
@@ -126,7 +125,7 @@ func (mr *MockMediatorMockRecorder) Publish(ctx, notification interface{}) *gomo
 }
 
 // RegisterNotification mocks base method.
-func (m *MockMediator) RegisterNotification(notificationType contracts0.TNotification, handler any) error {
+func (m *MockMediator) RegisterNotification(notificationType contracts.TNotification, handler any) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterNotification", notificationType, handler)
 	ret0, _ := ret[0].(error)
@@ -140,7 +139,7 @@ func (mr *MockMediatorMockRecorder) RegisterNotification(notificationType, handl
 }
 
 // RegisterRequest mocks base method.
-func (m *MockMediator) RegisterRequest(requestType contracts0.TRequest, handler any) error {
+func (m *MockMediator) RegisterRequest(requestType contracts.TRequest, handler any) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "RegisterRequest", requestType, handler)
 	ret0, _ := ret[0].(error)
@@ -154,10 +153,10 @@ func (mr *MockMediatorMockRecorder) RegisterRequest(requestType, handler interfa
 }
 
 // Send mocks base method.
-func (m *MockMediator) Send(ctx context.Context, request contracts0.Request) (contracts0.Response, error) {
+func (m *MockMediator) Send(ctx context.Context, request contracts.Request) (contracts.Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, request)
-	ret0, _ := ret[0].(contracts0.Response)
+	ret0, _ := ret[0].(contracts.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -8,7 +8,6 @@ import (
 	"frisboo-bank/openapi-generator-service/internal/entities/contracts"
 	"frisboo-bank/openapi-generator-service/internal/entities/features/delete_entity/dtos"
 	applicationerror "frisboo-bank/openapi-generator-service/pkg/application_error"
-	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	mediatorcontracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -31,7 +30,7 @@ func NewDeleteEntityHandler(
 	}
 }
 
-func (d *DeleteEntityHandler) Handle(ctx context.Context, request *DeleteEntityQuery) (response *dtos.DeleteEntityResponseDto, err applicationerrorcontracts.AppError) {
+func (d *DeleteEntityHandler) Handle(ctx context.Context, request *DeleteEntityQuery) (response *dtos.DeleteEntityResponseDto, err error) {
 	validation.AssertNotNil("request", request)
 
 	tx, txErr := d.repo.BeginTx(ctx)

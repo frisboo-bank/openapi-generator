@@ -30,7 +30,7 @@ func EntitiesModule() containercontracts.Module {
 
 		container.Provider(func(params struct {
 			dig.In
-			SQLClient sqlclientcontracts.SQLClientCore `name:"sql-client:main"`
+			SQLClient sqlclientcontracts.SQLClientCore `name:"database.sql-client:main"`
 			Logger    loggercontracts.Logger           `name:"logger:main"`
 		},
 		) (contracts.EntityRepository, error) {
