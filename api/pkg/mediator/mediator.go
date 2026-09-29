@@ -3,13 +3,13 @@ package mediator
 import (
 	"context"
 	"fmt"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"reflect"
 	"sync"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
-	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
 var _ contracts.Mediator = (*mediator)(nil)
