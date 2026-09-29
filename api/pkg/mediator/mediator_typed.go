@@ -3,7 +3,6 @@ package mediator
 import (
 	"context"
 	"fmt"
-
 	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )

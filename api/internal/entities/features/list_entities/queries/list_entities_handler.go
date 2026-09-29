@@ -6,7 +6,6 @@ import (
 	"frisboo-bank/openapi-generator-service/internal/entities/contracts"
 	listdtos "frisboo-bank/openapi-generator-service/internal/entities/features/list_entities/dtos"
 	applicationerror "frisboo-bank/openapi-generator-service/pkg/application_error"
-	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	mediatorcontracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -32,7 +31,7 @@ func NewListEntitiesHandler(
 	}
 }
 
-func (h *ListEntitiesHandler) Handle(ctx context.Context, request *ListEntitiesQuery) (*listdtos.ListEntitiesResponseDto, applicationerrorcontracts.AppError) {
+func (h *ListEntitiesHandler) Handle(ctx context.Context, request *ListEntitiesQuery) (*listdtos.ListEntitiesResponseDto, error) {
 	validation.AssertNotNil("request", request)
 
 	entities, pagination, err := h.repo.ListEntities(ctx, &request.Query)

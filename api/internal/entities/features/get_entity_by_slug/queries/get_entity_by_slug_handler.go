@@ -8,7 +8,6 @@ import (
 	"frisboo-bank/openapi-generator-service/internal/entities/contracts"
 	"frisboo-bank/openapi-generator-service/internal/entities/features/get_entity_by_slug/dtos"
 	applicationerror "frisboo-bank/openapi-generator-service/pkg/application_error"
-	applicationerrorcontracts "frisboo-bank/openapi-generator-service/pkg/application_error/contracts"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	mediatorcontracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -31,7 +30,7 @@ func NewGetEntityBySlugHandler(
 	}
 }
 
-func (h *GetEntityBySlugHandler) Handle(ctx context.Context, request *GetEntityBySlugQuery) (*dtos.GetEntityBySlugResponseDto, applicationerrorcontracts.AppError) {
+func (h *GetEntityBySlugHandler) Handle(ctx context.Context, request *GetEntityBySlugQuery) (*dtos.GetEntityBySlugResponseDto, error) {
 	validation.AssertNotNil("request", request)
 
 	entity, err := h.repository.GetEntityBySlug(ctx, request.Slug, nil)

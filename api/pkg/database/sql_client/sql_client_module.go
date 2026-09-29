@@ -2,7 +2,6 @@ package sqlclient
 
 import (
 	"context"
-
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
@@ -37,7 +36,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{
-				Name: "sql-client:" + name,
+				Name: "database.sql-client:" + name,
 				Wait: func(ctx context.Context) error {
 					if err := instance.Ping(ctx); err != nil {
 						instance.Logger().Fatalf("sql-clients %q failed to access database with error: %v", instance.Name(), err)

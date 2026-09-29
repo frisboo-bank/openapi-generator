@@ -3,13 +3,13 @@ package mediator
 import (
 	"context"
 	"fmt"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"reflect"
 	"sync"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
-	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
 var _ contracts.Mediator = (*mediator)(nil)
@@ -21,10 +21,7 @@ type mediator struct {
 	logger               loggercontracts.Logger
 }
 
-func NewMediator(
-	cfg *models.MediatorOptions,
-	logger loggercontracts.Logger,
-) (contracts.Mediator, error) {
+func NewMediator(cfg *models.MediatorOptions, logger loggercontracts.Logger) (contracts.Mediator, error) {
 	return &mediator{
 		logger:               logger,
 		requestHandlers:      make(map[reflect.Type]any, 0),
