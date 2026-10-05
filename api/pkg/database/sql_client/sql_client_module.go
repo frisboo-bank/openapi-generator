@@ -2,6 +2,8 @@ package sqlclient
 
 import (
 	"context"
+	"fmt"
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
@@ -21,7 +23,6 @@ type SQLClientDependencies struct {
 	dig.In
 	Tracer  tracercontracts.Tracer   `name:"telemetry.tracer:main"`
 	Metrics metricscontracts.Metrics `name:"telemetry.metrics:main"`
-	// Log     logcontracts.Log         `name:"telemetry.log:main"`
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
@@ -39,16 +40,19 @@ var SQLClientModule = module.NewMultiInstancesModule(
 				Name: "database.sql-client:" + name,
 				Wait: func(ctx context.Context) error {
 					if err := instance.Ping(ctx); err != nil {
-						instance.Logger().Fatalf("sql-clients %q failed to access database with error: %v", instance.Name(), err)
+						instance.Logger().Errorf("sql-clients %q failed to access database: %v", name, err)
+						return fmt.Errorf("sql-client %q ping: %w", name, err)
 					}
+
 					<-ctx.Done()
 					return nil
 				},
 				Cleanup: func(ctx context.Context) error {
 					if err := instance.Close(ctx); err != nil {
 						instance.Logger().Errorf("sql-clients %q close failed with error: %v", name, err)
-						return err
+						return fmt.Errorf("sql-client %q close: %w", name, err)
 					}
+
 					instance.Logger().Infof("sql-clients: %q shutdown successfully", name)
 					return nil
 				},
