@@ -13,7 +13,7 @@ type (
 	}
 
 	TracerAdapter interface {
-		Start(event string) (context.Context, TracerSpan)
+		Start(ctx context.Context, event string) (context.Context, TracerSpan)
 		Close(ctx context.Context) error
 		Name() string
 		Type() tracertype.TracerType

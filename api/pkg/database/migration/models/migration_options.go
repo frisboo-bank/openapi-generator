@@ -21,7 +21,7 @@ type MigrationOptions struct {
 	DBClient string `mapstructure:"dbClient"`
 }
 
-func (c *MigrationOptions) GetEnabled() bool  { return c.IsEnabled }
+func (c *MigrationOptions) Enable() bool  { return c.IsEnabled }
 func (c *MigrationOptions) GetLogger() string { return c.Logger }
 
 func (c *MigrationOptions) SetDefaults() {}

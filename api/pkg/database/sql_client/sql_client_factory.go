@@ -1,7 +1,6 @@
 package sqlclient
 
 import (
-	"context"
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
@@ -19,26 +18,24 @@ import (
 func CreateSQLClient(
 	name string,
 	cfg *models.SQLClientOptions,
-	ctx context.Context,
 	logger loggerContracts.Logger,
 	tracer tracercontracts.Tracer,
 	metrics metricscontracts.Metrics,
 ) (contracts.SQLClientCore, error) {
-	validation.AssertNotNil("name", name)
+	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("logger", logger)
 	validation.AssertNotNil("tracer", tracer)
 	validation.AssertNotNil("metrics", metrics)
 
-	var adapter contracts.SQLClientCore
+	var adapter contracts.SQLXClientAdapter
 	var err error
 
 	switch cfg.Type {
 	case sqlclienttype.SqlClientTypes.POSTGRESX:
-		adapter, err = pgx.NewPostgresSQLXClientAdapter(name, cfg, ctx, logger)
+		adapter, err = pgx.NewPostgresSQLXClientAdapter(name, cfg, logger)
 	case sqlclienttype.SqlClientTypes.SQLITE3X:
-		adapter, err = sqlite3x.NewSQLite3SQLXClientAdapter(name, cfg, ctx, logger)
+		adapter, err = sqlite3x.NewSQLite3SQLXClientAdapter(name, cfg, logger)
 	default:
 		err = fmt.Errorf("unsupported SQLClient type: %v", cfg.Type)
 	}
@@ -47,9 +44,6 @@ func CreateSQLClient(
 		return nil, err
 	}
 
-	if delegate, ok := adapter.(contracts.SQLXClientAdapter); ok {
-		delegate = sqlx.WrapSQLXClientForTelemetry(name, delegate, tracer, metrics)
-		return &sqlXClient{adapter: delegate}, nil
-	}
-	return nil, fmt.Errorf("unknown SQLClient type: %v", cfg.Type)
+	delegate := sqlx.WrapSQLXClientForTelemetry(name, &sqlXClient{adapter: adapter}, tracer, metrics)
+	return delegate, nil
 }

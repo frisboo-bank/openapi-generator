@@ -41,13 +41,11 @@ var SQLClientModule = module.NewMultiInstancesModule(
 			logger loggercontracts.Logger,
 			extra SQLClientDependencies,
 		) (contracts.SQLClientCore, error) {
-			ctx := context.Background()
-
 			var err error
 
 			var tracerInstance tracercontracts.Tracer
 			if !cfg.EnableTracing {
-				tracerInstance, err = tracer.CreateNoopTracer(name, context.Background(), logger)
+				tracerInstance, err = tracer.CreateNoopTracer(name, logger)
 				if err != nil {
 					return nil, err
 				}
@@ -61,7 +59,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 
 			var metricsInstance metricscontracts.Metrics
 			if !cfg.EnableMetrics {
-				metricsInstance, err = metrics.CreateNoopMetrics(name, ctx, logger)
+				metricsInstance, err = metrics.CreateNoopMetrics(name, logger)
 				if err != nil {
 					return nil, err
 				}
@@ -73,7 +71,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 				}
 			}
 
-			return CreateSQLClient(name, cfg, ctx, logger, tracerInstance, metricsInstance)
+			return CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{

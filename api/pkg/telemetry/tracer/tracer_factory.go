@@ -16,7 +16,6 @@ import (
 func CreateTracer(
 	name string,
 	cfg *models.TracerOptions,
-	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
 	cfg.SetDefaults()
@@ -24,14 +23,14 @@ func CreateTracer(
 		return nil, err
 	}
 
-	var adapter contracts.Tracer
+	var adapter contracts.TracerAdapter
 	var err error
 
 	switch cfg.Type {
 	case tracertype.TracerTypes.OPEN_TELEMETRY:
-		adapter, err = otel.NewOtelTracerAdapter(name, cfg, ctx, shared.Resource("openapi-generator-service"), logger)
+		adapter, err = otel.NewOtelTracerAdapter(name, cfg, shared.Resource("openapi-generator-service"), logger)
 	case tracertype.TracerTypes.NOOP:
-		adapter, err = noop.NewNoopTracerAdapter(name, ctx, logger)
+		adapter, err = noop.NewNoopTracerAdapter(name, logger)
 	default:
 		err = fmt.Errorf("unsupported Tracer type: %v", cfg.Type)
 	}
@@ -45,13 +44,11 @@ func CreateTracer(
 
 func CreateNoopTracer(
 	name string,
-	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
 	return CreateTracer(
 		name,
 		&models.TracerOptions{Type: tracertype.TracerTypes.NOOP},
-		ctx,
 		logger,
 	)
 }

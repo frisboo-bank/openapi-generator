@@ -18,35 +18,28 @@ var (
 type noopTracerSpan struct{}
 
 func (n *noopTracerSpan) RecordError(err error) {}
-
-func (n *noopTracerSpan) End() {
-	panic("unimplemented")
-}
+func (n *noopTracerSpan) End()                  {}
 
 type noopTracerAdapter struct {
 	name   string
-	ctx    context.Context
 	logger loggercontracts.Logger
 }
 
 func NewNoopTracerAdapter(
 	name string,
-	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.TracerAdapter, error) {
 	validation.AssertNotEmpty("name", name)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("logger", logger)
 
 	return &noopTracerAdapter{
 		name:   name,
-		ctx:    ctx,
 		logger: logger,
 	}, nil
 }
 
-func (n *noopTracerAdapter) Start(event string) (context.Context, contracts.TracerSpan) {
-	return n.ctx, &noopTracerSpan{}
+func (n *noopTracerAdapter) Start(ctx context.Context, event string) (context.Context, contracts.TracerSpan) {
+	return ctx, &noopTracerSpan{}
 }
 
 func (n *noopTracerAdapter) Close(ctx context.Context) error { return nil }

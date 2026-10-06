@@ -8,10 +8,6 @@ type MediatorOptions struct {
 	Logger string `mapstructure:"logger"`
 }
 
-func (c *MediatorOptions) GetEnabled() bool {
-	return true
-}
-
 func (c *MediatorOptions) GetLogger() string {
 	return c.Logger
 }

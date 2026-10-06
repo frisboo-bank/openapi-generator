@@ -2,41 +2,28 @@ package sqlclient_test
 
 import (
 	"context"
+	"path/filepath"
 	"testing"
 	"time"
 
 	sqlclient "frisboo-bank/openapi-generator-service/pkg/database/sql_client"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
-	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_ssl_mode"
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
-	"frisboo-bank/openapi-generator-service/pkg/tests/devcontainers"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-func TestCreateSQLClient_Postgres(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+func TestCreateSQLClient_SQLite3(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	pg := devcontainers.NewPostgresTestContainer(devcontainers.PostgresTestContainerOptions{
-		DBName:                   "sqlclient_test",
-		Username:                 "postgres",
-		Password:                 "postgres",
-		AdditionalWaitStrategies: []wait.Strategy{wait.ForListeningPort("5432/tcp")},
-	})
-	pg.Run(t)
-
-	host, err := pg.Container().Host(ctx)
-	require.NoError(t, err, "failed to get container host")
-
-	port, err := pg.Container().MappedPort(ctx, "5432/tcp")
-	require.NoError(t, err, "failed to get container port")
+	// Temp file (not :memory:) so the sqlx pool shares one DB across connections.
+	dbPath := filepath.Join(t.TempDir(), "sqlclient_test.db")
 
 	log := logger.CreateNoopLogger("test", environmentenum.Environments.TESTING)
 
@@ -48,13 +35,8 @@ func TestCreateSQLClient_Postgres(t *testing.T) {
 
 	client, err := sqlclient.CreateSQLClient("main", &models.SQLClientOptions{
 		IsEnabled:     true,
-		Type:          sqlclienttype.SqlClientTypes.POSTGRESX,
-		Host:          host,
-		Port:          port.Port(),
-		Database:      "sqlclient_test",
-		User:          "postgres",
-		Password:      "postgres",
-		SSLMode:       sqlclientsslmode.SqlClientSSLModes.DISABLED,
+		Type:          sqlclienttype.SqlClientTypes.SQLITE3X,
+		Database:      dbPath,
 		EnableTracing: false,
 		EnableMetrics: false,
 	}, log, tr, me)
@@ -63,7 +45,7 @@ func TestCreateSQLClient_Postgres(t *testing.T) {
 
 	require.NoError(t, client.Ping(ctx), "failed to ping sql client")
 
-	assert.Equal(t, sqlclienttype.SqlClientTypes.POSTGRESX, client.Type())
+	assert.Equal(t, sqlclienttype.SqlClientTypes.SQLITE3X, client.Type())
 
 	assert.NoError(t, client.Close(ctx), "failed to close sql client")
 }
