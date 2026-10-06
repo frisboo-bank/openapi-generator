@@ -15,25 +15,33 @@ var _ contracts.SQLXTransaction = (*sqlxTransactionTelemetry)(nil)
 type sqlxTransactionTelemetry struct {
 	contracts.SQLXTransaction
 	name    string
+	ctx     context.Context
 	tracer  tracercontracts.Tracer
 	metrics metricscontracts.Metrics
 }
 
-func wrapSQLXTransactionForTelemetry(name string, delegate contracts.SQLXTransaction, tracer tracercontracts.Tracer, metrics metricscontracts.Metrics) contracts.SQLXTransaction {
+func wrapSQLXTransactionForTelemetry(
+	name string,
+	delegate contracts.SQLXTransaction,
+	ctx context.Context,
+	tracer tracercontracts.Tracer,
+	metrics metricscontracts.Metrics,
+) contracts.SQLXTransaction {
 	return &sqlxTransactionTelemetry{
 		SQLXTransaction: delegate,
 		name:            name,
+		ctx:             ctx,
 		metrics:         metrics,
 		tracer:          tracer,
 	}
 }
 
-func (s *sqlxTransactionTelemetry) Commit(ctx context.Context) error {
+func (s *sqlxTransactionTelemetry) Commit() error {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.commit")
+	_, span := s.tracer.Start("sqlx.transaction.commit")
 	defer span.End()
 
-	err := s.SQLXTransaction.Commit(ctx)
+	err := s.SQLXTransaction.Commit()
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -42,12 +50,12 @@ func (s *sqlxTransactionTelemetry) Commit(ctx context.Context) error {
 	return err
 }
 
-func (s *sqlxTransactionTelemetry) NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error) {
+func (s *sqlxTransactionTelemetry) NamedExec(query string, args map[string]any) (sql.Result, error) {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.named_exec")
+	_, span := s.tracer.Start("sqlx.transaction.named_exec")
 	defer span.End()
 
-	res, err := s.SQLXTransaction.NamedExec(ctx, query, args)
+	res, err := s.SQLXTransaction.NamedExec(query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -56,12 +64,12 @@ func (s *sqlxTransactionTelemetry) NamedExec(ctx context.Context, query string, 
 	return res, err
 }
 
-func (s *sqlxTransactionTelemetry) NamedGet(ctx context.Context, dest any, query string, args map[string]any) error {
+func (s *sqlxTransactionTelemetry) NamedGet(dest any, query string, args map[string]any) error {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.named_get")
+	_, span := s.tracer.Start("sqlx.transaction.named_get")
 	defer span.End()
 
-	err := s.SQLXTransaction.NamedGet(ctx, dest, query, args)
+	err := s.SQLXTransaction.NamedGet(dest, query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -70,11 +78,11 @@ func (s *sqlxTransactionTelemetry) NamedGet(ctx context.Context, dest any, query
 	return err
 }
 
-func (s *sqlxTransactionTelemetry) NamedQuery(ctx context.Context, query string, args map[string]any) (contracts.SQLXRows, error) {
+func (s *sqlxTransactionTelemetry) NamedQuery(query string, args map[string]any) (contracts.SQLXRows, error) {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.named_query")
+	_, span := s.tracer.Start("sqlx.transaction.named_query")
 
-	rows, err := s.SQLXTransaction.NamedQuery(ctx, query, args)
+	rows, err := s.SQLXTransaction.NamedQuery(query, args)
 	if err != nil {
 		span.RecordError(err)
 		s.metrics.RecordDuration("sql.operation", time.Since(start), "client", s.name, "op", "tx.named_query", "error", true)
@@ -86,12 +94,12 @@ func (s *sqlxTransactionTelemetry) NamedQuery(ctx context.Context, query string,
 	return wrapSQLXRowsForTelemetry(rows, span), nil
 }
 
-func (s *sqlxTransactionTelemetry) NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error {
+func (s *sqlxTransactionTelemetry) NamedSelect(dest any, query string, args map[string]any) error {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.named_select")
+	_, span := s.tracer.Start("sqlx.transaction.named_select")
 	defer span.End()
 
-	err := s.SQLXTransaction.NamedSelect(ctx, dest, query, args)
+	err := s.SQLXTransaction.NamedSelect(dest, query, args)
 	if err != nil {
 		span.RecordError(err)
 	}
@@ -102,7 +110,7 @@ func (s *sqlxTransactionTelemetry) NamedSelect(ctx context.Context, dest any, qu
 
 func (s *sqlxTransactionTelemetry) Rollback(ctx context.Context) error {
 	start := time.Now()
-	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.rollback")
+	_, span := s.tracer.Start("sqlx.transaction.rollback")
 	defer span.End()
 
 	err := s.SQLXTransaction.Rollback(ctx)

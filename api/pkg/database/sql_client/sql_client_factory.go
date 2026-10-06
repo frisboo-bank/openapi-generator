@@ -1,13 +1,13 @@
 package sqlclient
 
 import (
+	"context"
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/decorators/telemetry/sql"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/decorators/telemetry/sqlx"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres/pg"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres/pgx"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/sqlite/sqlite3x"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -16,31 +16,40 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
-func CreateSQLClient(name string, cfg *models.SQLClientOptions, logger loggerContracts.Logger, tracer tracercontracts.Tracer, metrics metricscontracts.Metrics) (contracts.SQLClientCore, error) {
+func CreateSQLClient(
+	name string,
+	cfg *models.SQLClientOptions,
+	ctx context.Context,
+	logger loggerContracts.Logger,
+	tracer tracercontracts.Tracer,
+	metrics metricscontracts.Metrics,
+) (contracts.SQLClientCore, error) {
 	validation.AssertNotNil("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("logger", logger)
 	validation.AssertNotNil("tracer", tracer)
 	validation.AssertNotNil("metrics", metrics)
 
+	var adapter contracts.SQLClientCore
+	var err error
+
 	switch cfg.Type {
-	case sqlclienttype.SqlClientTypes.POSTGRES:
-		adapter, err := pg.NewPostgresSQLClientAdapter(name, cfg, logger)
-		if err != nil {
-			return nil, err
-		}
-		decoratedAdapter := sql.WrapSQLClientForTelemetry(name, adapter, tracer, metrics)
-		return &sqlClient{adapter: decoratedAdapter}, nil
-
 	case sqlclienttype.SqlClientTypes.POSTGRESX:
-		adapter, err := pgx.NewPostgresSQLXClientAdapter(name, cfg, logger)
-		if err != nil {
-			return nil, err
-		}
-		decoratedAdapter := sqlx.WrapSQLXClientForTelemetry(name, adapter, tracer, metrics)
-		return &sqlXClient{adapter: decoratedAdapter}, nil
-
+		adapter, err = pgx.NewPostgresSQLXClientAdapter(name, cfg, ctx, logger)
+	case sqlclienttype.SqlClientTypes.SQLITE3X:
+		adapter, err = sqlite3x.NewSQLite3SQLXClientAdapter(name, cfg, ctx, logger)
 	default:
-		return nil, fmt.Errorf("unsupported SQLClient type: %v", cfg.Type)
+		err = fmt.Errorf("unsupported SQLClient type: %v", cfg.Type)
 	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if delegate, ok := adapter.(contracts.SQLXClientAdapter); ok {
+		delegate = sqlx.WrapSQLXClientForTelemetry(name, delegate, tracer, metrics)
+		return &sqlXClient{adapter: delegate}, nil
+	}
+	return nil, fmt.Errorf("unknown SQLClient type: %v", cfg.Type)
 }

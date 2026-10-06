@@ -1,10 +1,10 @@
 package contracts
 
 import (
-	"context"
+	"time"
+
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
-	"time"
 )
 
 type (
@@ -16,7 +16,7 @@ type (
 
 	MetricsAdapter interface {
 		RecordDuration(name string, duraction time.Duration, attrs ...any)
-		Close(ctx context.Context) error
+		Close() error
 		Name() string
 		Type() metricstype.MetricsType
 		Logger() loggercontracts.Logger
