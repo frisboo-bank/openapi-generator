@@ -23,31 +23,27 @@ var _ contracts.EntitySQLRepository = (*EntityRepositoryPgx)(nil)
 
 type EntityRepositoryPgx struct {
 	sqlClient sqlclientContracts.SQLXClientAdapter
-	ctx       context.Context
 	logger    loggerContracts.Logger
 }
 
 func NewEntityRepositoryPgx(
 	sqlClient sqlclientContracts.SQLXClientAdapter,
-	ctx context.Context,
 	logger loggerContracts.Logger,
 ) contracts.EntitySQLRepository {
 	validation.AssertNotNil("sqlClient", sqlClient)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("logger", logger)
 
 	return &EntityRepositoryPgx{
 		sqlClient: sqlClient,
-		ctx:       ctx,
 		logger:    logger,
 	}
 }
 
-func (e *EntityRepositoryPgx) BeginTx() (sqlclientContracts.SQLXTransaction, error) {
-	return e.sqlClient.BeginTransaction(&sql.TxOptions{Isolation: sql.LevelReadCommitted})
+func (e *EntityRepositoryPgx) BeginTx(ctx context.Context) (sqlclientContracts.SQLXTransaction, error) {
+	return e.sqlClient.BeginTransaction(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func (e *EntityRepositoryPgx) CreateEntityTx(tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) CreateEntityTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
 	validation.AssertNotNil("entity", entity)
 
 	query := fmt.Sprintf(`
@@ -56,7 +52,7 @@ func (e *EntityRepositoryPgx) CreateEntityTx(tx sqlclientContracts.SQLXTransacti
     RETURNING id, slug, name, description, version_lock, hidden_at, created_at, updated_at
   `, entityTableName)
 
-	if err := tx.NamedGet(e.ctx, entity, query, map[string]any{
+	if err := tx.NamedGet(ctx, entity, query, map[string]any{
 		"slug":        entity.Slug,
 		"name":        entity.Name,
 		"description": entity.Description,
@@ -66,10 +62,10 @@ func (e *EntityRepositoryPgx) CreateEntityTx(tx sqlclientContracts.SQLXTransacti
 	return entity, nil
 }
 
-func (e *EntityRepositoryPgx) DeleteEntityByIDTx(tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID) (int64, error) {
+func (e *EntityRepositoryPgx) DeleteEntityByIDTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = :id`, entityTableName)
 
-	result, err := tx.NamedExec(e.ctx, query, map[string]any{"id": entityID})
+	result, err := tx.NamedExec(ctx, query, map[string]any{"id": entityID})
 	if err != nil {
 		return 0, fmt.Errorf("delete entity: %w", err)
 	}
@@ -82,19 +78,19 @@ func (e *EntityRepositoryPgx) DeleteEntityByIDTx(tx sqlclientContracts.SQLXTrans
 	return rowsAffected, nil
 }
 
-func (e *EntityRepositoryPgx) GetEntityByID(entityID uuid.UUID, query *query.Query) (*models.Entity, error) {
-	return e.doGetEntityByID(nil, entityID, query)
+func (e *EntityRepositoryPgx) GetEntityByID(ctx context.Context, entityID uuid.UUID, query *query.Query) (*models.Entity, error) {
+	return e.doGetEntityByID(ctx, nil, entityID, query)
 }
 
-func (e *EntityRepositoryPgx) GetEntityBySlug(entitySlug string, query *query.Query) (*models.Entity, error) {
-	return e.doGetEntityBySlug(nil, entitySlug, query)
+func (e *EntityRepositoryPgx) GetEntityBySlug(ctx context.Context, entitySlug string, query *query.Query) (*models.Entity, error) {
+	return e.doGetEntityBySlug(ctx, nil, entitySlug, query)
 }
 
-func (e *EntityRepositoryPgx) GetEntityBySlugTx(tx sqlclientContracts.SQLXTransaction, entitySlug string, query *query.Query) (*models.Entity, error) {
-	return e.doGetEntityBySlug(tx, entitySlug, query)
+func (e *EntityRepositoryPgx) GetEntityBySlugTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entitySlug string, query *query.Query) (*models.Entity, error) {
+	return e.doGetEntityBySlug(ctx, tx, entitySlug, query)
 }
 
-func (e *EntityRepositoryPgx) HideEntity(entityID uuid.UUID) (int64, error) {
+func (e *EntityRepositoryPgx) HideEntity(ctx context.Context, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`
 		UPDATE %s
 		SET hidden_at = now()
@@ -102,7 +98,7 @@ func (e *EntityRepositoryPgx) HideEntity(entityID uuid.UUID) (int64, error) {
 		AND hidden_at IS NULL
 	`, entityTableName)
 
-	res, err := e.sqlClient.NamedExec(query, map[string]any{"id": entityID})
+	res, err := e.sqlClient.NamedExec(ctx, query, map[string]any{"id": entityID})
 	if err != nil {
 		return 0, fmt.Errorf("hide entity: %w", err)
 	}
@@ -115,15 +111,15 @@ func (e *EntityRepositoryPgx) HideEntity(entityID uuid.UUID) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (e *EntityRepositoryPgx) ListEntities(query *query.Query) ([]*models.Entity, *query.Pagination, error) {
-	return e.doListEntities(nil, query)
+func (e *EntityRepositoryPgx) ListEntities(ctx context.Context, query *query.Query) ([]*models.Entity, *query.Pagination, error) {
+	return e.doListEntities(ctx, nil, query)
 }
 
-func (e *EntityRepositoryPgx) ListEntitiesTx(tx sqlclientContracts.SQLXTransaction, query *query.Query) ([]*models.Entity, *query.Pagination, error) {
-	return e.doListEntities(tx, query)
+func (e *EntityRepositoryPgx) ListEntitiesTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, query *query.Query) ([]*models.Entity, *query.Pagination, error) {
+	return e.doListEntities(ctx, tx, query)
 }
 
-func (e *EntityRepositoryPgx) UnhideEntity(entityID uuid.UUID) (int64, error) {
+func (e *EntityRepositoryPgx) UnhideEntity(ctx context.Context, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`
 		UPDATE %s
 		SET hidden_at = null
@@ -131,7 +127,7 @@ func (e *EntityRepositoryPgx) UnhideEntity(entityID uuid.UUID) (int64, error) {
 		AND hidden_at IS NOT NULL
 	`, entityTableName)
 
-	res, err := e.sqlClient.NamedExec(query, map[string]any{"id": entityID})
+	res, err := e.sqlClient.NamedExec(ctx, query, map[string]any{"id": entityID})
 	if err != nil {
 		return 0, fmt.Errorf("unhide entity: %w", err)
 	}
@@ -144,7 +140,7 @@ func (e *EntityRepositoryPgx) UnhideEntity(entityID uuid.UUID) (int64, error) {
 	return rowsAffected, nil
 }
 
-func (e *EntityRepositoryPgx) UpdateEntityTx(tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) UpdateEntityTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
 	validation.AssertNotNil("entity", entity)
 	validation.AssertNotNil("entity.EntityID", entity.EntityID)
 
@@ -160,7 +156,7 @@ func (e *EntityRepositoryPgx) UpdateEntityTx(tx sqlclientContracts.SQLXTransacti
 		RETURNING id, slug, name, description, version_lock, hidden_at, created_at, updated_at
 	`, entityTableName)
 
-	if err := tx.NamedGet(e.ctx, entity, query, map[string]any{
+	if err := tx.NamedGet(ctx, entity, query, map[string]any{
 		"id":              entity.EntityID,
 		"slug":            entity.Slug,
 		"name":            entity.Name,
@@ -177,17 +173,17 @@ func (e *EntityRepositoryPgx) UpdateEntityTx(tx sqlclientContracts.SQLXTransacti
 	return entity, nil
 }
 
-func (e *EntityRepositoryPgx) doGetEntityByID(tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID, q *query.Query) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) doGetEntityByID(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID, q *query.Query) (*models.Entity, error) {
 	validation.AssertNotEmpty("entityID", entityID.String())
 	validation.AssertNotNil("q", q)
 
 	return nil, nil
 }
 
-func (e *EntityRepositoryPgx) doGetEntityBySlug(tx sqlclientContracts.SQLXTransaction, entitySlug string, q *query.Query) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) doGetEntityBySlug(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entitySlug string, q *query.Query) (*models.Entity, error) {
 	panic("unimplemented")
 }
 
-func (e *EntityRepositoryPgx) doListEntities(tx sqlclientContracts.SQLXTransaction, q *query.Query) ([]*models.Entity, *query.Pagination, error) {
+func (e *EntityRepositoryPgx) doListEntities(ctx context.Context, tx sqlclientContracts.SQLXTransaction, q *query.Query) ([]*models.Entity, *query.Pagination, error) {
 	panic("unimplemented")
 }

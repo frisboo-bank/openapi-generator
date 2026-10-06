@@ -1,6 +1,7 @@
 package contracts
 
 import (
+	"context"
 	"database/sql"
 
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
@@ -24,8 +25,8 @@ type (
 	}
 
 	SQLClientCore interface {
-		Close() error
-		Ping() error
+		Close(ctx context.Context) error
+		Ping(ctx context.Context) error
 		Name() string
 		Type() sqlclienttype.SqlClientType
 		Logger() loggerContracts.Logger
@@ -45,20 +46,20 @@ type (
 
 	SQLXClientAdapter interface {
 		SQLClientCore
-		BeginTransaction(opts *sql.TxOptions) (SQLXTransaction, error)
-		NamedExec(query string, args map[string]any) (sql.Result, error)
-		NamedGet(dest any, query string, args map[string]any) error
-		NamedQuery(query string, args map[string]any) (SQLXRows, error)
-		NamedSelect(dest any, query string, args map[string]any) error
+		BeginTransaction(ctx context.Context, opts *sql.TxOptions) (SQLXTransaction, error)
+		NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error)
+		NamedGet(ctx context.Context, dest any, query string, args map[string]any) error
+		NamedQuery(ctx context.Context, query string, args map[string]any) (SQLXRows, error)
+		NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error
 	}
 
 	SQLXTransaction interface {
-		Commit() error
-		NamedExec(query string, args map[string]any) (sql.Result, error)
-		NamedGet(dest any, query string, args map[string]any) error
-		NamedQuery(query string, args map[string]any) (SQLXRows, error)
-		NamedSelect(dest any, query string, args map[string]any) error
-		Rollback() error
+		Commit(ctx context.Context) error
+		NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error)
+		NamedGet(ctx context.Context, dest any, query string, args map[string]any) error
+		NamedQuery(ctx context.Context, query string, args map[string]any) (SQLXRows, error)
+		NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error
+		Rollback(ctx context.Context) error
 	}
 
 	WithDBGetter interface {

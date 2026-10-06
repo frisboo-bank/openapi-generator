@@ -72,7 +72,7 @@ func NewMultiInstancesModule[Config configContracts.Configurable, Instance, Extr
 				instances := make(InstancesMapType)
 
 				for name, cfg := range cfgMap {
-					if !cfg.GetEnabled() {
+					if e, ok := any(cfg).(configContracts.Enablable); ok && !e.Enable() {
 						continue
 					}
 
@@ -107,7 +107,7 @@ func NewMultiInstancesModule[Config configContracts.Configurable, Instance, Extr
 		))
 
 		for name, cfg := range cfgMap {
-			if !cfg.GetEnabled() {
+			if e, ok := any(cfg).(configContracts.Enablable); ok && !e.Enable() {
 				continue
 			}
 

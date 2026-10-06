@@ -35,7 +35,7 @@ type SQLClientOptions struct {
 	Metrics string `mapstructure:"metrics"`
 }
 
-func (o *SQLClientOptions) GetEnabled() bool  { return o.IsEnabled }
+func (o *SQLClientOptions) Enable() bool { return o.IsEnabled }
 func (o *SQLClientOptions) GetLogger() string { return o.Logger }
 
 func (o *SQLClientOptions) SetDefaults() {
@@ -65,6 +65,13 @@ func (o *SQLClientOptions) Validate() error {
 	}
 	if !o.Type.IsValid() {
 		return fmt.Errorf("client type is invalid")
+	}
+	// sqlite3x is file-based: Database is the file path; no host/port/user.
+	if o.Type == sqlclienttype.SqlClientTypes.SQLITE3X {
+		if o.Database == "" {
+			return fmt.Errorf("database (file path) is required")
+		}
+		return nil
 	}
 	if o.Host == "" {
 		return fmt.Errorf("host is required")

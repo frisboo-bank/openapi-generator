@@ -32,7 +32,7 @@ func (c *RPCServerOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *RPCServerOptions) GetEnabled() bool  { return c.IsEnabled }
+func (c *RPCServerOptions) Enable() bool  { return c.IsEnabled }
 func (c *RPCServerOptions) GetLogger() string { return c.Logger }
 
 func (c *RPCServerOptions) SetDefaults() {

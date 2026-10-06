@@ -36,7 +36,7 @@ func (c *CacheOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *CacheOptions) GetEnabled() bool  { return c.IsEnabled }
+func (c *CacheOptions) Enable() bool  { return c.IsEnabled }
 func (c *CacheOptions) GetLogger() string { return c.Logger }
 
 func (c *CacheOptions) SetDefaults() {
