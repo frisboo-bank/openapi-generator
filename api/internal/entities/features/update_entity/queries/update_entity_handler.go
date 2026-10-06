@@ -17,11 +17,13 @@ var _ mediatorcontracts.RequestHandler[*UpdateEntityQuery, *dtos.UpdateEntityRes
 
 type UpdateEntityHandler struct {
 	repo   contracts.EntityRepository
+	ctx    context.Context
 	logger loggerContracts.Logger
 }
 
 func NewUpdateEntityHandler(
 	repository contracts.EntityRepository,
+	ctx context.Context,
 	logger loggerContracts.Logger,
 ) *UpdateEntityHandler {
 	validation.AssertNotNil("repository", repository)
@@ -29,11 +31,12 @@ func NewUpdateEntityHandler(
 
 	return &UpdateEntityHandler{
 		repo:   repository,
+		ctx:    ctx,
 		logger: logger,
 	}
 }
 
-// func (h *ListEntitiesHandler) Handle(ctx context.Context, request *ListEntitiesQuery) (*listdtos.ListEntitiesResponseDto, applicationerrorcontracts.AppError) {
+// func (h *ListEntitiesHandler) Handle(request *ListEntitiesQuery) (*listdtos.ListEntitiesResponseDto, applicationerrorcontracts.AppError) {
 // 	validation.AssertNotNil("request", request)
 //
 // 	entities, pagination, err := h.repo.ListEntities(ctx, &request.Query)
@@ -47,30 +50,30 @@ func NewUpdateEntityHandler(
 // 	}, nil
 // }
 
-func (h *UpdateEntityHandler) Handle(ctx context.Context, request *UpdateEntityQuery) (response *dtos.UpdateEntityResponseDto, err error) {
+func (h *UpdateEntityHandler) Handle(request *UpdateEntityQuery) (response *dtos.UpdateEntityResponseDto, err error) {
 	validation.AssertNotNil("request", request)
 
-	tx, txErr := h.repo.BeginTx(ctx)
+	tx, txErr := h.repo.BeginTx()
 	if txErr != nil {
-		return nil, applicationerror.NewInternalErrorWrap(ctx, txErr, "create transaction failed", nil)
+		return nil, applicationerror.NewInternalErrorWrap(h.ctx, txErr, "create transaction failed", nil)
 	}
 	defer func() {
 		if err != nil {
-			_ = tx.Rollback(ctx)
+			_ = tx.Rollback()
 		}
 	}()
 
-	existingEntity, fetchErr := h.repo.GetEntityBySlugTx(ctx, tx, request.Slug, nil)
+	existingEntity, fetchErr := h.repo.GetEntityBySlugTx(tx, request.Slug, nil)
 	if fetchErr != nil && !errors.Is(fetchErr, sql.ErrNoRows) {
-		return nil, applicationerror.NewInternalErrorWrap(ctx, fetchErr, "retrieve entity failed", nil)
+		return nil, applicationerror.NewInternalErrorWrap(h.ctx, fetchErr, "retrieve entity failed", nil)
 	}
 	if existingEntity == nil {
-		return nil, applicationerror.NewNotFoundError(ctx, "entity", request.Slug, nil)
+		return nil, applicationerror.NewNotFoundError(h.ctx, "entity", request.Slug, nil)
 	}
 
 	if request.VersionLock != existingEntity.VersionLock {
 		return nil, applicationerror.NewVersionMismatchError(
-			ctx,
+			h.ctx,
 			"entity",
 			request.Slug,
 			existingEntity.VersionLock,

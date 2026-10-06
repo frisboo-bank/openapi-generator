@@ -3,11 +3,12 @@ package otel
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
+
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
-	"sync"
-	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 
@@ -26,6 +27,7 @@ var _ contracts.MetricsAdapter = (*otelMetricsAdapter)(nil)
 
 type otelMetricsAdapter struct {
 	name             string
+	ctx              context.Context
 	meterProvider    *sdkmetric.MeterProvider
 	meter            metric.Meter
 	histogram        sync.Once
@@ -33,12 +35,18 @@ type otelMetricsAdapter struct {
 	logger           loggercontracts.Logger
 }
 
-func NewOtelMetricsAdapter(name string, cfg *models.MetricsOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.MetricsAdapter, error) {
+func NewOtelMetricsAdapter(
+	name string,
+	cfg *models.MetricsOptions,
+	ctx context.Context,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.MetricsAdapter, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
+	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
-
-	ctx := context.Background()
 
 	opts := []otlpmetrichttp.Option{otlpmetrichttp.WithEndpoint(cfg.Endpoint)}
 	if cfg.Insecure {
@@ -78,7 +86,7 @@ func (o *otelMetricsAdapter) RecordDuration(name string, duraction time.Duration
 	})
 
 	if o.float64Histogram != nil {
-		o.float64Histogram.Record(context.Background(), float64(duraction), measurement)
+		o.float64Histogram.Record(o.ctx, float64(duraction), measurement)
 	}
 }
 
@@ -94,12 +102,12 @@ func toAttributeSet(attrs []any) attribute.Set {
 	return attribute.NewSet(set...)
 }
 
-func (o *otelMetricsAdapter) Close(ctx context.Context) error {
-	return o.meterProvider.Shutdown(ctx)
+func (o *otelMetricsAdapter) Close() error {
+	return o.meterProvider.Shutdown(o.ctx)
 }
 
+func (o *otelMetricsAdapter) Name() string                   { return o.name }
+func (o *otelMetricsAdapter) Logger() loggercontracts.Logger { return o.logger }
 func (o *otelMetricsAdapter) Type() metrictype.MetricsType {
 	return metrictype.MetricsTypes.OPEN_TELEMETRY
 }
-func (o *otelMetricsAdapter) Name() string                   { return o.name }
-func (o *otelMetricsAdapter) Logger() loggercontracts.Logger { return o.logger }

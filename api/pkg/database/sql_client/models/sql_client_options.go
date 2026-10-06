@@ -22,6 +22,7 @@ type SQLClientOptions struct {
 	Password              string                            `mapstructure:"password"`
 	SSLMode               sqlclientsslmode.SqlClientSSLMode `mapstructure:"sslMode"`
 	EnableTracing         bool                              `mapstructure:"enableTracing"`
+	EnableMetrics         bool                              `mapstructure:"enableMetrics"`
 	ConnectionTimeout     time.Duration                     `mapstructure:"connectionTimeout"`
 	MaxOpenConnections    int                               `mapstructure:"maxOpenConns"`
 	MaxIdleConnections    int                               `mapstructure:"maxIdleConns"`
@@ -29,7 +30,9 @@ type SQLClientOptions struct {
 	ConnectionMaxIdleTime time.Duration                     `mapstructure:"connMaxIdleTime"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger  string `mapstructure:"logger"`
+	Tracer  string `mapstructure:"tracer"`
+	Metrics string `mapstructure:"metrics"`
 }
 
 func (o *SQLClientOptions) GetEnabled() bool  { return o.IsEnabled }

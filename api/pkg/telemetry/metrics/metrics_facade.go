@@ -1,7 +1,6 @@
 package metrics
 
 import (
-	"context"
 	"time"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -19,7 +18,8 @@ func (m *metrics) RecordDuration(name string, duraction time.Duration, attrs ...
 	m.adapter.RecordDuration(name, duraction, attrs...)
 }
 
-func (m *metrics) Close(ctx context.Context) error { return m.adapter.Close(ctx) }
-func (m *metrics) Name() string                    { return m.adapter.Name() }
-func (m *metrics) Type() metricstype.MetricsType   { return m.adapter.Type() }
-func (m *metrics) Logger() loggercontracts.Logger  { return m.adapter.Logger() }
+func (m *metrics) Close() error { return m.adapter.Close() }
+
+func (m *metrics) Name() string                   { return m.adapter.Name() }
+func (m *metrics) Type() metricstype.MetricsType  { return m.adapter.Type() }
+func (m *metrics) Logger() loggercontracts.Logger { return m.adapter.Logger() }

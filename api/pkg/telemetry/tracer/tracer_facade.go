@@ -18,18 +18,10 @@ func (t *tracer) Close(ctx context.Context) error {
 	return t.adapter.Close(ctx)
 }
 
-func (t *tracer) Logger() loggercontracts.Logger {
-	return t.adapter.Logger()
+func (t *tracer) Start(event string) (context.Context, contracts.TracerSpan) {
+	return t.adapter.Start(event)
 }
 
-func (t *tracer) Name() string {
-	return t.adapter.Name()
-}
-
-func (t *tracer) Start(ctx context.Context, event string) (context.Context, contracts.TracerSpan) {
-	return t.adapter.Start(ctx, event)
-}
-
-func (t *tracer) Type() tracertype.TracerType {
-	return t.adapter.Type()
-}
+func (t *tracer) Logger() loggercontracts.Logger { return t.adapter.Logger() }
+func (t *tracer) Name() string                   { return t.adapter.Name() }
+func (t *tracer) Type() tracertype.TracerType    { return t.adapter.Type() }

@@ -2,6 +2,7 @@ package otel
 
 import (
 	"context"
+
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -22,18 +23,24 @@ var _ contracts.TracerAdapter = (*otelTracerAdapter)(nil)
 
 type otelTracerAdapter struct {
 	name           string
+	ctx            context.Context
 	logger         loggercontracts.Logger
 	tracerProvider *sdktrace.TracerProvider
 	tracer         trace.Tracer
 }
 
-func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.TracerAdapter, error) {
+func NewOtelTracerAdapter(
+	name string,
+	cfg *models.TracerOptions,
+	ctx context.Context,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.TracerAdapter, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
-
-	ctx := context.Background()
 
 	opts := []otlptracehttp.Option{otlptracehttp.WithEndpoint(cfg.Endpoint)}
 	if cfg.Insecure {
@@ -61,26 +68,17 @@ func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkr
 	}, nil
 }
 
-func (o *otelTracerAdapter) Start(ctx context.Context, event string) (context.Context, contracts.TracerSpan) {
-	ctx, span := o.tracer.Start(ctx, event)
+func (o *otelTracerAdapter) Start(event string) (context.Context, contracts.TracerSpan) {
+	ctx, span := o.tracer.Start(o.ctx, event)
 	return ctx, &otelTracerSpan{span: span}
 }
 
-// Close implements [contracts.TracerAdapter].
 func (o *otelTracerAdapter) Close(ctx context.Context) error {
 	return o.tracerProvider.Shutdown(ctx)
 }
 
+func (o *otelTracerAdapter) Name() string                   { return o.name }
+func (o *otelTracerAdapter) Logger() loggercontracts.Logger { return o.logger }
 func (o *otelTracerAdapter) Type() tracertype.TracerType {
 	return tracertype.TracerTypes.OPEN_TELEMETRY
 }
-func (o *otelTracerAdapter) Name() string                   { return o.name }
-func (o *otelTracerAdapter) Logger() loggercontracts.Logger { return o.logger }
-
-// otelTracerSpan adapts [trace.Span] to [contracts.TracerSpan].
-type otelTracerSpan struct {
-	span trace.Span
-}
-
-func (s *otelTracerSpan) End()                  { s.span.End() }
-func (s *otelTracerSpan) RecordError(err error) { s.span.RecordError(err) }
