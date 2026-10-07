@@ -60,7 +60,7 @@ func (p *postgresSQLXClientAdapter) BeginTransaction(ctx context.Context, opts *
 }
 
 func (p *postgresSQLXClientAdapter) NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error) {
-	res, err := sqlxutils.NamedExec(ctx, p.db, query, args)
+	res, err := sqlxutils.NamedExec(ctx, p.db, query, args, sqlx.DOLLAR)
 	if err != nil {
 		return nil, fmt.Errorf("fetch with NamedExec failed with error: %w", err)
 	}
@@ -68,14 +68,14 @@ func (p *postgresSQLXClientAdapter) NamedExec(ctx context.Context, query string,
 }
 
 func (p *postgresSQLXClientAdapter) NamedGet(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedGet(ctx, p.db, dest, query, args); err != nil {
+	if err := sqlxutils.NamedGet(ctx, p.db, dest, query, args, sqlx.DOLLAR); err != nil {
 		return fmt.Errorf("fetch with NamedGet failed with error: %w", err)
 	}
 	return nil
 }
 
 func (p *postgresSQLXClientAdapter) NamedQuery(ctx context.Context, query string, args map[string]any) (contracts.SQLXRows, error) {
-	res, err := sqlxutils.NamedQuery(ctx, p.db, query, args)
+	res, err := sqlxutils.NamedQuery(ctx, p.db, query, args, sqlx.DOLLAR)
 	if err != nil {
 		return nil, fmt.Errorf("fetch with NamedQuery failed with error: %w", err)
 	}
@@ -83,7 +83,7 @@ func (p *postgresSQLXClientAdapter) NamedQuery(ctx context.Context, query string
 }
 
 func (p *postgresSQLXClientAdapter) NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedSelect(ctx, p.db, dest, query, args); err != nil {
+	if err := sqlxutils.NamedSelect(ctx, p.db, dest, query, args, sqlx.DOLLAR); err != nil {
 		return fmt.Errorf("fetch with NamedSelect failed with error: %w", err)
 	}
 	return nil

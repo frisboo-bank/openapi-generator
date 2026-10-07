@@ -24,7 +24,7 @@ func NewSQLite3SQLXTransaction(tx *sqlx.Tx) contracts.SQLXTransaction {
 }
 
 func (s *sqlite3SQLXTransaction) NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error) {
-	res, err := sqlxutils.NamedExec(ctx, s.tx, query, args)
+	res, err := sqlxutils.NamedExec(ctx, s.tx, query, args, sqlx.QUESTION)
 	if err != nil {
 		return nil, fmt.Errorf("NamedExec: %w", err)
 	}
@@ -32,14 +32,14 @@ func (s *sqlite3SQLXTransaction) NamedExec(ctx context.Context, query string, ar
 }
 
 func (s *sqlite3SQLXTransaction) NamedGet(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedGet(ctx, s.tx, dest, query, args); err != nil {
+	if err := sqlxutils.NamedGet(ctx, s.tx, dest, query, args, sqlx.QUESTION); err != nil {
 		return fmt.Errorf("NamedGet: %w", err)
 	}
 	return nil
 }
 
 func (s *sqlite3SQLXTransaction) NamedQuery(ctx context.Context, query string, args map[string]any) (contracts.SQLXRows, error) {
-	res, err := sqlxutils.NamedQuery(ctx, s.tx, query, args)
+	res, err := sqlxutils.NamedQuery(ctx, s.tx, query, args, sqlx.QUESTION)
 	if err != nil {
 		return nil, fmt.Errorf("NamedQuery: %w", err)
 	}
@@ -47,7 +47,7 @@ func (s *sqlite3SQLXTransaction) NamedQuery(ctx context.Context, query string, a
 }
 
 func (s *sqlite3SQLXTransaction) NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedSelect(ctx, s.tx, dest, query, args); err != nil {
+	if err := sqlxutils.NamedSelect(ctx, s.tx, dest, query, args, sqlx.QUESTION); err != nil {
 		return fmt.Errorf("NamedSelect: %w", err)
 	}
 	return nil
