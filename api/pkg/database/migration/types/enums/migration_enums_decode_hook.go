@@ -3,7 +3,7 @@ package enums
 import (
 	"reflect"
 
-	migrationTypeEnum "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums/migration_type"
+	migrationTypeEnum "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 
 	"github.com/go-viper/mapstructure/v2"
 )
