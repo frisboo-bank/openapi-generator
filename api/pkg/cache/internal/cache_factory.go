@@ -4,8 +4,8 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/internal/adapters/memory"
 	"frisboo-bank/openapi-generator-service/pkg/cache/internal/adapters/redis"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
@@ -13,7 +13,7 @@ import (
 
 func CreateCache(
 	name string,
-	cfg *models.CacheOptions,
+	cfg *config.CacheOptions,
 	logger loggercontracts.Logger,
 	env environmentEnum.Environment,
 ) (contracts.Cache, error) {

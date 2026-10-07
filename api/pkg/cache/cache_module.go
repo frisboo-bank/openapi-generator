@@ -5,8 +5,9 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
+	cacheinternal "frisboo-bank/openapi-generator-service/pkg/cache/internal"
+	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/types/enums"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -22,7 +23,7 @@ type CacheDependencies struct {
 }
 
 var CacheModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.CacheOptions, contracts.Cache, CacheDependencies]{
+	module.MultiInstancesModuleOptions[*config.CacheOptions, contracts.Cache, CacheDependencies]{
 		Name:      "cache",
 		ConfigKey: "caches",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
@@ -30,12 +31,12 @@ var CacheModule = module.NewMultiInstancesModule(
 		},
 		ProviderFn: func(
 			name string,
-			cfg *models.CacheOptions,
+			cfg *config.CacheOptions,
 			env environmentEnum.Environment,
 			logger loggerContracts.Logger,
 			extra CacheDependencies,
 		) (contracts.Cache, error) {
-			return CreateCache(name, cfg, logger, env)
+			return cacheinternal.CreateCache(name, cfg, logger, env)
 		},
 		HookFn: func(name string, instance contracts.Cache) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
