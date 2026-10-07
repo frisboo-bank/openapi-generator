@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"frisboo-bank/openapi-generator-service/pkg/application/contracts"
-	configModels "frisboo-bank/openapi-generator-service/pkg/config/models"
+	configModels "frisboo-bank/openapi-generator-service/pkg/config/config"
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	httpServerContracts "frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
