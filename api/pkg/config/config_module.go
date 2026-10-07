@@ -5,6 +5,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	config "frisboo-bank/openapi-generator-service/pkg/config/config"
 )
 
 func ConfigModule(configLoader contracts.ConfigLoader) containerContracts.Module {

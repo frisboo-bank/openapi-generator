@@ -3,12 +3,16 @@ package tracer
 import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	tracerinternal "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/noop"
 )
 
 func CreateNoopTracer(
 	name string,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
-	return tracerinternal.CreateNoopTracer(name, logger)
+	adapter, err := noop.NewNoopTracerAdapter(name, logger)
+	if err != nil {
+		return nil, err
+	}
+	return &tracer{adapter: adapter}, nil
 }
