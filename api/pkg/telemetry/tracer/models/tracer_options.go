@@ -8,7 +8,6 @@ import (
 var _ configContracts.Configurable = (*TracerOptions)(nil)
 
 type TracerOptions struct {
-	IsEnabled bool                  `mapstructure:"enabled"`
 	Type      tracertype.TracerType `mapstructure:"type"`
 
 	// OpenTelemetry
@@ -19,7 +18,6 @@ type TracerOptions struct {
 	Logger string `mapstructure:"logger"`
 }
 
-func (o *TracerOptions) GetEnabled() bool  { return o.IsEnabled }
 func (o *TracerOptions) GetLogger() string { return o.Logger }
 
 func (o *TracerOptions) SetDefaults() {}

@@ -19,7 +19,7 @@ type LogOptions struct {
 	Logger string `mapstructure:"logger"`
 }
 
-func (o *LogOptions) GetEnabled() bool  { return o.IsEnabled }
+func (o *LogOptions) Enable() bool  { return o.IsEnabled }
 func (o *LogOptions) GetLogger() string { return o.Logger }
 
 func (o *LogOptions) SetDefaults() {}

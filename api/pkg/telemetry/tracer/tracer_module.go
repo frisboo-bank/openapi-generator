@@ -1,6 +1,7 @@
 package tracer
 
 import (
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -23,7 +24,13 @@ var TracerModule = module.NewMultiInstancesModule(
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
 			tracerenums.TracerEnumsDecodeHook(),
 		},
-		ProviderFn: func(name string, cfg *models.TracerOptions, _ environmentenum.Environment, logger loggercontracts.Logger, _ TracerModuleDependencies) (contracts.Tracer, error) {
+		ProviderFn: func(
+			name string,
+			cfg *models.TracerOptions,
+			_ environmentenum.Environment,
+			logger loggercontracts.Logger,
+			_ TracerModuleDependencies,
+		) (contracts.Tracer, error) {
 			return CreateTracer(name, cfg, logger)
 		},
 	},

@@ -33,20 +33,6 @@ func NewUpdateEntityHandler(
 	}
 }
 
-// func (h *ListEntitiesHandler) Handle(ctx context.Context, request *ListEntitiesQuery) (*listdtos.ListEntitiesResponseDto, applicationerrorcontracts.AppError) {
-// 	validation.AssertNotNil("request", request)
-//
-// 	entities, pagination, err := h.repo.ListEntities(ctx, &request.Query)
-// 	if err != nil {
-// 		return nil, applicationerror.NewInternalErrorWrap(ctx, err, "list entities failed", nil)
-// 	}
-//
-// 	return &listdtos.ListEntitiesResponseDto{
-// 		Entities:   entities,
-// 		Pagination: pagination,
-// 	}, nil
-// }
-
 func (h *UpdateEntityHandler) Handle(ctx context.Context, request *UpdateEntityQuery) (response *dtos.UpdateEntityResponseDto, err error) {
 	validation.AssertNotNil("request", request)
 

@@ -39,7 +39,7 @@ func (c *HTTPServerOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *HTTPServerOptions) GetEnabled() bool  { return c.IsEnabled }
+func (c *HTTPServerOptions) Enable() bool  { return c.IsEnabled }
 func (c *HTTPServerOptions) GetLogger() string { return c.Logger }
 
 func (c *HTTPServerOptions) SetDefaults() {

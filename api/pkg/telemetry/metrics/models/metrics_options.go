@@ -8,8 +8,7 @@ import (
 var _ configContracts.Configurable = (*MetricsOptions)(nil)
 
 type MetricsOptions struct {
-	IsEnabled bool                    `mapstructure:"enabled"`
-	Type      metricstype.MetricsType `mapstructure:"type"`
+	Type metricstype.MetricsType `mapstructure:"type"`
 
 	// OpenTelemetry
 	Endpoint string `mapstructure:"endpoint"`
@@ -19,11 +18,10 @@ type MetricsOptions struct {
 	Logger string `mapstructure:"logger"`
 }
 
-func (o *MetricsOptions) GetEnabled() bool  { return o.IsEnabled }
-func (o *MetricsOptions) GetLogger() string { return o.Logger }
-
 func (o *MetricsOptions) SetDefaults() {}
 
 func (o *MetricsOptions) Validate() error {
 	return nil
 }
+
+func (o *MetricsOptions) GetLogger() string { return o.Logger }

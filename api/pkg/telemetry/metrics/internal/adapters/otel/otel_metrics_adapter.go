@@ -3,11 +3,12 @@ package otel
 import (
 	"context"
 	"fmt"
+	"sync"
+	"time"
+
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
-	"sync"
-	"time"
 
 	"go.opentelemetry.io/otel/attribute"
 
@@ -33,19 +34,23 @@ type otelMetricsAdapter struct {
 	logger           loggercontracts.Logger
 }
 
-func NewOtelMetricsAdapter(name string, cfg *models.MetricsOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.MetricsAdapter, error) {
+func NewOtelMetricsAdapter(
+	name string,
+	cfg *models.MetricsOptions,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.MetricsAdapter, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
-
-	ctx := context.Background()
 
 	opts := []otlpmetrichttp.Option{otlpmetrichttp.WithEndpoint(cfg.Endpoint)}
 	if cfg.Insecure {
 		opts = append(opts, otlpmetrichttp.WithInsecure())
 	}
 
-	exporter, err := otlpmetrichttp.New(ctx, opts...)
+	exporter, err := otlpmetrichttp.New(context.Background(), opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -94,12 +99,12 @@ func toAttributeSet(attrs []any) attribute.Set {
 	return attribute.NewSet(set...)
 }
 
-func (o *otelMetricsAdapter) Close(ctx context.Context) error {
-	return o.meterProvider.Shutdown(ctx)
+func (o *otelMetricsAdapter) Close() error {
+	return o.meterProvider.Shutdown(context.Background())
 }
 
+func (o *otelMetricsAdapter) Name() string                   { return o.name }
+func (o *otelMetricsAdapter) Logger() loggercontracts.Logger { return o.logger }
 func (o *otelMetricsAdapter) Type() metrictype.MetricsType {
 	return metrictype.MetricsTypes.OPEN_TELEMETRY
 }
-func (o *otelMetricsAdapter) Name() string                   { return o.name }
-func (o *otelMetricsAdapter) Logger() loggercontracts.Logger { return o.logger }

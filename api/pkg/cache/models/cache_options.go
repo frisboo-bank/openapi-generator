@@ -5,7 +5,7 @@ import (
 	"net"
 	"time"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 )
 
@@ -36,7 +36,7 @@ func (c *CacheOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *CacheOptions) GetEnabled() bool  { return c.IsEnabled }
+func (c *CacheOptions) Enable() bool  { return c.IsEnabled }
 func (c *CacheOptions) GetLogger() string { return c.Logger }
 
 func (c *CacheOptions) SetDefaults() {

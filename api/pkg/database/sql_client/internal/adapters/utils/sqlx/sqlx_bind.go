@@ -15,7 +15,10 @@ type SQLXExecutor interface {
 	SelectContext(context.Context, any, string, ...any) error
 }
 
-func BindNamed(query string, args map[string]any) (string, []any, error) {
+// BindNamed converts a named-placeholder query into a driver-specific
+// positional query. The placeholder style must match the underlying driver:
+// sqlx.DOLLAR for postgres/pgx, sqlx.QUESTION for sqlite3x.
+func BindNamed(query string, args map[string]any, style int) (string, []any, error) {
 	if len(args) == 0 {
 		return query, nil, nil
 	}
@@ -29,35 +32,35 @@ func BindNamed(query string, args map[string]any) (string, []any, error) {
 		return "", nil, fmt.Errorf("query has no named placeholders for %d provided args", len(args))
 	}
 
-	return sqlx.Rebind(sqlx.DOLLAR, namedQuery), namedArgs, nil
+	return sqlx.Rebind(style, namedQuery), namedArgs, nil
 }
 
-func NamedExec(ctx context.Context, ex SQLXExecutor, query string, args map[string]any) (sql.Result, error) {
-	q, a, err := BindNamed(query, args)
+func NamedExec(ctx context.Context, ex SQLXExecutor, query string, args map[string]any, style int) (sql.Result, error) {
+	q, a, err := BindNamed(query, args, style)
 	if err != nil {
 		return nil, err
 	}
 	return ex.ExecContext(ctx, q, a...)
 }
 
-func NamedGet(ctx context.Context, ex SQLXExecutor, dest any, query string, args map[string]any) error {
-	q, a, err := BindNamed(query, args)
+func NamedGet(ctx context.Context, ex SQLXExecutor, dest any, query string, args map[string]any, style int) error {
+	q, a, err := BindNamed(query, args, style)
 	if err != nil {
 		return err
 	}
 	return ex.GetContext(ctx, dest, q, a...)
 }
 
-func NamedQuery(ctx context.Context, ex SQLXExecutor, query string, args map[string]any) (*sqlx.Rows, error) {
-	q, a, err := BindNamed(query, args)
+func NamedQuery(ctx context.Context, ex SQLXExecutor, query string, args map[string]any, style int) (*sqlx.Rows, error) {
+	q, a, err := BindNamed(query, args, style)
 	if err != nil {
 		return nil, err
 	}
 	return ex.QueryxContext(ctx, q, a...)
 }
 
-func NamedSelect(ctx context.Context, ex SQLXExecutor, dest any, query string, args map[string]any) error {
-	q, a, err := BindNamed(query, args)
+func NamedSelect(ctx context.Context, ex SQLXExecutor, dest any, query string, args map[string]any, style int) error {
+	q, a, err := BindNamed(query, args, style)
 	if err != nil {
 		return err
 	}

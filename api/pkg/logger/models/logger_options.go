@@ -22,10 +22,6 @@ type LoggerOptions struct {
 	TracerEnabled bool                      `mapstructure:"tracerEnabled"`
 }
 
-func (l *LoggerOptions) GetEnabled() bool {
-	return true
-}
-
 func (l *LoggerOptions) GetLogger() string {
 	return ""
 }

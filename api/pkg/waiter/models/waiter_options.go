@@ -19,10 +19,6 @@ type WaiterOptions struct {
 	Logger                 string `mapstructure:"logger"`
 }
 
-func (c *WaiterOptions) GetEnabled() bool {
-	return true
-}
-
 func (c *WaiterOptions) GetLogger() string {
 	return c.Logger
 }
