@@ -14,7 +14,7 @@ import (
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/enums"
+	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 

@@ -10,7 +10,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/config"
 	rpcserverinternal "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/internal"
-	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/enums"
+	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"

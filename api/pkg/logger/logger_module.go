@@ -10,7 +10,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	loggerinternal "frisboo-bank/openapi-generator-service/pkg/logger/internal"
-	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/types/enums"
+	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/types"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 

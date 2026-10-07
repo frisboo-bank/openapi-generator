@@ -5,7 +5,7 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/log/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/log/config"
-	logenums "frisboo-bank/openapi-generator-service/pkg/telemetry/log/types/enums"
+	logenums "frisboo-bank/openapi-generator-service/pkg/telemetry/log/types"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"

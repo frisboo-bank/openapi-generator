@@ -12,7 +12,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
 	httpserverinternal "frisboo-bank/openapi-generator-service/pkg/http/http_server/internal"
-	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/enums"
+	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/types"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"

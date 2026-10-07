@@ -7,7 +7,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/config"
 	cacheinternal "frisboo-bank/openapi-generator-service/pkg/cache/internal"
-	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/types/enums"
+	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/types"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"

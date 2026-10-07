@@ -8,7 +8,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	tracerinternal "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal"
-	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/enums"
+	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"

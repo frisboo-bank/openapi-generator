@@ -7,7 +7,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
 	migrationinternal "frisboo-bank/openapi-generator-service/pkg/database/migration/internal"
-	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/types/enums"
+	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/types"
 	sqlclientcontracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
