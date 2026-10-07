@@ -10,14 +10,14 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/config"
 )
 
 func MediatorModule(
 	env environmentEnum.Environment,
 	configLoader configContracts.ConfigLoader,
 ) containerContracts.Module {
-	var cfg *models.MediatorOptions
+	var cfg *config.MediatorOptions
 	if err := configLoader.LoadKey(env, &cfg, "mediator"); err != nil {
 		log.Fatalf("Failed to build mediator module with error: %v", err)
 	}
@@ -29,7 +29,7 @@ func MediatorModule(
 
 	mod := container.NewModule(
 		"mediator",
-		container.Provider(func() *models.MediatorOptions {
+		container.Provider(func() *config.MediatorOptions {
 			return cfg
 		}),
 	)
