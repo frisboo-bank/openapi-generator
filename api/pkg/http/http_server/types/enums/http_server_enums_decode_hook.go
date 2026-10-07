@@ -3,7 +3,7 @@ package enums
 import (
 	"reflect"
 
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
+	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

@@ -3,7 +3,7 @@ package contracts
 import (
 	"context"
 
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
+	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 
