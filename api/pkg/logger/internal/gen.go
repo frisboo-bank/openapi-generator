@@ -1,5 +1,0 @@
-package logger
-
-//go:generate goenums -f -c ../types/encodingtype/encoding_type.go
-//go:generate goenums -f -c ../types/loglvl/log_level.go
-//go:generate goenums -f -c ../types/loggertype/logger_type.go
