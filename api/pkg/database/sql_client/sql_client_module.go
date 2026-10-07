@@ -77,7 +77,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 			return containercontracts.HookResolveResult{
 				Name: "database.sql-client:" + name,
 				Wait: func(ctx context.Context) error {
-					if err := instance.Ping(); err != nil {
+					if err := instance.Ping(ctx); err != nil {
 						instance.Logger().Errorf("sql-clients %q failed to access database: %v", name, err)
 						return fmt.Errorf("sql-client %q ping: %w", name, err)
 					}
@@ -86,7 +86,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 					return nil
 				},
 				Cleanup: func(ctx context.Context) error {
-					if err := instance.Close(); err != nil {
+					if err := instance.Close(ctx); err != nil {
 						instance.Logger().Errorf("sql-clients %q close failed with error: %v", name, err)
 						return fmt.Errorf("sql-client %q close: %w", name, err)
 					}
