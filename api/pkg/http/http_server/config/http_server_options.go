@@ -13,26 +13,26 @@ import (
 var _ configContracts.Configurable = (*HTTPServerOptions)(nil)
 
 type HTTPServerOptions struct {
-	IsEnabled             bool                          `mapstructure:"enabled"`
-	Type                  httpservertype.HttpServerType `mapstructure:"type"`
-	Debug                 bool                          `mapstructure:"debug"`
-	Mode                  string                        `mapstructure:"mode"`
-	Host                  string                        `mapstructure:"host"`
-	Port                  string                        `mapstructure:"port"`
-	BasePath              string                        `mapstructure:"basePath"`
-	IgnoreLogUrls         []string                      `mapstructure:"ignoreLogUrls"`
-	TrustedProxies        []string                      `mapstructure:"trustedProxies"`
-	MaxHeaderBytes        int                           `mapstructure:"maxHeaderBytes"`
-	BodyLimit             string                        `mapstructure:"bodyLimit"`
-	IdleTimeout           time.Duration                 `mapstructure:"idleTimeout"`
-	ReadHeaderTimeout     time.Duration                 `mapstructure:"readHeaderTimeout"`
-	ReadTimeout           time.Duration                 `mapstructure:"readTimeout"`
-	ServerShutdownTimeout time.Duration                 `mapstructure:"serverShutdownTimeout"`
-	WriteTimeout          time.Duration                 `mapstructure:"writeTimeout"`
-	GzipLevel             int                           `mapstructure:"gzipLevel"`
+	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
+	Type httpservertype.HttpServerType `mapstructure:"type" json:"type"`
+	Debug bool `mapstructure:"debug" json:"debug"`
+	Mode string `mapstructure:"mode" json:"mode"`
+	Host string `mapstructure:"host" json:"host"`
+	Port string `mapstructure:"port" json:"port"`
+	BasePath string `mapstructure:"basePath" json:"basePath"`
+	IgnoreLogUrls []string `mapstructure:"ignoreLogUrls" json:"ignoreLogUrls"`
+	TrustedProxies []string `mapstructure:"trustedProxies" json:"trustedProxies"`
+	MaxHeaderBytes int `mapstructure:"maxHeaderBytes" json:"maxHeaderBytes"`
+	BodyLimit string `mapstructure:"bodyLimit" json:"bodyLimit"`
+	IdleTimeout time.Duration `mapstructure:"idleTimeout" json:"idleTimeout"`
+	ReadHeaderTimeout time.Duration `mapstructure:"readHeaderTimeout" json:"readHeaderTimeout"`
+	ReadTimeout time.Duration `mapstructure:"readTimeout" json:"readTimeout"`
+	ServerShutdownTimeout time.Duration `mapstructure:"serverShutdownTimeout" json:"serverShutdownTimeout"`
+	WriteTimeout time.Duration `mapstructure:"writeTimeout" json:"writeTimeout"`
+	GzipLevel int `mapstructure:"gzipLevel" json:"gzipLevel"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (c *HTTPServerOptions) Address() string {
@@ -90,3 +90,5 @@ func (c *HTTPServerOptions) Validate() error {
 	}
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config HTTPServerOptions

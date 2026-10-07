@@ -13,19 +13,19 @@ import (
 var _ configContracts.Configurable = (*RPCServerOptions)(nil)
 
 type RPCServerOptions struct {
-	IsEnabled             bool                        `mapstructure:"enabled"`
-	Type                  rpcservertype.RpcServerType `mapstructure:"type"`
-	Debug                 bool                        `mapstructure:"debug"`
-	Host                  string                      `mapstructure:"host"`
-	Port                  string                      `mapstructure:"port"`
-	KeepAliveTime         time.Duration               `mapstructure:"keepAliveTime"`
-	KeepAliveTimeout      time.Duration               `mapstructure:"KeepAliveTimeout"`
-	MaxConnectionAge      time.Duration               `mapstructure:"MaxConnectionAge"`
-	MaxConnectionAgeGrace time.Duration               `mapstructure:"MaxConnectionAgeGrace"`
-	MaxConnectionIdle     time.Duration               `mapstructure:"MaxConnectionIdle"`
+	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
+	Type rpcservertype.RpcServerType `mapstructure:"type" json:"type"`
+	Debug bool `mapstructure:"debug" json:"debug"`
+	Host string `mapstructure:"host" json:"host"`
+	Port string `mapstructure:"port" json:"port"`
+	KeepAliveTime time.Duration `mapstructure:"keepAliveTime" json:"keepAliveTime"`
+	KeepAliveTimeout time.Duration `mapstructure:"KeepAliveTimeout" json:"KeepAliveTimeout"`
+	MaxConnectionAge time.Duration `mapstructure:"MaxConnectionAge" json:"MaxConnectionAge"`
+	MaxConnectionAgeGrace time.Duration `mapstructure:"MaxConnectionAgeGrace" json:"MaxConnectionAgeGrace"`
+	MaxConnectionIdle time.Duration `mapstructure:"MaxConnectionIdle" json:"MaxConnectionIdle"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (c *RPCServerOptions) Address() string {
@@ -75,3 +75,5 @@ func (c *RPCServerOptions) Validate() error {
 	}
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config RPCServerOptions

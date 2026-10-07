@@ -8,15 +8,15 @@ import (
 var _ configContracts.Configurable = (*LogOptions)(nil)
 
 type LogOptions struct {
-	IsEnabled bool            `mapstructure:"enabled"`
-	Type      logtype.LogType `mapstructure:"type"`
+	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
+	Type logtype.LogType `mapstructure:"type" json:"type"`
 
 	// OpenTelemetry
-	Endpoint string `mapstructure:"endpoint"`
-	Insecure bool   `mapstructure:"insecure"`
+	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
+	Insecure bool `mapstructure:"insecure" json:"insecure"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (o *LogOptions) Enable() bool  { return o.IsEnabled }
@@ -27,3 +27,5 @@ func (o *LogOptions) SetDefaults() {}
 func (o *LogOptions) Validate() error {
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config LogOptions

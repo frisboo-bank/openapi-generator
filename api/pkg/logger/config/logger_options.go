@@ -13,13 +13,13 @@ import (
 var _ configContracts.Configurable = (*LoggerOptions)(nil)
 
 type LoggerOptions struct {
-	Type          loggertype.LoggerType     `mapstructure:"type"`
-	CallDepth     int                       `mapstructure:"callDepth"`
-	CallerEnabled bool                      `mapstructure:"callerEnabled"`
-	Encoding      encodingtype.EncodingType `mapstructure:"encoding"`
-	Level         loglevel.LogLevel         `mapstructure:"level"`
-	Prefix        string                    `mapstructure:"prefix"`
-	TracerEnabled bool                      `mapstructure:"tracerEnabled"`
+	Type loggertype.LoggerType `mapstructure:"type" json:"type"`
+	CallDepth int `mapstructure:"callDepth" json:"callDepth"`
+	CallerEnabled bool `mapstructure:"callerEnabled" json:"callerEnabled"`
+	Encoding encodingtype.EncodingType `mapstructure:"encoding" json:"encoding"`
+	Level loglevel.LogLevel `mapstructure:"level" json:"level"`
+	Prefix string `mapstructure:"prefix" json:"prefix"`
+	TracerEnabled bool `mapstructure:"tracerEnabled" json:"tracerEnabled"`
 }
 
 func (l *LoggerOptions) GetLogger() string {
@@ -47,3 +47,5 @@ func (l *LoggerOptions) Validate() error {
 		vendorvalidation.Field(&l.Level, vendorvalidation.Required, validators.ValidEnum()),
 	)
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config LoggerOptions
