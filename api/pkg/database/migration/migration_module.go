@@ -5,8 +5,9 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/database/migration/models"
-	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
+	migrationinternal "frisboo-bank/openapi-generator-service/pkg/database/migration/internal"
+	migrationenums "frisboo-bank/openapi-generator-service/pkg/database/migration/types/enums"
 	sqlclientcontracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -21,7 +22,7 @@ type MigrationDependencies struct {
 }
 
 var MigrationModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.MigrationOptions, contracts.Migration, MigrationDependencies]{
+	module.MultiInstancesModuleOptions[*config.MigrationOptions, contracts.Migration, MigrationDependencies]{
 		Name:      "database.migration",
 		ConfigKey: "database.migration",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
@@ -29,7 +30,7 @@ var MigrationModule = module.NewMultiInstancesModule(
 		},
 		ProviderFn: func(
 			name string,
-			cfg *models.MigrationOptions,
+			cfg *config.MigrationOptions,
 			env environmentenum.Environment,
 			logger loggercontracts.Logger,
 			extra MigrationDependencies,
@@ -48,7 +49,7 @@ var MigrationModule = module.NewMultiInstancesModule(
 				return nil, fmt.Errorf("sql client %q does not expose its DB connection", name)
 			}
 
-			return CreateMigration(name, dbClient.DB(), cfg, env, logger)
+			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, env, logger)
 		},
 	},
 )
