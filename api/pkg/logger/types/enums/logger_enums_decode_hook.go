@@ -5,9 +5,9 @@ import (
 	"reflect"
 	"strings"
 
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/types/loglvl"
+	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 
 	"github.com/go-viper/mapstructure/v2"
 )
