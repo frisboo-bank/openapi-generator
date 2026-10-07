@@ -1,4 +1,4 @@
-package models
+package config
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums/rpc_server_type"
+	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 )
 
 var _ configContracts.Configurable = (*RPCServerOptions)(nil)
