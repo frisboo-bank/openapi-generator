@@ -3,7 +3,7 @@ package enums
 import (
 	"reflect"
 
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums/rpc_server_type"
+	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

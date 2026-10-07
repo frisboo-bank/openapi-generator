@@ -5,14 +5,14 @@ import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/internal/adapters/grpc"
-	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums/rpc_server_type"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/config"
+	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 )
 
 func CreateRPCServer(
 	name string,
-	cfg *models.RPCServerOptions,
+	cfg *config.RPCServerOptions,
 	logger loggercontracts.Logger,
 	env environmentenum.Environment,
 ) (contracts.RPCServer, error) {
