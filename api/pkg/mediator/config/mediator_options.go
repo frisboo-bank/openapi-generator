@@ -18,5 +18,3 @@ func (c *MediatorOptions) SetDefaults() {
 func (c *MediatorOptions) Validate() error {
 	return nil
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MediatorOptions

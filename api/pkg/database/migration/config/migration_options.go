@@ -37,5 +37,3 @@ func (c *MigrationOptions) Validate() error {
 		vendorvalidation.Field(&c.DBClient, vendorvalidation.Required),
 	)
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MigrationOptions
