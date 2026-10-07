@@ -1,4 +1,4 @@
-package models
+package config
 
 type AppOptions struct {
 	Name string `mapstructure:"name" json:"name"`

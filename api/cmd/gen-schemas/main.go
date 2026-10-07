@@ -7,7 +7,7 @@ import (
 	"github.com/invopop/jsonschema"
 
 	cacheconfig "frisboo-bank/openapi-generator-service/pkg/cache/config"
-	appconfig "frisboo-bank/openapi-generator-service/pkg/config/models"
+	appconfig "frisboo-bank/openapi-generator-service/pkg/config/config"
 	migrationconfig "frisboo-bank/openapi-generator-service/pkg/database/migration/config"
 	sqlclientconfig "frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	httpconfig "frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
@@ -30,7 +30,7 @@ type genEntry struct {
 func main() {
 	entries := []genEntry{
 		{dir: "pkg/cache/config", v: &cacheconfig.CacheOptions{}, name: "CacheOptions"},
-		{dir: "pkg/config/models", v: &appconfig.AppOptions{}, name: "AppOptions"},
+		{dir: "pkg/config/config", v: &appconfig.AppOptions{}, name: "AppOptions"},
 		{dir: "pkg/database/migration/config", v: &migrationconfig.MigrationOptions{}, name: "MigrationOptions"},
 		{dir: "pkg/database/sql_client/config", v: &sqlclientconfig.SQLClientOptions{}, name: "SQLClientOptions"},
 		{dir: "pkg/http/http_server/config", v: &httpconfig.HTTPServerOptions{}, name: "HTTPServerOptions"},
