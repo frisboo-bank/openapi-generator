@@ -1,1 +1,0 @@
-{"$schema":"https://json-schema.org/draft/2020-12/schema","$ref":"#/$defs/AppOptions","$defs":{"AppOptions":{"properties":{"name":{"type":"string"},"version":{"type":"string"},"description":{"type":"string"},"logger":{"type":"string"}},"additionalProperties":false,"type":"object","required":["name","version","description","logger"]}}}
