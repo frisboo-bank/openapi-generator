@@ -1,9 +1,10 @@
 package sqlx
 
 import (
+	"sync"
+
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	"sync"
 )
 
 var _ contracts.SQLXRows = (*sqlxRowsTelemetry)(nil)
@@ -21,9 +22,9 @@ func wrapSQLXRowsForTelemetry(delegate contracts.SQLXRows, span tracercontracts.
 	}
 }
 
-func (s *sqlxRowsTelemetry) Close() error {
-	err := s.SQLXRows.Close()
-	s.end(err)
+func (r *sqlxRowsTelemetry) Close() error {
+	err := r.SQLXRows.Close()
+	r.end(err)
 	return err
 }
 
