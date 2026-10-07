@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres"
 	sqlxutils "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/utils/sqlx"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"

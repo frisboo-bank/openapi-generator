@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	sqlclientinternal "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"

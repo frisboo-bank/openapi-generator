@@ -1,4 +1,4 @@
-package sqlclient
+package sqlclient_test
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"

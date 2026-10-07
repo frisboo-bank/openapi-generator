@@ -2,9 +2,9 @@ package config
 
 import (
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/types/loglvl"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loglevel"
 	"frisboo-bank/openapi-generator-service/pkg/validation/validators"
 
 	vendorvalidation "github.com/go-ozzo/ozzo-validation"
@@ -13,13 +13,13 @@ import (
 var _ configContracts.Configurable = (*LoggerOptions)(nil)
 
 type LoggerOptions struct {
-	Type loggertype.LoggerType `mapstructure:"type" json:"type"`
-	CallDepth int `mapstructure:"callDepth" json:"callDepth"`
-	CallerEnabled bool `mapstructure:"callerEnabled" json:"callerEnabled"`
-	Encoding encodingtype.EncodingType `mapstructure:"encoding" json:"encoding"`
-	Level loglevel.LogLevel `mapstructure:"level" json:"level"`
-	Prefix string `mapstructure:"prefix" json:"prefix"`
-	TracerEnabled bool `mapstructure:"tracerEnabled" json:"tracerEnabled"`
+	Type          loggertype.LoggerType     `mapstructure:"type" json:"type"`
+	CallDepth     int                       `mapstructure:"callDepth" json:"callDepth"`
+	CallerEnabled bool                      `mapstructure:"callerEnabled" json:"callerEnabled"`
+	Encoding      encodingtype.EncodingType `mapstructure:"encoding" json:"encoding"`
+	Level         loglevel.LogLevel         `mapstructure:"level" json:"level"`
+	Prefix        string                    `mapstructure:"prefix" json:"prefix"`
+	TracerEnabled bool                      `mapstructure:"tracerEnabled" json:"tracerEnabled"`
 }
 
 func (l *LoggerOptions) GetLogger() string {

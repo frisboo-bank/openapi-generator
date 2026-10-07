@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$ref":"#/$defs/WaiterOptions","$defs":{"WaiterOptions":{"properties":{"cancelOnShutdownSignal":{"type":"boolean"},"cleanupTimeoutMs":{"type":"integer"},"logger":{"type":"string"}},"additionalProperties":false,"type":"object","required":["cancelOnShutdownSignal","cleanupTimeoutMs","logger"]}}}

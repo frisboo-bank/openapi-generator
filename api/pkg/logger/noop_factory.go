@@ -1,11 +1,13 @@
 package logger
 
 import (
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/logger/internal/adapters/noop"
+	loggerinternal "frisboo-bank/openapi-generator-service/pkg/logger/internal"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 )
 
-func CreateNoopLogger(name string, env environmentEnum.Environment) contracts.Logger {
-	return &logger{adapter: noop.NewNoopAdapter(name)}
+func CreateNoopLogger(name string, env environmentenum.Environment) (contracts.Logger, error) {
+	return loggerinternal.CreateLogger(name, &config.LoggerOptions{Type: loggertype.LoggerTypes.NOOP}, env)
 }

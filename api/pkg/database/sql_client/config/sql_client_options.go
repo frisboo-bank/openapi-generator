@@ -12,30 +12,30 @@ import (
 var _ configContracts.Configurable = (*SQLClientOptions)(nil)
 
 type SQLClientOptions struct {
-	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
-	Type sqlclienttype.SqlClientType `mapstructure:"type" json:"type"`
-	Debug bool `mapstructure:"debug" json:"debug"`
-	Host string `mapstructure:"host" json:"host"`
-	Port string `mapstructure:"port" json:"port"`
-	Database string `mapstructure:"database" json:"database"`
-	User string `mapstructure:"user" json:"user"`
-	Password string `mapstructure:"password" json:"password"`
-	SSLMode sqlclientsslmode.SqlClientSSLMode `mapstructure:"sslMode" json:"sslMode"`
-	EnableTracing bool `mapstructure:"enableTracing" json:"enableTracing"`
-	EnableMetrics bool `mapstructure:"enableMetrics" json:"enableMetrics"`
-	ConnectionTimeout time.Duration `mapstructure:"connectionTimeout" json:"connectionTimeout"`
-	MaxOpenConnections int `mapstructure:"maxOpenConns" json:"maxOpenConns"`
-	MaxIdleConnections int `mapstructure:"maxIdleConns" json:"maxIdleConns"`
-	ConnectionMaxLifetime time.Duration `mapstructure:"connMaxLifetime" json:"connMaxLifetime"`
-	ConnectionMaxIdleTime time.Duration `mapstructure:"connMaxIdleTime" json:"connMaxIdleTime"`
+	IsEnabled             bool                              `mapstructure:"enabled" json:"enabled"`
+	Type                  sqlclienttype.SqlClientType       `mapstructure:"type" json:"type"`
+	Debug                 bool                              `mapstructure:"debug" json:"debug"`
+	Host                  string                            `mapstructure:"host" json:"host"`
+	Port                  string                            `mapstructure:"port" json:"port"`
+	Database              string                            `mapstructure:"database" json:"database"`
+	User                  string                            `mapstructure:"user" json:"user"`
+	Password              string                            `mapstructure:"password" json:"password"`
+	SSLMode               sqlclientsslmode.SqlClientSSLMode `mapstructure:"sslMode" json:"sslMode"`
+	EnableTracing         bool                              `mapstructure:"enableTracing" json:"enableTracing"`
+	EnableMetrics         bool                              `mapstructure:"enableMetrics" json:"enableMetrics"`
+	ConnectionTimeout     time.Duration                     `mapstructure:"connectionTimeout" json:"connectionTimeout"`
+	MaxOpenConnections    int                               `mapstructure:"maxOpenConns" json:"maxOpenConns"`
+	MaxIdleConnections    int                               `mapstructure:"maxIdleConns" json:"maxIdleConns"`
+	ConnectionMaxLifetime time.Duration                     `mapstructure:"connMaxLifetime" json:"connMaxLifetime"`
+	ConnectionMaxIdleTime time.Duration                     `mapstructure:"connMaxIdleTime" json:"connMaxIdleTime"`
 
 	// dependencies
-	Logger string `mapstructure:"logger" json:"logger"`
-	Tracer string `mapstructure:"tracer" json:"tracer"`
+	Logger  string `mapstructure:"logger" json:"logger"`
+	Tracer  string `mapstructure:"tracer" json:"tracer"`
 	Metrics string `mapstructure:"metrics" json:"metrics"`
 }
 
-func (o *SQLClientOptions) Enable() bool { return o.IsEnabled }
+func (o *SQLClientOptions) Enable() bool      { return o.IsEnabled }
 func (o *SQLClientOptions) GetLogger() string { return o.Logger }
 
 func (o *SQLClientOptions) SetDefaults() {
