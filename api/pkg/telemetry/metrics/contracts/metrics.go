@@ -3,8 +3,8 @@ package contracts
 import (
 	"context"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
 	"time"
+	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 )
 
 type (

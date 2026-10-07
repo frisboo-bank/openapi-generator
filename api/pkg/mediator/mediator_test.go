@@ -3,7 +3,7 @@ package mediator_test
 import (
 	"context"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
-	"frisboo-bank/openapi-generator-service/pkg/mediator/models"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/config"
 	"testing"
 
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
@@ -44,7 +44,7 @@ func createNewMediator(t *testing.T) contracts.Mediator {
 	t.Helper()
 
 	mediator, err := mediator.NewMediator(
-		&models.MediatorOptions{},
+		&config.MediatorOptions{},
 		logger.CreateNoopLogger("test", environmentenum.Environments.DEVELOPMENT),
 	)
 	require.NoError(t, err)

@@ -9,10 +9,10 @@ import (
 
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/logger/models"
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/logger/config"
+	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/types/loglvl"
+	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/rs/zerolog"
@@ -42,7 +42,7 @@ var levelMapping = map[loglevel.LogLevel]zerolog.Level{
 
 func NewZerologAdapter(
 	name string,
-	cfg *models.LoggerOptions,
+	cfg *config.LoggerOptions,
 	env environmentEnum.Environment,
 ) contracts.LoggerAdapter {
 	validation.AssertNotEmpty("name", name)

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

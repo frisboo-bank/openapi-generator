@@ -13,7 +13,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/utils"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/waiter/models"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -31,14 +31,14 @@ type waiter struct {
 }
 
 func NewWaiter(
-	cfg *models.WaiterOptions,
+	cfg *config.WaiterOptions,
 	logger loggerContracts.Logger,
 ) (contracts.Waiter, error) {
 	return NewWaiterWithContext(cfg, logger, context.Background())
 }
 
 func NewWaiterWithContext(
-	cfg *models.WaiterOptions,
+	cfg *config.WaiterOptions,
 	logger loggerContracts.Logger,
 	parentCtx context.Context,
 ) (contracts.Waiter, error) {

@@ -1,5 +1,8 @@
 package filtercomparison
 
+import (
+)
+
 type (
 	filterComparison int8
 )
@@ -12,8 +15,8 @@ const (
 	greater
 	greaterOrEqual
 	in
-	less
-	lessOrEqual
+	lower
+	lowerOrEqual
 	notEqual
 
 	// no value
@@ -27,3 +30,22 @@ const (
 	isTrue
 	isUnknown
 )
+
+func (f FilterComparison) RequiresValue() bool {
+	switch f {
+	case
+		FilterComparisons.ISEMPTY,
+		FilterComparisons.ISFALSE,
+		FilterComparisons.ISNOTEMPTY,
+		FilterComparisons.ISNOTFALSE,
+		FilterComparisons.ISNOTNULL,
+		FilterComparisons.ISNOTTRUE,
+		FilterComparisons.ISNULL,
+		FilterComparisons.ISTRUE,
+		FilterComparisons.ISUNKNOWN:
+		return false
+	default:
+		return true
+	}
+}
+

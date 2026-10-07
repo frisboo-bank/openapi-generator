@@ -5,8 +5,9 @@ import (
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
-	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
+	tracerinternal "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal"
+	tracerenums "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/enums"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -17,7 +18,7 @@ type TracerModuleDependencies struct {
 }
 
 var TracerModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.TracerOptions, contracts.Tracer, TracerModuleDependencies]{
+	module.MultiInstancesModuleOptions[*config.TracerOptions, contracts.Tracer, TracerModuleDependencies]{
 		Name:      "telemetry.tracer",
 		ConfigKey: "telemetry.tracer",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
@@ -25,6 +26,14 @@ var TracerModule = module.NewMultiInstancesModule(
 		},
 		ProviderFn: func(name string, cfg *models.TracerOptions, _ environmentenum.Environment, logger loggercontracts.Logger, _ TracerModuleDependencies) (contracts.Tracer, error) {
 			return CreateTracer(name, cfg, logger)
+		ProviderFn: func(
+			name string,
+			cfg *config.TracerOptions,
+			_ environmentenum.Environment,
+			logger loggercontracts.Logger,
+			_ TracerModuleDependencies,
+		) (contracts.Tracer, error) {
+			return tracerinternal.CreateTracer(name, cfg, logger)
 		},
 	},
 )
