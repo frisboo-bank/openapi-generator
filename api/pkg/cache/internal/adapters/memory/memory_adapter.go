@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
@@ -22,7 +22,7 @@ type memoryAdapter struct {
 }
 
 func NewMemoryAdapter(
-	cfg *models.CacheOptions,
+	cfg *config.CacheOptions,
 	logger loggerContracts.Logger,
 	env environmentEnum.Environment,
 ) (contracts.CacheAdapter, error) {

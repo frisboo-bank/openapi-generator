@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

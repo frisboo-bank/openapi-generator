@@ -1,11 +1,11 @@
-package models
+package config
 
 import (
 	"fmt"
 	"net"
 	"time"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 )
 

@@ -3,7 +3,7 @@ package enums
 import (
 	"reflect"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
+	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 
 	"github.com/go-viper/mapstructure/v2"
 )
