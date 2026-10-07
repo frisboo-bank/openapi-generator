@@ -64,7 +64,7 @@ func (s *sqlxClientTelemetry) BeginTransaction(ctx context.Context, opts *sql.Tx
 
 func (s *sqlxClientTelemetry) Close(ctx context.Context) error {
 	start := time.Now()
-	_, span := s.tracer.Start(context.Background(), "sqlx.close")
+	ctx, span := s.tracer.Start(ctx, "sqlx.close")
 	defer span.End()
 
 	err := s.delegate.Close(ctx)

@@ -1,7 +1,6 @@
 package tracer
 
 import (
-	"context"
 	"fmt"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -42,10 +41,7 @@ func CreateTracer(
 	return &tracer{adapter: adapter}, nil
 }
 
-func CreateNoopTracer(
-	name string,
-	logger loggercontracts.Logger,
-) (contracts.Tracer, error) {
+func CreateNoopTracer(name string, logger loggercontracts.Logger) (contracts.Tracer, error) {
 	return CreateTracer(
 		name,
 		&models.TracerOptions{Type: tracertype.TracerTypes.NOOP},

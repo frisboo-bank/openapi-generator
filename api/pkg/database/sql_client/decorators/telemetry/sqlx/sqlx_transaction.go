@@ -35,7 +35,7 @@ func wrapSQLXTransactionForTelemetry(
 
 func (s *sqlxTransactionTelemetry) Commit(ctx context.Context) error {
 	start := time.Now()
-	_, span := s.tracer.Start(ctx, "sqlx.transaction.commit")
+	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.commit")
 	defer span.End()
 
 	err := s.SQLXTransaction.Commit(ctx)
@@ -107,7 +107,7 @@ func (s *sqlxTransactionTelemetry) NamedSelect(ctx context.Context, dest any, qu
 
 func (s *sqlxTransactionTelemetry) Rollback(ctx context.Context) error {
 	start := time.Now()
-	_, span := s.tracer.Start(ctx, "sqlx.transaction.rollback")
+	ctx, span := s.tracer.Start(ctx, "sqlx.transaction.rollback")
 	defer span.End()
 
 	err := s.SQLXTransaction.Rollback(ctx)
