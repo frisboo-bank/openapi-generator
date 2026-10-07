@@ -4,6 +4,8 @@ import (
 	"context"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
+	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -28,6 +30,12 @@ type otelTracerAdapter struct {
 }
 
 func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.TracerAdapter, error) {
+func NewOtelTracerAdapter(
+	name string,
+	cfg *config.TracerOptions,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.TracerAdapter, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("resource", resource)
