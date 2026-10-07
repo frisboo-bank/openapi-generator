@@ -50,6 +50,5 @@ var MigrationModule = module.NewMultiInstancesModule(
 
 			return CreateMigration(name, dbClient.DB(), cfg, env, logger)
 		},
-		// ProviderFn: CreateMigration,
 	},
 )
