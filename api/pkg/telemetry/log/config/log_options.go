@@ -1,8 +1,8 @@
-package models
+package config
 
 import (
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	logtype "frisboo-bank/openapi-generator-service/pkg/telemetry/log/models/enums/log_type"
+	logtype "frisboo-bank/openapi-generator-service/pkg/telemetry/log/types/logtype"
 )
 
 var _ configContracts.Configurable = (*LogOptions)(nil)
