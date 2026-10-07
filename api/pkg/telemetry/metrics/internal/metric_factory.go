@@ -4,14 +4,19 @@ import (
 	"fmt"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal/adapters/otel"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/shared"
 )
 
 func CreateMetrics(name string, cfg *models.MetricsOptions, logger loggercontracts.Logger) (contracts.Metrics, error) {
+func CreateMetrics(
+	name string,
+	cfg *config.MetricsOptions,
+	logger loggercontracts.Logger,
+) (contracts.Metrics, error) {
 	cfg.SetDefaults()
 	if err := cfg.Validate(); err != nil {
 		return nil, err
@@ -28,4 +33,9 @@ func CreateMetrics(name string, cfg *models.MetricsOptions, logger loggercontrac
 	default:
 		return nil, fmt.Errorf("unsupported Metrics type: %v", cfg.Type)
 	}
+
+	if err != nil {
+		return nil, err
+	}
+	return &metrics{adapter: adapter}, nil
 }
