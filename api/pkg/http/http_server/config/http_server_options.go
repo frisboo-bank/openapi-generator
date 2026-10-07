@@ -1,4 +1,4 @@
-package models
+package config
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
+	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 )
 
 var _ configContracts.Configurable = (*HTTPServerOptions)(nil)
