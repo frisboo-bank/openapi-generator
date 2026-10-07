@@ -7,9 +7,9 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/adapters/echo/middlewares/logger"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
+	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/routing"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -33,7 +33,7 @@ type echoAdapter struct {
 
 func NewEchoAdapter(
 	name string,
-	cfg *models.HTTPServerOptions,
+	cfg *config.HTTPServerOptions,
 	logger loggerContracts.Logger,
 	env environmentEnum.Environment,
 ) contracts.HTTPServerAdapter {

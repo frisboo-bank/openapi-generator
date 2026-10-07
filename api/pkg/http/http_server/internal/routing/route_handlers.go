@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/constants"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/constants"
 )
 
 func JSON(w http.ResponseWriter, statusCode int, data any) {

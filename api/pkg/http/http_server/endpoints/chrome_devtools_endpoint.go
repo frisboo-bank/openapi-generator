@@ -6,7 +6,7 @@ import (
 
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/routing"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 

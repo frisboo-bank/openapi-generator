@@ -10,8 +10,9 @@ import (
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
-	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
+	httpserverinternal "frisboo-bank/openapi-generator-service/pkg/http/http_server/internal"
+	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/enums"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -23,7 +24,7 @@ type HTTPServerDependencies struct {
 }
 
 var HTTPServerModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.HTTPServerOptions, contracts.HTTPServer, HTTPServerDependencies]{
+	module.MultiInstancesModuleOptions[*config.HTTPServerOptions, contracts.HTTPServer, HTTPServerDependencies]{
 		Name:      "http-server",
 		ConfigKey: "http-servers",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
@@ -31,12 +32,12 @@ var HTTPServerModule = module.NewMultiInstancesModule(
 		},
 		ProviderFn: func(
 			name string,
-			cfg *models.HTTPServerOptions,
+			cfg *config.HTTPServerOptions,
 			env environmentEnum.Environment,
 			logger loggerContracts.Logger,
 			extra HTTPServerDependencies,
 		) (contracts.HTTPServer, error) {
-			return CreateHTTPServer(name, cfg, logger, env)
+			return httpserverinternal.CreateHTTPServer(name, cfg, logger, env)
 		},
 		HookFn: func(name string, instance contracts.HTTPServer) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
