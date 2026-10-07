@@ -10,13 +10,14 @@ var _ configContracts.Configurable = (*TracerOptions)(nil)
 type TracerOptions struct {
 	IsEnabled bool                  `mapstructure:"enabled"`
 	Type      tracertype.TracerType `mapstructure:"type"`
+	Type tracertype.TracerType `mapstructure:"type" json:"type"`
 
 	// OpenTelemetry
-	Endpoint string `mapstructure:"endpoint"`
-	Insecure bool   `mapstructure:"insecure"`
+	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
+	Insecure bool `mapstructure:"insecure" json:"insecure"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (o *TracerOptions) GetEnabled() bool  { return o.IsEnabled }
@@ -27,3 +28,5 @@ func (o *TracerOptions) SetDefaults() {}
 func (o *TracerOptions) Validate() error {
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config TracerOptions

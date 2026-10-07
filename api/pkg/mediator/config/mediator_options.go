@@ -5,7 +5,7 @@ import configContracts "frisboo-bank/openapi-generator-service/pkg/config/contra
 var _ configContracts.Configurable = (*MediatorOptions)(nil)
 
 type MediatorOptions struct {
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (c *MediatorOptions) GetEnabled() bool {
@@ -22,3 +22,5 @@ func (c *MediatorOptions) SetDefaults() {
 func (c *MediatorOptions) Validate() error {
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MediatorOptions

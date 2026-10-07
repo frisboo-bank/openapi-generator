@@ -12,24 +12,24 @@ import (
 var _ configContracts.Configurable = (*CacheOptions)(nil)
 
 type CacheOptions struct {
-	IsEnabled    bool                `mapstructure:"enabled"`
-	Type         cachetype.CacheType `mapstructure:"type"`
-	Host         string              `mapstructure:"host"`
-	Port         string              `mapstructure:"port"`
-	Password     string              `mapstructure:"password"`
-	DB           int                 `mapstructure:"db"`
-	PoolSize     int                 `mapstructure:"poolSize"`
-	MinIdleConns int                 `mapstructure:"minIdleConns"`
-	MaxRetries   int                 `mapstructure:"maxRetries"`
-	DialTimeout  time.Duration       `mapstructure:"dialTimeout"`
-	ReadTimeout  time.Duration       `mapstructure:"readTimeout"`
-	WriteTimeout time.Duration       `mapstructure:"writeTimeout"`
+	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
+	Type cachetype.CacheType `mapstructure:"type" json:"type"`
+	Host string `mapstructure:"host" json:"host"`
+	Port string `mapstructure:"port" json:"port"`
+	Password string `mapstructure:"password" json:"password"`
+	DB int `mapstructure:"db" json:"db"`
+	PoolSize int `mapstructure:"poolSize" json:"poolSize"`
+	MinIdleConns int `mapstructure:"minIdleConns" json:"minIdleConns"`
+	MaxRetries int `mapstructure:"maxRetries" json:"maxRetries"`
+	DialTimeout time.Duration `mapstructure:"dialTimeout" json:"dialTimeout"`
+	ReadTimeout time.Duration `mapstructure:"readTimeout" json:"readTimeout"`
+	WriteTimeout time.Duration `mapstructure:"writeTimeout" json:"writeTimeout"`
 
 	// Memory-specific
-	MaxEntries int64 `mapstructure:"maxEntries"`
+	MaxEntries int64 `mapstructure:"maxEntries" json:"maxEntries"`
 
 	// Dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (c *CacheOptions) Address() string {
@@ -78,3 +78,5 @@ func (c *CacheOptions) Validate() error {
 	}
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config CacheOptions

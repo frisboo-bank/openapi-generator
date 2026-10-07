@@ -10,13 +10,14 @@ var _ configContracts.Configurable = (*MetricsOptions)(nil)
 type MetricsOptions struct {
 	IsEnabled bool                    `mapstructure:"enabled"`
 	Type      metricstype.MetricsType `mapstructure:"type"`
+	Type metricstype.MetricsType `mapstructure:"type" json:"type"`
 
 	// OpenTelemetry
-	Endpoint string `mapstructure:"endpoint"`
-	Insecure bool   `mapstructure:"insecure"`
+	Endpoint string `mapstructure:"endpoint" json:"endpoint"`
+	Insecure bool `mapstructure:"insecure" json:"insecure"`
 
 	// dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (o *MetricsOptions) GetEnabled() bool  { return o.IsEnabled }
@@ -27,3 +28,7 @@ func (o *MetricsOptions) SetDefaults() {}
 func (o *MetricsOptions) Validate() error {
 	return nil
 }
+
+func (o *MetricsOptions) GetLogger() string { return o.Logger }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MetricsOptions

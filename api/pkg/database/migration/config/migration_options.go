@@ -11,14 +11,14 @@ import (
 var _ configContracts.Configurable = (*MigrationOptions)(nil)
 
 type MigrationOptions struct {
-	IsEnabled     bool                        `mapstructure:"enabled"`
-	Type          migrationtype.MigrationType `mapstructure:"type"`
-	Debug         bool                        `mapstructure:"debug"`
-	MigrationsDir string                      `mapstructure:"migrationsDir"`
+	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
+	Type migrationtype.MigrationType `mapstructure:"type" json:"type"`
+	Debug bool `mapstructure:"debug" json:"debug"`
+	MigrationsDir string `mapstructure:"migrationsDir" json:"migrationsDir"`
 
 	// dependencies
-	Logger   string `mapstructure:"logger"`
-	DBClient string `mapstructure:"dbClient"`
+	Logger string `mapstructure:"logger" json:"logger"`
+	DBClient string `mapstructure:"dbClient" json:"dbClient"`
 }
 
 func (c *MigrationOptions) GetEnabled() bool  { return c.IsEnabled }
@@ -37,3 +37,5 @@ func (c *MigrationOptions) Validate() error {
 		vendorvalidation.Field(&c.DBClient, vendorvalidation.Required),
 	)
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MigrationOptions

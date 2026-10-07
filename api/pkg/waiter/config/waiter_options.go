@@ -14,9 +14,9 @@ const (
 )
 
 type WaiterOptions struct {
-	CancelOnShutdownSignal bool   `mapstructure:"cancelOnShutdownSignal"`
-	CleanupTimeoutMs       int    `mapstructure:"cleanupTimeoutMs"`
-	Logger                 string `mapstructure:"logger"`
+	CancelOnShutdownSignal bool `mapstructure:"cancelOnShutdownSignal" json:"cancelOnShutdownSignal"`
+	CleanupTimeoutMs int `mapstructure:"cleanupTimeoutMs" json:"cleanupTimeoutMs"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }
 
 func (c *WaiterOptions) GetEnabled() bool {
@@ -39,3 +39,5 @@ func (c *WaiterOptions) Validate() error {
 	}
 	return nil
 }
+
+//go:generate go run github.com/invopop/jsonschema -o schema.json -package config WaiterOptions
