@@ -8,5 +8,3 @@ type AppOptions struct {
 	// Dependencies
 	Logger string `mapstructure:"logger" json:"logger"`
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package models AppOptions

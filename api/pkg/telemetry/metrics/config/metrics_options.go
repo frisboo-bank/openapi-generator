@@ -30,5 +30,3 @@ func (o *MetricsOptions) Validate() error {
 }
 
 func (o *MetricsOptions) GetLogger() string { return o.Logger }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config MetricsOptions

@@ -28,5 +28,3 @@ func (o *TracerOptions) SetDefaults() {}
 func (o *TracerOptions) Validate() error {
 	return nil
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config TracerOptions

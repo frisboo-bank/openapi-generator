@@ -51,5 +51,3 @@ func (l *LoggerOptions) Validate() error {
 		vendorvalidation.Field(&l.Level, vendorvalidation.Required, validators.ValidEnum()),
 	)
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config LoggerOptions

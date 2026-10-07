@@ -75,5 +75,3 @@ func (c *RPCServerOptions) Validate() error {
 	}
 	return nil
 }
-
-//go:generate go run github.com/invopop/jsonschema -o schema.json -package config RPCServerOptions
