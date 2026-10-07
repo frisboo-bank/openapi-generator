@@ -8,7 +8,7 @@ import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
+	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 

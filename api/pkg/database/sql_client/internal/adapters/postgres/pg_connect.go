@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
-	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_ssl_mode"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
+	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -17,7 +17,7 @@ var postgresSSLModeMap = map[sqlclientsslmode.SqlClientSSLMode]string{
 	sqlclientsslmode.SqlClientSSLModes.VERIFYFULL: "verify-full",
 }
 
-func ConnectToPostgres(cfg *models.SQLClientOptions) (*sqlx.DB, error) {
+func ConnectToPostgres(cfg *config.SQLClientOptions) (*sqlx.DB, error) {
 	sslMode := postgresSSLModeMap[cfg.SSLMode]
 	if sslMode == "" {
 		sslMode = "disable"

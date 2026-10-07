@@ -1,4 +1,4 @@
-package sqlclient_test
+package sqlclient
 
 import (
 	"context"
@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	sqlclient "frisboo-bank/openapi-generator-service/pkg/database/sql_client"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
@@ -33,7 +32,7 @@ func TestCreateSQLClient_SQLite3(t *testing.T) {
 	me, err := metrics.CreateNoopMetrics("test", log)
 	require.NoError(t, err, "failed to create noop metrics")
 
-	client, err := sqlclient.CreateSQLClient("main", &models.SQLClientOptions{
+	client, err := CreateSQLClient("main", &config.SQLClientOptions{
 		IsEnabled:     true,
 		Type:          sqlclienttype.SqlClientTypes.SQLITE3X,
 		Database:      dbPath,

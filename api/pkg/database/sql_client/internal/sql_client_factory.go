@@ -4,11 +4,11 @@ import (
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/decorators/telemetry/sqlx"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/decorators/telemetry/sqlx"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres/pgx"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/sqlite/sqlite3x"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
+	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
@@ -17,7 +17,7 @@ import (
 
 func CreateSQLClient(
 	name string,
-	cfg *models.SQLClientOptions,
+	cfg *config.SQLClientOptions,
 	logger loggerContracts.Logger,
 	tracer tracercontracts.Tracer,
 	metrics metricscontracts.Metrics,
