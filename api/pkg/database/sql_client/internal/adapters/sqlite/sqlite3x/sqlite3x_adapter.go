@@ -59,7 +59,7 @@ func (s *sqlite3SQLXClientAdapter) BeginTransaction(ctx context.Context, opts *s
 }
 
 func (s *sqlite3SQLXClientAdapter) NamedExec(ctx context.Context, query string, args map[string]any) (sql.Result, error) {
-	res, err := sqlxutils.NamedExec(ctx, s.db, query, args)
+	res, err := sqlxutils.NamedExec(ctx, s.db, query, args, sqlx.QUESTION)
 	if err != nil {
 		return nil, fmt.Errorf("fetch with NamedExec failed with error: %w", err)
 	}
@@ -67,14 +67,14 @@ func (s *sqlite3SQLXClientAdapter) NamedExec(ctx context.Context, query string, 
 }
 
 func (s *sqlite3SQLXClientAdapter) NamedGet(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedGet(ctx, s.db, dest, query, args); err != nil {
+	if err := sqlxutils.NamedGet(ctx, s.db, dest, query, args, sqlx.QUESTION); err != nil {
 		return fmt.Errorf("fetch with NamedGet failed with error: %w", err)
 	}
 	return nil
 }
 
 func (s *sqlite3SQLXClientAdapter) NamedQuery(ctx context.Context, query string, args map[string]any) (contracts.SQLXRows, error) {
-	res, err := sqlxutils.NamedQuery(ctx, s.db, query, args)
+	res, err := sqlxutils.NamedQuery(ctx, s.db, query, args, sqlx.QUESTION)
 	if err != nil {
 		return nil, fmt.Errorf("fetch with NamedQuery failed with error: %w", err)
 	}
@@ -82,7 +82,7 @@ func (s *sqlite3SQLXClientAdapter) NamedQuery(ctx context.Context, query string,
 }
 
 func (s *sqlite3SQLXClientAdapter) NamedSelect(ctx context.Context, dest any, query string, args map[string]any) error {
-	if err := sqlxutils.NamedSelect(ctx, s.db, dest, query, args); err != nil {
+	if err := sqlxutils.NamedSelect(ctx, s.db, dest, query, args, sqlx.QUESTION); err != nil {
 		return fmt.Errorf("fetch with NamedSelect failed with error: %w", err)
 	}
 	return nil
