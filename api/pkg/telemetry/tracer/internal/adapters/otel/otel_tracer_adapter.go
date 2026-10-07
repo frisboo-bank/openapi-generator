@@ -3,13 +3,11 @@ package otel
 import (
 	"context"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -29,7 +27,7 @@ type otelTracerAdapter struct {
 	tracer         trace.Tracer
 }
 
-func NewOtelTracerAdapter(name string, cfg *models.TracerOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.TracerAdapter, error) {
+func NewOtelTracerAdapter(name string, cfg *config.TracerOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.TracerAdapter, error) {
 func NewOtelTracerAdapter(
 	name string,
 	cfg *config.TracerOptions,

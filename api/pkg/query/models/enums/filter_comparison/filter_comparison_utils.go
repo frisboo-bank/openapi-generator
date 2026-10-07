@@ -30,8 +30,8 @@ func (f FilterComparison) Options() FilterOptions {
 	case FilterComparisons.EQUAL,
 		FilterComparisons.GREATER,
 		FilterComparisons.GREATEROREQUAL,
-		FilterComparisons.LESS,
-		FilterComparisons.LESSOREQUAL,
+		FilterComparisons.LOWER,
+		FilterComparisons.LOWEROREQUAL,
 		FilterComparisons.NOTEQUAL:
 		return FilterOptions{
 			RequiresValue: true,
