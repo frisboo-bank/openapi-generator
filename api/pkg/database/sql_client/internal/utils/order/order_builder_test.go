@@ -1,7 +1,7 @@
 package order_test
 
 import (
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/utils/order"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/utils/order"
 	"frisboo-bank/openapi-generator-service/pkg/query"
 	orderdirection "frisboo-bank/openapi-generator-service/pkg/query/models/enums/order_direction"
 	"testing"

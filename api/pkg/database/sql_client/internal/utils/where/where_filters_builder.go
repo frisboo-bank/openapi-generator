@@ -5,7 +5,7 @@ import (
 	"maps"
 	"strings"
 
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/mappers"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/mappers"
 	"frisboo-bank/openapi-generator-service/pkg/query"
 	filtercomparisonEnum "frisboo-bank/openapi-generator-service/pkg/query/models/enums/filter_comparison"
 )

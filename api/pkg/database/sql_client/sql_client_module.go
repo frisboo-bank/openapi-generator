@@ -6,14 +6,15 @@ import (
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
+	sqlclientinternal "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
+	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/enums"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
@@ -28,7 +29,7 @@ type SQLClientDependencies struct {
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
+	module.MultiInstancesModuleOptions[*config.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
 		Name:      "database.sql-client",
 		ConfigKey: "database.sql-clients",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
@@ -36,7 +37,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 		},
 		ProviderFn: func(
 			name string,
-			cfg *models.SQLClientOptions,
+			cfg *config.SQLClientOptions,
 			env environmentenum.Environment,
 			logger loggercontracts.Logger,
 			extra SQLClientDependencies,
@@ -71,7 +72,7 @@ var SQLClientModule = module.NewMultiInstancesModule(
 				}
 			}
 
-			return CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
+			return sqlclientinternal.CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{

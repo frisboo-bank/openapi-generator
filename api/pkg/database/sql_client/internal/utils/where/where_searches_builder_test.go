@@ -1,7 +1,7 @@
 package where_test
 
 import (
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/utils/where"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/utils/where"
 	"frisboo-bank/openapi-generator-service/pkg/query"
 	logicaloperatorenum "frisboo-bank/openapi-generator-service/pkg/query/models/enums/logical_operator"
 	searchconditionenum "frisboo-bank/openapi-generator-service/pkg/query/models/enums/search_condition"
