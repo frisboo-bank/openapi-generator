@@ -5,16 +5,16 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/shared"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/otel"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
+	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
 
 func CreateTracer(
 	name string,
-	cfg *models.TracerOptions,
+	cfg *config.TracerOptions,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
 	cfg.SetDefaults()
@@ -39,12 +39,4 @@ func CreateTracer(
 	}
 
 	return &tracer{adapter: adapter}, nil
-}
-
-func CreateNoopTracer(name string, logger loggercontracts.Logger) (contracts.Tracer, error) {
-	return CreateTracer(
-		name,
-		&models.TracerOptions{Type: tracertype.TracerTypes.NOOP},
-		logger,
-	)
 }

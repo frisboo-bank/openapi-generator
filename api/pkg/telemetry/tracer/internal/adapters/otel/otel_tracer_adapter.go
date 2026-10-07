@@ -5,8 +5,8 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
+	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"go.opentelemetry.io/otel"
@@ -28,7 +28,7 @@ type otelTracerAdapter struct {
 
 func NewOtelTracerAdapter(
 	name string,
-	cfg *models.TracerOptions,
+	cfg *config.TracerOptions,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.TracerAdapter, error) {

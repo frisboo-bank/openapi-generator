@@ -4,7 +4,7 @@ import (
 	"context"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/models/enums/tracer_type"
+	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
 
 type (
