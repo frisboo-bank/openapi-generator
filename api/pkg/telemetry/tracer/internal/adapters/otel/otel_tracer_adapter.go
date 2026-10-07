@@ -4,9 +4,9 @@ import (
 	"context"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"go.opentelemetry.io/otel"

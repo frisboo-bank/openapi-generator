@@ -3,7 +3,7 @@ package types
 import (
 	"reflect"
 
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

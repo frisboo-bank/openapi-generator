@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
-	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"

@@ -7,7 +7,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/internal/adapters/goose"
-	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )

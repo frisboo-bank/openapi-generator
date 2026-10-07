@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
-	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
 
 	"github.com/jmoiron/sqlx"
 )

@@ -3,7 +3,7 @@ package types
 import (
 	"reflect"
 
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

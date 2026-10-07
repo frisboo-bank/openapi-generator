@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

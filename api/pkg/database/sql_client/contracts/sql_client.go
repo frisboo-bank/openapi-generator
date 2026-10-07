@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

@@ -3,7 +3,7 @@ package contracts
 import (
 	"time"
 
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 )
 
 type (

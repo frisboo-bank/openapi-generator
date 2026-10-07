@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/adapters/echo/middlewares/logger"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/routing"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 	"frisboo-bank/openapi-generator-service/pkg/validation"

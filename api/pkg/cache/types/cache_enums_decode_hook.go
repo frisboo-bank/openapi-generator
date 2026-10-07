@@ -3,7 +3,7 @@ package types
 import (
 	"reflect"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	"strconv"
 
-	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
-	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 

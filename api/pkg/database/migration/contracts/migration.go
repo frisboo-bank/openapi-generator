@@ -3,7 +3,7 @@ package contracts
 import (
 	"context"
 
-	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

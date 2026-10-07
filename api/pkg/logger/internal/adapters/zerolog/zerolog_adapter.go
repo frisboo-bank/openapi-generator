@@ -10,8 +10,8 @@ import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 	"frisboo-bank/openapi-generator-service/pkg/logger/types/loglevel"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 

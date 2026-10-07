@@ -1,11 +1,11 @@
 package cache
 
 import (
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/internal/adapters/memory"
 	"frisboo-bank/openapi-generator-service/pkg/cache/internal/adapters/redis"
-	"frisboo-bank/openapi-generator-service/pkg/cache/config"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"

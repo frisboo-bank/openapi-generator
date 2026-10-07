@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	sqlxutils "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/utils/sqlx"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
@@ -92,7 +92,7 @@ func (s *sqlite3SQLXClientAdapter) Ping(ctx context.Context) error { return s.db
 
 func (s *sqlite3SQLXClientAdapter) Close(ctx context.Context) error { return s.db.Close() }
 
-func (s *sqlite3SQLXClientAdapter) DB() *sql.DB                   { return s.db.DB }
+func (s *sqlite3SQLXClientAdapter) DB() *sql.DB                    { return s.db.DB }
 func (s *sqlite3SQLXClientAdapter) Logger() loggerContracts.Logger { return s.logger }
 func (s *sqlite3SQLXClientAdapter) Name() string                   { return s.name }
 func (s *sqlite3SQLXClientAdapter) Type() sqlclienttype.SqlClientType {

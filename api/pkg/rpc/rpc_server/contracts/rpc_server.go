@@ -4,8 +4,8 @@ import (
 	"context"
 
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/registrar"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 )
 
 type (

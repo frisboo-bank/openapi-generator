@@ -7,7 +7,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
 
 var (

@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 

@@ -6,19 +6,19 @@ import (
 	"sync"
 	"time"
 
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/config"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"go.opentelemetry.io/otel/attribute"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 
 	"go.opentelemetry.io/otel"
 
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
-	metric "go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 )
@@ -105,6 +105,6 @@ func (o *otelMetricsAdapter) Close() error {
 
 func (o *otelMetricsAdapter) Name() string                   { return o.name }
 func (o *otelMetricsAdapter) Logger() loggercontracts.Logger { return o.logger }
-func (o *otelMetricsAdapter) Type() metrictype.MetricsType {
-	return metrictype.MetricsTypes.OPEN_TELEMETRY
+func (o *otelMetricsAdapter) Type() metricstype.MetricsType {
+	return metricstype.MetricsTypes.OPEN_TELEMETRY
 }

@@ -6,8 +6,8 @@ import (
 	"net"
 	"time"
 
-	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/config"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/registrar"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
@@ -15,7 +15,7 @@ import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/internal/adapters/grpc/interceptors"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 
 	grpcctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 

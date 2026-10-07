@@ -1,4 +1,4 @@
-package metrictype
+package metricstype
 
 type metricsType int8
 

@@ -5,7 +5,7 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
 
 var _ contracts.Tracer = (*tracer)(nil)

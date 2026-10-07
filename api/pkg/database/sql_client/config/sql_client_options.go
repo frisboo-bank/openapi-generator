@@ -5,8 +5,8 @@ import (
 	"time"
 
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	sqlclientsslmode "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclientsslmode"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 )
 
 var _ configContracts.Configurable = (*SQLClientOptions)(nil)

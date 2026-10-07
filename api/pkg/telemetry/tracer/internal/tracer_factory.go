@@ -9,7 +9,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/otel"
-	tracertype "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
 
 func CreateTracer(

@@ -7,22 +7,22 @@ import (
 	"time"
 
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 )
 
 var _ configContracts.Configurable = (*RPCServerOptions)(nil)
 
 type RPCServerOptions struct {
-	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
-	Type rpcservertype.RpcServerType `mapstructure:"type" json:"type"`
-	Debug bool `mapstructure:"debug" json:"debug"`
-	Host string `mapstructure:"host" json:"host"`
-	Port string `mapstructure:"port" json:"port"`
-	KeepAliveTime time.Duration `mapstructure:"keepAliveTime" json:"keepAliveTime"`
-	KeepAliveTimeout time.Duration `mapstructure:"KeepAliveTimeout" json:"KeepAliveTimeout"`
-	MaxConnectionAge time.Duration `mapstructure:"MaxConnectionAge" json:"MaxConnectionAge"`
-	MaxConnectionAgeGrace time.Duration `mapstructure:"MaxConnectionAgeGrace" json:"MaxConnectionAgeGrace"`
-	MaxConnectionIdle time.Duration `mapstructure:"MaxConnectionIdle" json:"MaxConnectionIdle"`
+	IsEnabled             bool                        `mapstructure:"enabled" json:"enabled"`
+	Type                  rpcservertype.RpcServerType `mapstructure:"type" json:"type"`
+	Debug                 bool                        `mapstructure:"debug" json:"debug"`
+	Host                  string                      `mapstructure:"host" json:"host"`
+	Port                  string                      `mapstructure:"port" json:"port"`
+	KeepAliveTime         time.Duration               `mapstructure:"keepAliveTime" json:"keepAliveTime"`
+	KeepAliveTimeout      time.Duration               `mapstructure:"KeepAliveTimeout" json:"KeepAliveTimeout"`
+	MaxConnectionAge      time.Duration               `mapstructure:"MaxConnectionAge" json:"MaxConnectionAge"`
+	MaxConnectionAgeGrace time.Duration               `mapstructure:"MaxConnectionAgeGrace" json:"MaxConnectionAgeGrace"`
+	MaxConnectionIdle     time.Duration               `mapstructure:"MaxConnectionIdle" json:"MaxConnectionIdle"`
 
 	// dependencies
 	Logger string `mapstructure:"logger" json:"logger"`
@@ -32,7 +32,7 @@ func (c *RPCServerOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *RPCServerOptions) Enable() bool  { return c.IsEnabled }
+func (c *RPCServerOptions) Enable() bool      { return c.IsEnabled }
 func (c *RPCServerOptions) GetLogger() string { return c.Logger }
 
 func (c *RPCServerOptions) SetDefaults() {

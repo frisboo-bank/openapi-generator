@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/cache/config"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 

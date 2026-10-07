@@ -5,8 +5,8 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/registrar"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 )
 
 var _ contracts.RPCServer = (*rpcServer)(nil)

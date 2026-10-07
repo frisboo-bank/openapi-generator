@@ -2,11 +2,11 @@ package logger
 
 import (
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/logger/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/logger/internal/adapters/zerolog"
-	"frisboo-bank/openapi-generator-service/pkg/logger/config"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )

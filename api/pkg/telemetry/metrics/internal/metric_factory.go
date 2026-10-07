@@ -8,7 +8,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal/adapters/otel"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/shared"
 )
 

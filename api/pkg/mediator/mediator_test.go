@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	mediator "frisboo-bank/openapi-generator-service/pkg/mediator"
-	contracts "frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/mediator"
+	"frisboo-bank/openapi-generator-service/pkg/mediator/contracts"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

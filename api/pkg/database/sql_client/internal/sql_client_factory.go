@@ -8,7 +8,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres/pgx"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/sqlite/sqlite3x"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/decorators/telemetry/sqlx"
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"

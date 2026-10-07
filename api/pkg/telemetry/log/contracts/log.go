@@ -2,7 +2,7 @@ package contracts
 
 import (
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	logtype "frisboo-bank/openapi-generator-service/pkg/telemetry/log/types/logtype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/log/types/logtype"
 )
 
 type (

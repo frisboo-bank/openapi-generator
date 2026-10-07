@@ -4,7 +4,7 @@ import (
 	"time"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 )
 
 type (

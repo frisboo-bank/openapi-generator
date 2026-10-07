@@ -5,7 +5,7 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 )
 
 var _ contracts.Metrics = (*metrics)(nil)

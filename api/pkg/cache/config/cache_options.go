@@ -5,25 +5,25 @@ import (
 	"net"
 	"time"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 )
 
 var _ configContracts.Configurable = (*CacheOptions)(nil)
 
 type CacheOptions struct {
-	IsEnabled bool `mapstructure:"enabled" json:"enabled"`
-	Type cachetype.CacheType `mapstructure:"type" json:"type"`
-	Host string `mapstructure:"host" json:"host"`
-	Port string `mapstructure:"port" json:"port"`
-	Password string `mapstructure:"password" json:"password"`
-	DB int `mapstructure:"db" json:"db"`
-	PoolSize int `mapstructure:"poolSize" json:"poolSize"`
-	MinIdleConns int `mapstructure:"minIdleConns" json:"minIdleConns"`
-	MaxRetries int `mapstructure:"maxRetries" json:"maxRetries"`
-	DialTimeout time.Duration `mapstructure:"dialTimeout" json:"dialTimeout"`
-	ReadTimeout time.Duration `mapstructure:"readTimeout" json:"readTimeout"`
-	WriteTimeout time.Duration `mapstructure:"writeTimeout" json:"writeTimeout"`
+	IsEnabled    bool                `mapstructure:"enabled" json:"enabled"`
+	Type         cachetype.CacheType `mapstructure:"type" json:"type"`
+	Host         string              `mapstructure:"host" json:"host"`
+	Port         string              `mapstructure:"port" json:"port"`
+	Password     string              `mapstructure:"password" json:"password"`
+	DB           int                 `mapstructure:"db" json:"db"`
+	PoolSize     int                 `mapstructure:"poolSize" json:"poolSize"`
+	MinIdleConns int                 `mapstructure:"minIdleConns" json:"minIdleConns"`
+	MaxRetries   int                 `mapstructure:"maxRetries" json:"maxRetries"`
+	DialTimeout  time.Duration       `mapstructure:"dialTimeout" json:"dialTimeout"`
+	ReadTimeout  time.Duration       `mapstructure:"readTimeout" json:"readTimeout"`
+	WriteTimeout time.Duration       `mapstructure:"writeTimeout" json:"writeTimeout"`
 
 	// Memory-specific
 	MaxEntries int64 `mapstructure:"maxEntries" json:"maxEntries"`
@@ -36,7 +36,7 @@ func (c *CacheOptions) Address() string {
 	return net.JoinHostPort(c.Host, c.Port)
 }
 
-func (c *CacheOptions) Enable() bool  { return c.IsEnabled }
+func (c *CacheOptions) Enable() bool      { return c.IsEnabled }
 func (c *CacheOptions) GetLogger() string { return c.Logger }
 
 func (c *CacheOptions) SetDefaults() {
