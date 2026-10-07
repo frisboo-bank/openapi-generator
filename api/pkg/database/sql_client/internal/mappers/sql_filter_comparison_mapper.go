@@ -16,9 +16,9 @@ func FilterComparisonToSQLOperator(f filtercomparisonEnum.FilterComparison) (str
 		return ">", nil
 	case filtercomparisonEnum.FilterComparisons.GREATEROREQUAL:
 		return ">=", nil
-	case filtercomparisonEnum.FilterComparisons.LESS:
+	case filtercomparisonEnum.FilterComparisons.LOWER:
 		return "<", nil
-	case filtercomparisonEnum.FilterComparisons.LESSOREQUAL:
+	case filtercomparisonEnum.FilterComparisons.LOWEROREQUAL:
 		return "<=", nil
 	case filtercomparisonEnum.FilterComparisons.IN:
 		return "IN", nil
