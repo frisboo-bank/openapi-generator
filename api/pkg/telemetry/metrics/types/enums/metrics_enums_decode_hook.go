@@ -3,7 +3,7 @@ package enums
 import (
 	"reflect"
 
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 
 	"github.com/go-viper/mapstructure/v2"
 )

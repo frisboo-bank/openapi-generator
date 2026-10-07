@@ -1,8 +1,8 @@
-package models
+package config
 
 import (
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 )
 
 var _ configContracts.Configurable = (*MetricsOptions)(nil)

@@ -7,13 +7,13 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/config"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"go.opentelemetry.io/otel/attribute"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 
 	"go.opentelemetry.io/otel"
 
@@ -36,7 +36,7 @@ type otelMetricsAdapter struct {
 
 func NewOtelMetricsAdapter(
 	name string,
-	cfg *models.MetricsOptions,
+	cfg *config.MetricsOptions,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.MetricsAdapter, error) {

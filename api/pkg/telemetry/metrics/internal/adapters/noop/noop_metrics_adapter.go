@@ -7,7 +7,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metrictype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 )
 
 var _ contracts.MetricsAdapter = (*noopMetricsAdapter)(nil)

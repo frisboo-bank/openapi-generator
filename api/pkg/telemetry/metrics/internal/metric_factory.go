@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal/adapters/otel"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models"
-	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/models/enums/metrics_type"
+	metricstype "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/shared"
 )
 
 func CreateMetrics(
 	name string,
-	cfg *models.MetricsOptions,
+	cfg *config.MetricsOptions,
 	logger loggercontracts.Logger,
 ) (contracts.Metrics, error) {
 	cfg.SetDefaults()
@@ -38,15 +38,4 @@ func CreateMetrics(
 		return nil, err
 	}
 	return &metrics{adapter: adapter}, nil
-}
-
-func CreateNoopMetrics(
-	name string,
-	logger loggercontracts.Logger,
-) (contracts.Metrics, error) {
-	return CreateMetrics(
-		name,
-		&models.MetricsOptions{Type: metricstype.MetricsTypes.NOOP},
-		logger,
-	)
 }
