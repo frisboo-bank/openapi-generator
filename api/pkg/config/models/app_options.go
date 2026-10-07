@@ -1,10 +1,10 @@
 package models
 
 type AppOptions struct {
-	Name        string `mapstructure:"name"`
-	Version     string `mapstructure:"version"`
-	Description string `mapstructure:"description"`
+	Name string `mapstructure:"name" json:"name"`
+	Version string `mapstructure:"version" json:"version"`
+	Description string `mapstructure:"description" json:"description"`
 
 	// Dependencies
-	Logger string `mapstructure:"logger"`
+	Logger string `mapstructure:"logger" json:"logger"`
 }

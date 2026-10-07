@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 

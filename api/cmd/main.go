@@ -45,3 +45,5 @@ func main() {
 		os.Exit(1)
 	}
 }
+
+//go:generate go run ./gen-schemas

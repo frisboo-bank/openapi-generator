@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/internal/adapters/goose"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/models"
@@ -11,7 +12,6 @@ import (
 	sqlclientContracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 
 func CreateMigration(
@@ -66,7 +66,7 @@ func CreateMigrationForTests(
 
 	adapter, err := goose.NewGooseAdapter(
 		name,
-		&models.MigrationOptions{
+		&config.MigrationOptions{
 			MigrationsDir: migrationDir,
 		},
 		db,
