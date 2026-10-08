@@ -21,7 +21,7 @@ func MapListEntitiesResponseToProto(responseDto *dtos.ListEntitiesResponseDto) (
 	// 		Name:        entity.Name,
 	// 		Description: utils.StringToWrapper(&entity.Description),
 	// 		VersionLock: entity.VersionLock,
-	// 		HiddenAt:    utils.TimeToTimestamp(entity.HiddenAt),
+	// 		DeletedAt:    utils.TimeToTimestamp(entity.DeletedAt),
 	// 		CreatedAt:   utils.TimeToTimestamp(entity.CreatedAt),
 	// 		UpdatedAt:   utils.TimeToTimestamp(entity.UpdatedAt),
 	// 	})

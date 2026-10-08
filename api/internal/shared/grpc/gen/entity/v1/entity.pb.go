@@ -7,12 +7,13 @@
 package entityv1
 
 import (
-	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
-	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
+
+	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
+	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -144,11 +145,14 @@ func file_entity_v1_entity_proto_rawDescGZIP() []byte {
 	return file_entity_v1_entity_proto_rawDescData
 }
 
-var file_entity_v1_entity_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
-var file_entity_v1_entity_proto_goTypes = []any{
-	(*Entity)(nil),                // 0: entity.v1.Entity
-	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
-}
+var (
+	file_entity_v1_entity_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+	file_entity_v1_entity_proto_goTypes  = []any{
+		(*Entity)(nil),                // 0: entity.v1.Entity
+		(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
+	}
+)
+
 var file_entity_v1_entity_proto_depIdxs = []int32{
 	1, // 0: entity.v1.Entity.deleted_at:type_name -> google.protobuf.Timestamp
 	1, // 1: entity.v1.Entity.created_at:type_name -> google.protobuf.Timestamp

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS endpoints(
   description     text,
   deprecated      boolean NOT NULL DEFAULT false,
   version_lock    int NOT NULL DEFAULT 1 CHECK (version_lock > 0),
-  hidden_at       timestamptz,
+  deleted_at       timestamptz,
   created_at      timestamptz NOT NULL DEFAULT now(),
   updated_at      timestamptz,
   UNIQUE(api_version_id, method, path),
