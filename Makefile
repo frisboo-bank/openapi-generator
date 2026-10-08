@@ -15,91 +15,91 @@ FRONTEND_DIR := frontend
 .DEFAULT_GOAL := help
 
 .PHONY: build
-build:  ## Build api binary and frontend bundle
+build: ## Build: Build api binary and frontend bundle
 	$(MAKE) -C $(API_DIR) build
 	$(MAKE) -C $(FRONTEND_DIR) build
 
 .PHONY: install
-install:  ## Install dependencies for both sub-projects
+install: ## Install: Install dependencies for both sub-projects
 	$(MAKE) -C $(API_DIR) install
 	$(MAKE) -C $(FRONTEND_DIR) install
 
 .PHONY: install-tools
-install-tools:  ## Install all development tools
+install-tools: ## Install: Install all development tools
 	$(MAKE) -C $(API_DIR) install-tools
 
 .PHONY: generate
-generate:  ## Generate code (enums, protobuf, mocks)
+generate: ## Generate: Generate code (enums, protobuf, mocks)
 	$(MAKE) -C $(API_DIR) generate
 	$(MAKE) -C $(API_DIR) mocks
 
 .PHONY: tidy
-tidy:  ## Format + tidy sources in both sub-projects
+tidy: ## Tidy: Format + tidy sources in both sub-projects
 	$(MAKE) -C $(API_DIR) tidy
 
 .PHONY: vet
-vet:  ## Run go vet (alias of api/vet)
+vet: ## Vet: Run go vet (alias of api/vet)
 	$(MAKE) -C $(API_DIR) vet
 
 .PHONY: audit
-audit:  ## Run all quality-control checks
+audit: ## Audit: Run all quality-control checks
 	$(MAKE) -C $(API_DIR) audit
 
 .PHONY: test
-test:  ## Run tests in both sub-projects
+test: ## Test: Run tests in both sub-projects
 	$(MAKE) -C $(API_DIR) test
 	$(MAKE) -C $(FRONTEND_DIR) test
 
 .PHONY: lint
-lint:  ## Lint both sub-projects
+lint: ## Lint: Lint both sub-projects
 	$(MAKE) -C $(API_DIR) lint
 	$(MAKE) -C $(FRONTEND_DIR) lint
 
 .PHONY: check
-check: lint test audit  ## lint + test + audit (both)
+check: lint test audit  ## Check: lint + test + audit (both)
 
 .PHONY: clean
-clean:  ## Remove build artifacts and coverage reports
+clean: ## Clean: Remove build artifacts and coverage reports
 	rm -rf $(API_DIR)/bin $(API_DIR)/coverage.out $(FRONTEND_DIR)/dist $(FRONTEND_DIR)/build
 
 .PHONY: run
-run:  ## Run the api development server
+run: ## Run: Run the api development server
 	$(MAKE) -C $(API_DIR) run
 
 .PHONY: bench
-bench:  ## Run go benchmarks
+bench: ## Bench: Run go benchmarks
 	$(MAKE) -C $(API_DIR) bench
 
 .PHONY: deps-update
-deps-update:  ## Update + tidy go dependencies
+deps-update: ## Deps: Update + tidy go dependencies
 	$(MAKE) -C $(API_DIR) deps-update
 
 .PHONY: deps-cleancache
-deps-cleancache:  ## Clear the go module cache
+deps-cleancache: ## Deps: Clear the go module cache
 	$(MAKE) -C $(API_DIR) deps-cleancache
 
 .PHONY: proto-build
-proto-build:  ## Generate service protobuf/gRPC code
+proto-build: ## Proto: Generate service protobuf/gRPC code
 	$(MAKE) -C $(API_DIR) proto-build
 
 .PHONY: proto-shared
-proto-shared:  ## Generate shared protobuf code
+proto-shared: ## Proto: Generate shared protobuf code
 	$(MAKE) -C $(API_DIR) proto-shared
 
 .PHONY: format-proto
-format-proto:  ## Format protobuf files
+format-proto: ## Proto: Format protobuf files
 	$(MAKE) -C $(API_DIR) format-proto
 
 .PHONY: lint-proto
-lint-proto:  ## Lint protobuf schemas
+lint-proto: ## Proto: Lint protobuf schemas
 	$(MAKE) -C $(API_DIR) lint-proto
 
 .PHONY: proto-vendor
-proto-vendor:  ## Download third-party proto dependencies locally
+proto-vendor: ## Proto: Download third-party proto dependencies locally
 	$(MAKE) -C $(API_DIR) proto-vendor
 
 .PHONY: help
-help:  ## Print this help menu
+help: ## General: Print this help menu
 	@awk 'BEGIN {FS = ":.*## "; printf "\033[1;34mUsage:\033[0m\n  make \033[36m<target>\033[0m\n  (run from project root)\n\n"} \
 		/^[a-zA-Z0-9_\/-]+:.*?## / { \
 			desc = $$2; \

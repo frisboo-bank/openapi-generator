@@ -14,38 +14,38 @@ PNPM ?= pnpm
 .DEFAULT_GOAL := help
 
 .PHONY: install
-install:  ## Frontend: Install dependencies
+install: ## Install: Install dependencies
 	$(PNPM) install
 
 .PHONY: dev
-dev:  ## Frontend: Start the development server
+dev: ## Run: Start the development server
 	$(PNPM) dev
 
 .PHONY: build
-build:  ## Frontend: Build the production bundle
+build: ## Build: Build the production bundle
 	$(PNPM) build
 
 .PHONY: preview
-preview:  ## Frontend: Preview the production build
+preview: ## Build: Preview the production build
 	$(PNPM) preview
 
 .PHONY: lint
-lint:  ## Frontend: Lint sources
+lint: ## Lint: Lint sources
 	$(PNPM) lint
 
 .PHONY: test
-test:  ## Frontend: Run tests
+test: ## Test: Run tests
 	$(PNPM) test
 
 .PHONY: test-watch
-test-watch:  ## Frontend: Run tests in watch mode
+test-watch: ## Test: Run tests in watch mode
 	$(PNPM) test:watch
 
 .PHONY: check
-check: lint test  ## Frontend: lint + test
+check: lint test  ## Check: lint + test
 
 .PHONY: help
-help:  ## Frontend: Print this help menu
+help: ## General: Print this help menu
 	@awk 'BEGIN {FS = ":.*## "; printf "\033[1;34mUsage:\033[0m\n  make \033[36m<target>\033[0m\n"} \
 		/^[a-zA-Z0-9_\/-]+:.*?## / { \
 			desc = $$2; \

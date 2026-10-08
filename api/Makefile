@@ -33,56 +33,56 @@ BUILDFLAGS ?= $(GOFLAGS) -ldflags "$(GO_LDFLAGS)" -tags "osusergo,netgo"
 .DEFAULT_GOAL := help
 
 .PHONY: generate
-generate:  ## Api: Generate enum sources (installs pinned goenums, runs go generate)
+generate:  ## Generate: Generate enum sources (installs pinned goenums, runs go generate)
 	$(GO) install github.com/zarldev/goenums@v0.4.3
 	PATH="$$(go env GOPATH)/bin:$$PATH" $(GO) generate ./...
 
 .PHONY: run
-run: generate  ## Api: Run the application (development)
+run: generate  ## Run: Run the application (development)
 	CGO_ENABLED=$(CGO) $(GO) run $(BUILDFLAGS) $(CMD_DIR) run --environment=development
 
 .PHONY: build
-build: generate  ## Api: Build the application binary
+build: generate  ## Build: Build the application binary
 	mkdir -p $(BIN_DIR)
 	CGO_ENABLED=$(CGO) $(GO) build $(BUILDFLAGS) -o $(BIN_DIR)/$(NAME) $(CMD_DIR)
 
 .PHONY: build-debug
-build-debug: generate  ## Api: Build the application binary with debug enabled
+build-debug: generate  ## Build: Build the application binary with debug enabled
 	mkdir -p $(BIN_DIR)
 	CGO_ENABLED=1 $(GO) build -gcflags "all=-N -l" -o $(BIN_DIR)/$(NAME)-debug $(CMD_DIR)
 
 .PHONY: test
-test: generate  ## Api: Run tests (race + coverage)
+test: generate  ## Test: Run tests (race + coverage)
 	$(GO) test -race -coverprofile=coverage.out -covermode=atomic ./...
 	$(GO) tool cover -func=coverage.out | tail -n 1
 
 .PHONY: test-ci
-test-ci: generate  ## Api: Run tests (CI-optimized, no race detector)
+test-ci: generate  ## Test: Run tests (CI-optimized, no race detector)
 	$(GO) test -race -count=1 -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: bench
-bench: generate  ## Api: Run go benchmarks (10s each)
+bench: generate  ## Bench: Run go benchmarks (10s each)
 	$(GO) test -run=^$$ -bench=. -benchtime=10s -count=1 ./...
 
 .PHONY: mocks
-mocks:  ## Api: Generate mocks with mockgen
+mocks:  ## Generate: Generate mocks with mockgen
 	$(GO) generate ./mocks/gen.go
 
 .PHONY: update
-update:  ## Api: Bump go module dependencies
+update:  ## Deps: Bump go module dependencies
 	$(GO) get -u ./...
 
 .PHONY: deps-update
-deps-update:  ## Api: Update + tidy go dependencies
+deps-update:  ## Deps: Update + tidy go dependencies
 	$(GO) get -u -t -v ./...
 	$(GO) mod tidy
 
 .PHONY: deps-cleancache
-deps-cleancache:  ## Api: Clear the go module cache
+deps-cleancache:  ## Deps: Clear the go module cache
 	$(GO) clean -modcache
 
 .PHONY: tidy
-tidy: format-proto generate  ## Api: Format Go code, tidy modules, organize imports
+tidy: format-proto generate  ## Tidy: Format Go code, tidy modules, organize imports
 	$(GO) fmt ./...
 	$(GO) mod tidy
 	$(GO) mod verify
@@ -92,29 +92,29 @@ tidy: format-proto generate  ## Api: Format Go code, tidy modules, organize impo
 	gofumpt -l -w .
 
 .PHONY: lint
-lint: lint-proto generate  ## Api: Run go linters (revive + golangci-lint)
+lint: lint-proto generate  ## Lint: Run go linters (revive + golangci-lint)
 	revive -config revive-config.toml -formatter friendly ./...
 	golangci-lint run ./...
 
 .PHONY: vet
-vet: generate  ## Api: Run go vet
+vet: generate  ## Vet: Run go vet
 	$(GO) vet ./...
 
 .PHONY: audit
-audit: vet  ## Api: Security audit and static analysis
+audit: vet  ## Audit: Security audit and static analysis
 	$(GO) mod verify
 	staticcheck -checks=all,-ST1000,-U1000 ./...
 	govulncheck ./...
 
 .PHONY: check
-check: lint test audit  ## Api: lint + test + audit
+check: lint test audit  ## Check: lint + test + audit
 
 .PHONY: install
-install:  ## Api: Download go module dependencies
+install:  ## Install: Download go module dependencies
 	$(GO) mod download
 
 .PHONY: install-tools
-install-tools:  ## Api: Install development tools
+install-tools:  ## Install: Install development tools
 	$(GO) install github.com/daixiang0/gci@latest
 	$(GO) install github.com/golang/mock/mockgen@latest
 	$(GO) install github.com/mgechev/revive@latest
@@ -142,7 +142,7 @@ GRPC_GO_OUT := .
 GRPC_ES_OUT := ../frontend/grpc/client
 
 .PHONY: proto-shared
-proto-shared:  ## Api: Generate shared protobuf code
+proto-shared:  ## Proto: Generate shared protobuf code
 	protoc \
 		--proto_path=$(GRPC_PROTO_VENDOR_DIR) \
 		--proto_path=$(GRPC_PROTO_SHARED_DIR) \
@@ -151,7 +151,7 @@ proto-shared:  ## Api: Generate shared protobuf code
 		$(shell find $(GRPC_PROTO_SHARED_DIR) -name '*.proto')
 
 .PHONY: proto-build
-proto-build: proto-shared  ## Api: Generate service protobuf/gRPC code
+proto-build: proto-shared  ## Proto: Generate service protobuf/gRPC code
 	mkdir -p $(GRPC_ES_OUT) $(GRPC_SWAGGER_OUT)
 	protoc \
 		--proto_path=$(GRPC_PROTO_VENDOR_DIR) \
@@ -170,15 +170,15 @@ proto-build: proto-shared  ## Api: Generate service protobuf/gRPC code
 		$(shell find $(GRPC_PROTO_DIR) -name '*.proto')
 
 .PHONY: format-proto
-format-proto:  ## Api: Format protobuf files
+format-proto:  ## Proto: Format protobuf files
 	buf format -w
 
 .PHONY: lint-proto
-lint-proto:  ## Api: Lint protobuf schemas
+lint-proto:  ## Proto: Lint protobuf schemas
 	buf lint
 
 .PHONY: proto-vendor
-proto-vendor:  ## Api: Download third-party proto dependencies locally
+proto-vendor:  ## Proto: Download third-party proto dependencies locally
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/google/api
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/protoc-gen-openapiv2/options
 	echo "Downloading Google API protos..."
@@ -191,7 +191,7 @@ proto-vendor:  ## Api: Download third-party proto dependencies locally
 	echo "Done vendoring protos."
 
 .PHONY: help
-help:  ## Api: Print this help menu
+help:  ## General: Print this help menu
 	@awk 'BEGIN {FS = ":.*## "; printf "\033[1;34mUsage:\033[0m\n  make \033[36m<target>\033[0m\n"} \
 		/^[a-zA-Z0-9_\/-]+:.*?## / { \
 			desc = $$2; \
