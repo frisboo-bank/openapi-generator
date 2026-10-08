@@ -14,7 +14,7 @@ func MapUpdateEntityResponseToProto(dto *dtos.UpdateEntityResponseDto) *entityv1
 				Name:        dto.Name,
 				Description: &dto.Description,
 				VersionLock: dto.VersionLock,
-				HiddenAt:    utils.TimeToTimestamp(dto.HiddenAt),
+				DeletedAt:   utils.TimeToTimestamp(dto.DeletedAt),
 				CreatedAt:   utils.TimeToTimestamp(dto.CreatedAt),
 				UpdatedAt:   utils.TimeToTimestamp(dto.UpdatedAt),
 			},

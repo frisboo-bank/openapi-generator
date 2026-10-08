@@ -14,7 +14,7 @@ func TestAllowedQueryFieldsFor(t *testing.T) {
 		ID        uuid.UUID
 		Title     string     `query:"title:search,filter,order"`
 		Name      string     `query:"name:search"`
-		HiddenAt  *time.Time `query:"hidden_at:filter"`
+		DeletedAt  *time.Time `query:"deleted_at:filter"`
 		CreatedAt *time.Time `query:"created_at:order"`
 	}
 
@@ -30,14 +30,14 @@ func TestAllowedQueryFieldsFor(t *testing.T) {
 			name:       "happy path",
 			fn:         func() query.AllowedQueryFields { return query.AllowedQueryFieldsFor[Model]() },
 			wantSearch: []string{"title", "name"},
-			wantFilter: []string{"title", "hidden_at"},
+			wantFilter: []string{"title", "deleted_at"},
 			wantOrder:  []string{"title", "created_at"},
 		},
 		{
 			name:       "pointer to struct",
 			fn:         func() query.AllowedQueryFields { return query.AllowedQueryFieldsFor[*Model]() },
 			wantSearch: []string{"title", "name"},
-			wantFilter: []string{"title", "hidden_at"},
+			wantFilter: []string{"title", "deleted_at"},
 			wantOrder:  []string{"title", "created_at"},
 		},
 		{

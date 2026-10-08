@@ -100,7 +100,7 @@ func (h *UpdateEntityHandler) Handle(ctx context.Context, request *UpdateEntityQ
 		Name:        updatedEntity.Name,
 		Description: updatedEntity.Description,
 		VersionLock: updatedEntity.VersionLock,
-		HiddenAt:    updatedEntity.HiddenAt,
+		DeletedAt:    updatedEntity.DeletedAt,
 		CreatedAt:   updatedEntity.CreatedAt,
 		UpdatedAt:   updatedEntity.UpdatedAt,
 	}, nil

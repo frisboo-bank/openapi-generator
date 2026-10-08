@@ -20,9 +20,9 @@ func TestBuildNamedWhereFiltersClause(t *testing.T) {
 	}{
 		{
 			name:    "empty filters",
-			where:   "hidden_at IS NULL",
+			where:   "deleted_at IS NULL",
 			filters: []query.Filter{},
-			res:     "hidden_at IS NULL",
+			res:     "deleted_at IS NULL",
 			resArgs: nil,
 		},
 		{
@@ -34,19 +34,19 @@ func TestBuildNamedWhereFiltersClause(t *testing.T) {
 		},
 		{
 			name:    "append filter to existing where",
-			where:   "hidden_at IS NULL",
+			where:   "deleted_at IS NULL",
 			filters: []query.Filter{{Field: "username", Values: []string{"john.doe"}, Comparator: filtercomparisonenum.FilterComparisons.EQUAL}},
-			res:     "hidden_at IS NULL AND username = :username_0",
+			res:     "deleted_at IS NULL AND username = :username_0",
 			resArgs: map[string]any{"username_0": "john.doe"},
 		},
 		{
 			name:  "multiple filters combined with AND",
-			where: "hidden_at IS NULL",
+			where: "deleted_at IS NULL",
 			filters: []query.Filter{
 				{Field: "slug", Comparator: filtercomparisonenum.FilterComparisons.EQUAL, Values: []string{"foo"}},
 				{Field: "created_at", Comparator: filtercomparisonenum.FilterComparisons.GREATER, Values: []string{"2024-01-01"}},
 			},
-			res:     "hidden_at IS NULL AND slug = :slug_0 AND created_at > :created_at_1",
+			res:     "deleted_at IS NULL AND slug = :slug_0 AND created_at > :created_at_1",
 			resArgs: map[string]any{"slug_0": "foo", "created_at_1": "2024-01-01"},
 		},
 		{
@@ -88,10 +88,10 @@ func TestBuildNamedWhereFiltersClause(t *testing.T) {
 			name:  "nullary operators without values",
 			where: "1=1",
 			filters: []query.Filter{
-				{Field: "hidden_at", Comparator: filtercomparisonenum.FilterComparisons.ISNULL, Values: nil},
+				{Field: "deleted_at", Comparator: filtercomparisonenum.FilterComparisons.ISNULL, Values: nil},
 				{Field: "deleted_at", Comparator: filtercomparisonenum.FilterComparisons.ISNOTNULL, Values: []string{}},
 			},
-			res:     "1=1 AND hidden_at IS NULL AND deleted_at IS NOT NULL",
+			res:     "1=1 AND deleted_at IS NULL AND deleted_at IS NOT NULL",
 			resArgs: map[string]any{},
 		},
 
