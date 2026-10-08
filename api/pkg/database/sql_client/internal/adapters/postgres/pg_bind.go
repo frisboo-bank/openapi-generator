@@ -15,8 +15,6 @@ type SQLXExecutor interface {
 	SelectContext(context.Context, any, string, ...any) error
 }
 
-// BindNamed converts a named-placeholder query into a driver-specific
-// positional query. Postgres/pgx uses sqlx.DOLLAR.
 func BindNamed(query string, args map[string]any) (string, []any, error) {
 	if len(args) == 0 {
 		return query, nil, nil

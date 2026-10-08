@@ -7,23 +7,27 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/logger/models"
-	loggerenums "frisboo-bank/openapi-generator-service/pkg/logger/models/enums"
+	loggerinternal "frisboo-bank/openapi-generator-service/pkg/logger/internal"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
-func LoggerModule(env environmentenum.Environment, configLoader configloadercontracts.ConfigLoader) containercontracts.Module {
-	configLoader.RegisterDecodeHookFunc(loggerenums.LoggerEnumsDecodeHook())
+func LoggerModule(
+	env environmentenum.Environment,
+	configLoader configloadercontracts.ConfigLoader,
+) containercontracts.Module {
+	configLoader.RegisterDecodeHookFunc(types.LoggerEnumsDecodeHook())
 
-	var cfgMap map[string]*models.LoggerOptions
+	var cfgMap map[string]*config.LoggerOptions
 	if err := configLoader.LoadKey(env, &cfgMap, "loggers"); err != nil {
 		panic(fmt.Sprintf("failed to load logger config: %v", err))
 	}
 
 	mod := container.NewModule(
 		"logger",
-		container.Provider(func() map[string]*models.LoggerOptions {
+		container.Provider(func() map[string]*config.LoggerOptions {
 			return cfgMap
 		}),
 	)
@@ -33,7 +37,7 @@ func LoggerModule(env environmentenum.Environment, configLoader configloadercont
 	for name, cfg := range cfgMap {
 		validation.AssertNotNil("cfg", cfg)
 
-		logger, err := CreateLogger(name, cfg, env)
+		logger, err := loggerinternal.CreateLogger(name, cfg, env)
 		if err != nil {
 			panic(fmt.Sprintf("failed to create logger %q: %v", name, err))
 		}

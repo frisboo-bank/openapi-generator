@@ -34,7 +34,7 @@ func EntitiesModule() containercontracts.Module {
 			Logger    loggercontracts.Logger           `name:"logger:main"`
 		},
 		) (contracts.EntityRepository, error) {
-			sqlXClient, ok := params.SQLClient.(sqlclientcontracts.SQLXClientAdapter)
+			sqlXClient, ok := params.SQLClient.(sqlclientcontracts.SQLXClient)
 			if !ok {
 				return nil, fmt.Errorf("expected SQLXClient, got %T", params.SQLClient)
 			}

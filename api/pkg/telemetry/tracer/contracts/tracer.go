@@ -9,10 +9,6 @@ import (
 
 type (
 	Tracer interface {
-		TracerAdapter
-	}
-
-	TracerAdapter interface {
 		Start(ctx context.Context, event string) (context.Context, TracerSpan)
 		Close(ctx context.Context) error
 		Name() string

@@ -1,10 +1,10 @@
-package models
+package config
 
 import (
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loglevel"
 	"frisboo-bank/openapi-generator-service/pkg/validation/validators"
 
 	vendorvalidation "github.com/go-ozzo/ozzo-validation"

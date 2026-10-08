@@ -8,17 +8,17 @@ import (
 	"time"
 
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/logger/config"
 	"frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/logger/models"
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loglevel"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/rs/zerolog"
 )
 
-var _ contracts.LoggerAdapter = (*zerologAdapter)(nil)
+var _ contracts.Logger = (*zerologAdapter)(nil)
 
 type zerologAdapter struct {
 	callDepth     int
@@ -42,9 +42,9 @@ var levelMapping = map[loglevel.LogLevel]zerolog.Level{
 
 func NewZerologAdapter(
 	name string,
-	cfg *models.LoggerOptions,
+	cfg *config.LoggerOptions,
 	env environmentEnum.Environment,
-) contracts.LoggerAdapter {
+) contracts.Logger {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertValidEnum("env", env)
@@ -164,16 +164,8 @@ func (z *zerologAdapter) WithName(name string) {
 	z.logger = &newLogger
 }
 
-func (z *zerologAdapter) GrpcMiddlewareAccessLogger(
-	method string,
-	dur time.Duration,
-	metaData map[string][]string,
-	err error,
-) {
-	evt := z.logger.Info().
-		Str("method", method).
-		Dur("duration", dur).
-		Interface("metadata", metaData)
+func (z *zerologAdapter) GrpcMiddlewareAccessLogger(method string, dur time.Duration, metaData map[string][]string, err error) {
+	evt := z.logger.Info().Str("method", method).Dur("duration", dur).Interface("metadata", metaData)
 
 	if err != nil {
 		evt.Err(err)
@@ -189,9 +181,7 @@ func (z *zerologAdapter) GrpcClientInterceptorLogger(
 	metaData map[string][]string,
 	err error,
 ) {
-	evt := z.logger.Info().
-		Str("method", method).
-		Interface("request", req).
+	evt := z.logger.Info().Str("method", method).Interface("request", req).
 		Interface("reply", reply).
 		Dur("duration", dur).
 		Interface("metadata", metaData)

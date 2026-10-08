@@ -23,7 +23,7 @@ import (
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 )
 
-var _ contracts.MetricsAdapter = (*otelMetricsAdapter)(nil)
+var _ contracts.Metrics = (*otelMetricsAdapter)(nil)
 
 type otelMetricsAdapter struct {
 	name             string
@@ -34,7 +34,12 @@ type otelMetricsAdapter struct {
 	logger           loggercontracts.Logger
 }
 
-func NewOtelMetricsAdapter(name string, cfg *config.MetricsOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.MetricsAdapter, error) {
+func NewOtelMetricsAdapter(
+	name string,
+	cfg *config.MetricsOptions,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.Metrics, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)

@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	_ contracts.SQLXClientAdapter = (*postgresSQLXClientAdapter)(nil)
-	_ contracts.WithDBGetter      = (*postgresSQLXClientAdapter)(nil)
+	_ contracts.SQLXClient   = (*postgresSQLXClientAdapter)(nil)
+	_ contracts.WithDBGetter = (*postgresSQLXClientAdapter)(nil)
 )
 
 type postgresSQLXClientAdapter struct {
@@ -33,7 +33,7 @@ func NewPostgresSQLXClientAdapter(
 	name string,
 	cfg *config.SQLClientOptions,
 	logger loggerContracts.Logger,
-) (contracts.SQLXClientAdapter, error) {
+) (contracts.SQLXClient, error) {
 	validation.AssertNotNil("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)

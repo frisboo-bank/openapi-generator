@@ -17,8 +17,8 @@ import (
 )
 
 var (
-	_ contracts.SQLXClientAdapter = (*sqlite3SQLXClientAdapter)(nil)
-	_ contracts.WithDBGetter      = (*sqlite3SQLXClientAdapter)(nil)
+	_ contracts.SQLXClient   = (*sqlite3SQLXClientAdapter)(nil)
+	_ contracts.WithDBGetter = (*sqlite3SQLXClientAdapter)(nil)
 )
 
 type sqlite3SQLXClientAdapter struct {
@@ -32,7 +32,7 @@ func NewSQLite3SQLXClientAdapter(
 	name string,
 	cfg *config.SQLClientOptions,
 	logger loggerContracts.Logger,
-) (contracts.SQLXClientAdapter, error) {
+) (contracts.SQLXClient, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)

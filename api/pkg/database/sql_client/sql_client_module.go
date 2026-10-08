@@ -9,9 +9,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	sqlclientinternal "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
@@ -30,11 +28,9 @@ type SQLClientDependencies struct {
 
 var SQLClientModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*config.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
-		Name:      "database.sql-client",
-		ConfigKey: "database.sql-clients",
-		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			types.SQLClientEnumsDecodeHook(),
-		},
+		Name:             "database.sql-client",
+		ConfigKey:        "database.sql-clients",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.SQLClientEnumsDecodeHook()},
 		ProviderFn: func(
 			name string,
 			cfg *config.SQLClientOptions,
@@ -42,33 +38,21 @@ var SQLClientModule = module.NewMultiInstancesModule(
 			logger loggercontracts.Logger,
 			extra SQLClientDependencies,
 		) (contracts.SQLClientCore, error) {
-			var err error
-
 			var tracerInstance tracercontracts.Tracer
-			if !cfg.EnableTracing {
-				tracerInstance, err = tracer.CreateNoopTracer(name, logger)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				var ok bool
+			var ok bool
+
+			if cfg.EnableTracing {
 				tracerInstance, ok = extra.Tracers[cfg.Tracer]
 				if !ok {
-					return nil, fmt.Errorf("tracer %q not found for sql-client %q", cfg.Tracer, name)
+					return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
 				}
 			}
 
 			var metricsInstance metricscontracts.Metrics
-			if !cfg.EnableMetrics {
-				metricsInstance, err = metrics.CreateNoopMetrics(name, logger)
-				if err != nil {
-					return nil, err
-				}
-			} else {
-				var ok bool
+			if cfg.EnableMetrics {
 				metricsInstance, ok = extra.Metrics[cfg.Metrics]
 				if !ok {
-					return nil, fmt.Errorf("metrics %q not found for sql-client %q", cfg.Metrics, name)
+					return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
 				}
 			}
 
