@@ -9,6 +9,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	migrationinternal "frisboo-bank/openapi-generator-service/pkg/database/migration/internal"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/types"
+	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	sqlclientcontracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/logger"
@@ -35,7 +36,15 @@ var MigrationModule = module.NewMultiInstancesModule(
 			logger loggercontracts.Logger,
 			extra MigrationDependencies,
 		) (contracts.Migration, error) {
-			return migrationinternal.CreateMigration(name, cfg, env, logger, extra)
+			sqlClient, ok := extra.SQLClients[cfg.DBClient]
+			if !ok {
+				return nil, fmt.Errorf("sql client %q not found for migration %q", cfg.DBClient, name)
+			}
+			dbClient, ok := sqlClient.(sqlclientcontracts.WithDBGetter)
+			if !ok {
+				return nil, fmt.Errorf("sql client %q does not expose its DB connection", name)
+			}
+			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, env, logger)
 		},
 	},
 )
@@ -52,11 +61,12 @@ func CreateMigrationForTests(
 
 	return migrationinternal.CreateMigration(
 		name,
+		db,
 		&config.MigrationOptions{
 			MigrationsDir: migrationDir,
+			Type:       migrationtype.MigrationTypes.GOOSE,
 		},
 		env,
 		logger.CreateNoopLogger("test", environmentenum.Environments.TESTING),
-		MigrationDependencies{},
 	)
 }
