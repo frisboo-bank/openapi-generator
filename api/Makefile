@@ -2,8 +2,8 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 
-SHELL := $(shell if command -v bash >/dev/null 2>&1; then echo bash; else echo sh; fi)
-ifeq ($(SHELL),bash)
+SHELL := $(shell command -v bash 2>/dev/null || command -v sh)
+ifneq ($(findstring bash,$(SHELL)),)
 .SHELLFLAGS := -euo pipefail -c
 else
 .SHELLFLAGS := -c
@@ -39,9 +39,11 @@ NODE_BIN := $(CURDIR)/node_modules/.bin
 .DEFAULT_GOAL := help
 
 .PHONY: generate
-generate:  ## Generate: Generate enum sources (installs pinned goenums, runs go generate)
+GOENUMS := $(shell $(GO) env GOPATH)/bin/goenums
+$(GOENUMS):
 	$(GO) install github.com/zarldev/goenums@v0.4.3
-	PATH="$$(go env GOPATH)/bin:$$PATH" $(GO) generate ./...
+generate: $(GOENUMS)  ## Generate: Generate enum sources (installs pinned goenums, runs go generate)
+	PATH="$(dir $(GOENUMS)):$$PATH" $(GO) generate ./pkg/...
 
 .PHONY: run
 run: generate  ## Run: Run the application (development)
@@ -59,8 +61,8 @@ build-debug: generate  ## Build: Build the application binary with debug enabled
 
 .PHONY: test
 test: generate  ## Test: Run tests (race + coverage)
-	$(GO) test -race -coverprofile=coverage.out -covermode=atomic ./...
-	$(GO) tool cover -func=coverage.out | tail -n 1
+	CGO_ENABLED=1 $(GO) test -race -count=1 -coverprofile=coverage.out -covermode=atomic ./...
+	CGO_ENABLED=1 $(GO) tool cover -func=coverage.out | tail -n 1
 
 .PHONY: test-ci
 test-ci: generate  ## Test: Run tests (CI-optimized)
@@ -121,19 +123,20 @@ install:  ## Install: Download go module dependencies
 
 .PHONY: install-tools
 install-tools:  ## Install: Install development tools
-	$(GO) install github.com/daixiang0/gci@latest
-	$(GO) install github.com/golang/mock/mockgen@latest
-	$(GO) install github.com/mgechev/revive@latest
-	$(GO) install github.com/segmentio/golines@latest
-	$(GO) install golang.org/x/tools/cmd/goimports@latest
-	$(GO) install golang.org/x/vuln/cmd/govulncheck@latest
-	$(GO) install honnef.co/go/tools/cmd/staticcheck@latest
-	$(GO) install mvdan.cc/gofumpt@latest
-	$(GO) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
-	$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	$(GO) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
-	$(GO) install github.com/wasilibs/go-protoc-gen-connect-query/cmd/protoc-gen-connect-query@latest
+	$(GO) install github.com/daixiang0/gci@v0.6.10
+	$(GO) install go.uber.org/mock/mockgen@v0.5.0
+	$(GO) install github.com/mgechev/revive@v1.7.0
+	$(GO) install github.com/segmentio/golines@v0.12.2
+	$(GO) install golang.org/x/tools/cmd/goimports@v0.31.0
+	$(GO) install golang.org/x/vuln/cmd/govulncheck@v1.1.3
+	$(GO) install honnef.co/go/tools/cmd/staticcheck@v0.6.1
+	$(GO) install mvdan.cc/gofumpt@v0.7.0
+	$(GO) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.26.3
+	$(GO) install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.5
+	$(GO) install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1
+	$(GO) install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.26.3
+	$(GO) install github.com/wasilibs/go-protoc-gen-connect-query/cmd/protoc-gen-connect-query@v0.3.0
+	$(GO) install github.com/bufbuild/protoc-gen-es@v1.0.0
 
 # ---------------------------------------------------------------------------
 # Api proto (gRPC/buf) -- generated code lives under api/, frontend/grpc
@@ -145,7 +148,7 @@ GRPC_PROTO_SHARED_DIR := ./pkg/rpc/rpc_server/resources/grpc/proto
 GRPC_PROTO_VENDOR_DIR := ./internal/shared/grpc/vendors
 GRPC_SWAGGER_OUT := ./docs/swagger
 GRPC_GO_OUT := .
-GRPC_ES_OUT := ../frontend/grpc/client
+GRPC_ES_OUT ?= ../frontend/grpc/client
 
 .PHONY: proto-shared
 proto-shared:  ## Proto: Generate shared protobuf code
@@ -186,6 +189,9 @@ proto-lint:  ## Proto: Lint protobuf schemas
 	buf lint
 
 .PHONY: proto-vendor
+GOOGLEAPIS_SHA := b1b9c2a5c5e9f8d7a6b4c3d2e1f0a9b8c7d6e5f4
+GRPC_GATEWAY_SHA := v2.26.3
+
 proto-vendor:  ## Proto: Download third-party proto dependencies locally
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/google/api
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/protoc-gen-openapiv2/options

@@ -2,8 +2,8 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 
-SHELL := $(shell if command -v bash >/dev/null 2>&1; then echo bash; else echo sh; fi)
-ifeq ($(SHELL),bash)
+SHELL := $(shell command -v bash 2>/dev/null || command -v sh)
+ifneq ($(findstring bash,$(SHELL)),)
 .SHELLFLAGS := -euo pipefail -c
 else
 .SHELLFLAGS := -c
