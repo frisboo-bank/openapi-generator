@@ -21,16 +21,16 @@ func TestBuildNamedWhereSearchesClause(t *testing.T) {
 	}{
 		{
 			name:        "empty search group",
-			where:       "hidden_at IS NULL",
+			where:       "deleted_at IS NULL",
 			searchGroup: nil,
-			res:         "hidden_at IS NULL",
+			res:         "deleted_at IS NULL",
 			resArgs:     nil,
 		},
 		{
 			name:        "empty search group",
-			where:       "hidden_at IS NULL",
+			where:       "deleted_at IS NULL",
 			searchGroup: &query.SearchGroup{},
-			res:         "hidden_at IS NULL",
+			res:         "deleted_at IS NULL",
 			resArgs:     nil,
 		},
 		{
@@ -47,7 +47,7 @@ func TestBuildNamedWhereSearchesClause(t *testing.T) {
 		},
 		{
 			name:  "multiple conditions with OR",
-			where: "hidden_at IS NULL",
+			where: "deleted_at IS NULL",
 			searchGroup: &query.SearchGroup{
 				Operator: logicaloperatorenum.LogicalOperators.OR,
 				Conditions: []query.Search{
@@ -55,12 +55,12 @@ func TestBuildNamedWhereSearchesClause(t *testing.T) {
 					{Field: "description", Value: "bar", Operator: searchconditionenum.SearchConditions.CONTAINS},
 				},
 			},
-			res:     "hidden_at IS NULL AND (name ILIKE :search_d0_name_0 OR description ILIKE :search_d0_description_1)",
+			res:     "deleted_at IS NULL AND (name ILIKE :search_d0_name_0 OR description ILIKE :search_d0_description_1)",
 			resArgs: map[string]any{"search_d0_name_0": "%foo%", "search_d0_description_1": "%bar%"},
 		},
 		{
 			name:  "nested groups",
-			where: "hidden_at IS NULL",
+			where: "deleted_at IS NULL",
 			searchGroup: &query.SearchGroup{
 				Operator: logicaloperatorenum.LogicalOperators.AND,
 				Conditions: []query.Search{
@@ -76,7 +76,7 @@ func TestBuildNamedWhereSearchesClause(t *testing.T) {
 					},
 				},
 			},
-			res:     "hidden_at IS NULL AND (name = :search_d0_name_0 AND (slug ILIKE :search_d1_slug_0 OR slug ILIKE :search_d1_slug_1))",
+			res:     "deleted_at IS NULL AND (name = :search_d0_name_0 AND (slug ILIKE :search_d1_slug_0 OR slug ILIKE :search_d1_slug_1))",
 			resArgs: map[string]any{"search_d0_name_0": "foo", "search_d1_slug_0": "a%", "search_d1_slug_1": "%b"},
 		},
 

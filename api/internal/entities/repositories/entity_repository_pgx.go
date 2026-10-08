@@ -49,7 +49,7 @@ func (e *EntityRepositoryPgx) CreateEntityTx(ctx context.Context, tx sqlclientCo
 	query := fmt.Sprintf(`
     INSERT INTO %s (slug, name, description)
     VALUES (:slug, :name, :description)
-    RETURNING id, slug, name, description, version_lock, hidden_at, created_at, updated_at
+    RETURNING id, slug, name, description, version_lock, deleted_at, created_at, updated_at
   `, entityTableName)
 
 	if err := tx.NamedGet(ctx, entity, query, map[string]any{
@@ -93,9 +93,9 @@ func (e *EntityRepositoryPgx) GetEntityBySlugTx(ctx context.Context, tx sqlclien
 func (e *EntityRepositoryPgx) HideEntity(ctx context.Context, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`
 		UPDATE %s
-		SET hidden_at = now()
+		SET deleted_at = now()
 		WHERE id = :id
-		AND hidden_at IS NULL
+		AND deleted_at IS NULL
 	`, entityTableName)
 
 	res, err := e.sqlClient.NamedExec(ctx, query, map[string]any{"id": entityID})
@@ -122,9 +122,9 @@ func (e *EntityRepositoryPgx) ListEntitiesTx(ctx context.Context, tx sqlclientCo
 func (e *EntityRepositoryPgx) UnhideEntity(ctx context.Context, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`
 		UPDATE %s
-		SET hidden_at = null
+		SET deleted_at = null
 		WHERE id = :id
-		AND hidden_at IS NOT NULL
+		AND deleted_at IS NOT NULL
 	`, entityTableName)
 
 	res, err := e.sqlClient.NamedExec(ctx, query, map[string]any{"id": entityID})
@@ -152,8 +152,8 @@ func (e *EntityRepositoryPgx) UpdateEntityTx(ctx context.Context, tx sqlclientCo
 		SET name = :name, description = :description, version_lock = :version_lock
 		WHERE id = :id
 		AND version_lock = :current_version
-		AND hidden_at IS NULL
-		RETURNING id, slug, name, description, version_lock, hidden_at, created_at, updated_at
+		AND deleted_at IS NULL
+		RETURNING id, slug, name, description, version_lock, deleted_at, created_at, updated_at
 	`, entityTableName)
 
 	if err := tx.NamedGet(ctx, entity, query, map[string]any{

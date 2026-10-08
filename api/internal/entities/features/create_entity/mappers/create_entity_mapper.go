@@ -12,7 +12,7 @@ func MapCreateEntityResponseToProto(dto *dtos.CreateEntityResponseDto) (*entityv
 		// 	Name:        dto.Name,
 		// 	Description: utils.StringToWrapper(dto.Description),
 		// 	VersionLock: dto.VersionLock,
-		// 	HiddenAt:    utils.TimeToTimestamp(dto.HiddenAt),
+		// 	DeletedAt:    utils.TimeToTimestamp(dto.DeletedAt),
 		// 	CreatedAt:   utils.TimeToTimestamp(dto.CreatedAt),
 		// 	UpdatedAt:   utils.TimeToTimestamp(dto.UpdatedAt),
 		// },

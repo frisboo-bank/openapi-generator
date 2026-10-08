@@ -69,7 +69,7 @@ func (c *CreateEntityHandler) Handle(ctx context.Context, request *CreateEntityQ
 		Name:        createdEntity.Name,
 		Description: &createdEntity.Description,
 		VersionLock: createdEntity.VersionLock,
-		HiddenAt:    createdEntity.HiddenAt,
+		DeletedAt:    createdEntity.DeletedAt,
 		CreatedAt:   createdEntity.CreatedAt,
 		UpdatedAt:   createdEntity.UpdatedAt,
 	}, nil

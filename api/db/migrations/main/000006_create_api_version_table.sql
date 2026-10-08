@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS api_versions (
   description text,
   base_path text,
   version_lock int NOT NULL DEFAULT 1 CHECK (version_lock > 0),
-  hidden_at timestamptz,
+  deleted_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz,
   UNIQUE(api_id, version)
