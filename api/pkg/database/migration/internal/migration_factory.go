@@ -19,6 +19,30 @@ func CreateMigration(
 	env environmentenum.Environment,
 	logger loggerContracts.Logger,
 ) (contracts.Migration, error) {
+	if !env.IsDevelopment() {
+		return nil, fmt.Errorf("migration can only run in development environment")
+	}
+
+	return createMigration(name, db, cfg, logger)
+}
+
+// CreateMigrationForTesting is the test-only path: it skips the development
+// environment gate so migrations can run under the TESTING environment.
+func CreateMigrationForTesting(
+	name string,
+	db *sql.DB,
+	cfg *config.MigrationOptions,
+	logger loggerContracts.Logger,
+) (contracts.Migration, error) {
+	return createMigration(name, db, cfg, logger)
+}
+
+func createMigration(
+	name string,
+	db *sql.DB,
+	cfg *config.MigrationOptions,
+	logger loggerContracts.Logger,
+) (contracts.Migration, error) {
 	var adapter contracts.MigrationAdapter
 	var err error
 
