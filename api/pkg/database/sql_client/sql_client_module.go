@@ -5,15 +5,18 @@ import (
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/config"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/models"
+	sqlclientinternal "frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal"
+	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/types"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
+	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
+	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	sqlclientenums "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
-	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -21,19 +24,55 @@ import (
 
 type SQLClientDependencies struct {
 	dig.In
-	Tracer  tracercontracts.Tracer   `name:"telemetry.tracer:main"`
-	Metrics metricscontracts.Metrics `name:"telemetry.metrics:main"`
+	Tracers map[string]tracercontracts.Tracer
+	Metrics map[string]metricscontracts.Metrics
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
+	module.MultiInstancesModuleOptions[*config.SQLClientOptions, contracts.SQLClientCore, SQLClientDependencies]{
 		Name:      "database.sql-client",
 		ConfigKey: "database.sql-clients",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			sqlclientenums.SQLClientEnumsDecodeHook(),
+			types.SQLClientEnumsDecodeHook(),
 		},
-		ProviderFn: func(name string, cfg *models.SQLClientOptions, env environmentenum.Environment, logger loggercontracts.Logger, extra SQLClientDependencies) (contracts.SQLClientCore, error) {
-			return CreateSQLClient(name, cfg, logger, extra.Tracer, extra.Metrics)
+		ProviderFn: func(
+			name string,
+			cfg *config.SQLClientOptions,
+			env environmentenum.Environment,
+			logger loggercontracts.Logger,
+			extra SQLClientDependencies,
+		) (contracts.SQLClientCore, error) {
+			var err error
+
+			var tracerInstance tracercontracts.Tracer
+			if !cfg.EnableTracing {
+				tracerInstance, err = tracer.CreateNoopTracer(name, logger)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				var ok bool
+				tracerInstance, ok = extra.Tracers[cfg.Tracer]
+				if !ok {
+					return nil, fmt.Errorf("tracer %q not found for sql-client %q", cfg.Tracer, name)
+				}
+			}
+
+			var metricsInstance metricscontracts.Metrics
+			if !cfg.EnableMetrics {
+				metricsInstance, err = metrics.CreateNoopMetrics(name, logger)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				var ok bool
+				metricsInstance, ok = extra.Metrics[cfg.Metrics]
+				if !ok {
+					return nil, fmt.Errorf("metrics %q not found for sql-client %q", cfg.Metrics, name)
+				}
+			}
+
+			return sqlclientinternal.CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{

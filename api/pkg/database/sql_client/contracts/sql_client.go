@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/models/enums/sql_client_type"
+	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 
@@ -30,27 +30,6 @@ type (
 		Name() string
 		Type() sqlclienttype.SqlClientType
 		Logger() loggerContracts.Logger
-	}
-
-	SQLClient interface {
-		SQLClientCore
-		SQLClientAdapter
-	}
-
-	SQLClientAdapter interface {
-		SQLClientCore
-		BeginTx(ctx context.Context, opts *sql.TxOptions) (SQLTransaction, error)
-		Exec(ctx context.Context, query string, args ...any) (sql.Result, error)
-		Query(ctx context.Context, query string, args ...any) (SQLRows, error)
-		QueryRow(ctx context.Context, query string, args ...any) SQLRow
-	}
-
-	SQLTransaction interface {
-		Commit(ctx context.Context) error
-		Exec(ctx context.Context, query string, args ...any) (sql.Result, error)
-		Query(ctx context.Context, query string, args ...any) (SQLRows, error)
-		QueryRow(ctx context.Context, query string, args ...any) SQLRow
-		Rollback(ctx context.Context) error
 	}
 
 	SQLXRows interface {
