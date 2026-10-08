@@ -69,6 +69,10 @@ database:
       type: goose
       migrationsDir: resources/db/migrations/main
       dbClient: main
+      enableTelemetry: true
+      tracer: main
+      metrics: main
+      logger: metrics
 caches:
   main:
     enabled: true
