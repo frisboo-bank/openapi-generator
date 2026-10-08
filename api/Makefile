@@ -11,6 +11,7 @@ endif
 
 GO   ?= go
 CGO  ?= 0
+PNPM ?= pnpm
 
 MODULE   := $(shell $(GO) list -m 2>/dev/null || echo "unknown")
 NAME     := $(notdir $(MODULE))
@@ -29,6 +30,11 @@ GO_LDFLAGS ?= -s -w \
 
 GOFLAGS    ?= -trimpath
 BUILDFLAGS ?= $(GOFLAGS) -ldflags "$(GO_LDFLAGS)" -tags "osusergo,netgo"
+
+GOOGLEAPIS_SHA   ?= d71f2ee15b7ec0e8cc7ce19f3dce68a5a341ace2
+GRPC_GATEWAY_SHA ?= 069005e84c857849d0419b10abb9c0e50910631b
+
+NODE_BIN := $(CURDIR)/node_modules/.bin
 
 .DEFAULT_GOAL := help
 
@@ -59,8 +65,8 @@ test: generate  ## Test: Run tests (race + coverage)
 	CGO_ENABLED=1 $(GO) tool cover -func=coverage.out | tail -n 1
 
 .PHONY: test-ci
-test-ci: generate  ## Test: Run tests (CI-optimized, with race detector)
-	$(GO) test -race -count=1 -coverprofile=coverage.out -covermode=atomic ./...
+test-ci: generate  ## Test: Run tests (CI-optimized)
+  $(GO) test -race -count=1 -coverprofile=coverage.out -covermode=atomic ./...
 
 .PHONY: bench
 bench: generate  ## Bench: Run go benchmarks (10s each)
@@ -84,7 +90,7 @@ deps-cleancache:  ## Deps: Clear the go module cache
 	$(GO) clean -modcache
 
 .PHONY: tidy
-tidy: format-proto generate  ## Tidy: Format Go code, tidy modules, organize imports
+tidy: proto-format generate  ## Tidy: Format Go code, tidy modules, organize imports
 	$(GO) fmt ./...
 	$(GO) mod tidy
 	$(GO) mod verify
@@ -94,7 +100,7 @@ tidy: format-proto generate  ## Tidy: Format Go code, tidy modules, organize imp
 	gofumpt -l -w .
 
 .PHONY: lint
-lint: lint-proto generate  ## Lint: Run go linters (revive + golangci-lint)
+lint: proto-lint generate  ## Lint: Run go linters (revive + golangci-lint)
 	revive -config revive-config.toml -formatter friendly ./...
 	golangci-lint run ./...
 
@@ -167,17 +173,19 @@ proto-build: proto-shared  ## Proto: Generate service protobuf/gRPC code
 		--grpc-gateway_out=$(GRPC_GO_OUT) \
 		--grpc-gateway_opt=module=$(GRPC_PROTO_MODULE),generate_unbound_methods=true \
 		--openapiv2_out=$(GRPC_SWAGGER_OUT) \
-		--openapiv2_opt=allow_merge=true,merge_file_name=openapi_generator_service \
+		--openapiv2_opt=allow_merge=true,merge_file_name=entity_service \
+		--plugin=protoc-gen-es=$(NODE_BIN)/protoc-gen-es \
+		--plugin=protoc-gen-connect-query=$(NODE_BIN)/protoc-gen-connect-query \
 		--connect-query_out=$(GRPC_ES_OUT) \
 		--es_out=$(GRPC_ES_OUT) \
 		$(shell find $(GRPC_PROTO_DIR) -name '*.proto')
 
-.PHONY: format-proto
-format-proto:  ## Proto: Format protobuf files
+.PHONY: proto-format
+proto-format:  ## Proto: Format protobuf files
 	buf format -w
 
-.PHONY: lint-proto
-lint-proto:  ## Proto: Lint protobuf schemas
+.PHONY: proto-lint
+proto-lint:  ## Proto: Lint protobuf schemas
 	buf lint
 
 .PHONY: proto-vendor
@@ -188,6 +196,7 @@ proto-vendor:  ## Proto: Download third-party proto dependencies locally
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/google/api
 	mkdir -p $(GRPC_PROTO_VENDOR_DIR)/protoc-gen-openapiv2/options
 	echo "Downloading Google API protos..."
+	curl -fsSL -o $(GRPC_PROTO_VENDOR_DIR)/google/api/annotations.proto https://raw.githubusercontent.com/googleapis/googleapis/$(GOOGLEAPIS_SHA)/google/api/annotations.proto
 	curl -sSL -o $(GRPC_PROTO_VENDOR_DIR)/google/api/annotations.proto https://raw.githubusercontent.com/googleapis/googleapis/$(GOOGLEAPIS_SHA)/google/api/annotations.proto
 	curl -sSL -o $(GRPC_PROTO_VENDOR_DIR)/google/api/http.proto https://raw.githubusercontent.com/googleapis/googleapis/$(GOOGLEAPIS_SHA)/google/api/http.proto
 	curl -sSL -o $(GRPC_PROTO_VENDOR_DIR)/google/api/field_behavior.proto https://raw.githubusercontent.com/googleapis/googleapis/$(GOOGLEAPIS_SHA)/google/api/field_behavior.proto
