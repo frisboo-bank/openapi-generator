@@ -5,7 +5,9 @@ import (
 	"time"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
+	metricspkg "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
+	tracerpkg "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer"
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
@@ -24,7 +26,9 @@ type migrationAdapterTelemetry struct {
 }
 
 // WrapMigrationAdapterForTelemetry returns a MigrationAdapter that emits a
-// span and a duration metric for every migration operation.
+// span and a duration metric for every migration operation. A nil tracer or
+// metrics is replaced with a noop adapter, so callers can pass nil without
+// opting out at the call site.
 func WrapMigrationAdapterForTelemetry(
 	name string,
 	delegate contracts.MigrationAdapter,
@@ -33,6 +37,14 @@ func WrapMigrationAdapterForTelemetry(
 ) contracts.MigrationAdapter {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("delegate", delegate)
+
+	logger := delegate.Logger()
+	if tracer == nil {
+		tracer, _ = tracerpkg.CreateNoopTracer(name, logger)
+	}
+	if metrics == nil {
+		metrics, _ = metricspkg.CreateNoopMetrics(name, logger)
+	}
 
 	return &migrationAdapterTelemetry{
 		MigrationAdapter: delegate,
@@ -44,22 +56,14 @@ func WrapMigrationAdapterForTelemetry(
 
 func (m *migrationAdapterTelemetry) record(ctx context.Context, op string, fn func(context.Context) error) error {
 	start := time.Now()
-
-	var span tracercontracts.TracerSpan
-	if m.tracer != nil {
-		ctx, span = m.tracer.Start(ctx, "migration."+op)
-	}
+	ctx, span := m.tracer.Start(ctx, "migration."+op)
+	defer span.End()
 
 	err := fn(ctx)
-	if span != nil {
-		defer span.End()
-		if err != nil {
-			span.RecordError(err)
-		}
+	if err != nil {
+		span.RecordError(err)
 	}
-	if m.metrics != nil {
-		m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", op, "error", err != nil)
-	}
+	m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", op, "error", err != nil)
 	return err
 }
 
@@ -89,21 +93,13 @@ func (m *migrationAdapterTelemetry) Status(ctx context.Context) error {
 
 func (m *migrationAdapterTelemetry) CurrentVersion(ctx context.Context) (int64, error) {
 	start := time.Now()
-
-	var span tracercontracts.TracerSpan
-	if m.tracer != nil {
-		ctx, span = m.tracer.Start(ctx, "migration.current_version")
-	}
+	ctx, span := m.tracer.Start(ctx, "migration.current_version")
+	defer span.End()
 
 	version, err := m.MigrationAdapter.CurrentVersion(ctx)
-	if span != nil {
-		defer span.End()
-		if err != nil {
-			span.RecordError(err)
-		}
+	if err != nil {
+		span.RecordError(err)
 	}
-	if m.metrics != nil {
-		m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", "current_version", "error", err != nil)
-	}
+	m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", "current_version", "error", err != nil)
 	return version, err
 }

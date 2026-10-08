@@ -46,10 +46,12 @@ func (f *fakeAdapter) CurrentVersion(ctx context.Context) (int64, error) {
 }
 func (f *fakeAdapter) Name() string                      { return "fake" }
 func (f *fakeAdapter) Type() migrationtype.MigrationType { return migrationtype.MigrationTypes.GOOSE }
-func (f *fakeAdapter) Logger() loggercontracts.Logger    { return nil }
+func (f *fakeAdapter) Logger() loggercontracts.Logger {
+	return logger.CreateNoopLogger("fake", environmentenum.Environments.TESTING)
+}
 
 func TestWrapMigrationAdapterForTelemetry(t *testing.T) {
-	t.Run("nil tracer/metrics degrade gracefully", func(t *testing.T) {
+	t.Run("nil tracer/metrics are replaced with noop adapters", func(t *testing.T) {
 		fa := &fakeAdapter{cur: 7}
 		dec := WrapMigrationAdapterForTelemetry("m", fa, nil, nil)
 		require.NotNil(t, dec)
@@ -63,6 +65,10 @@ func TestWrapMigrationAdapterForTelemetry(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, int64(7), v)
 		require.Equal(t, []string{"up", "down", "reset", "status", "current_version"}, fa.calls)
+
+		// The noop adapters must be wired in, not left nil.
+		require.NotNil(t, dec.(*migrationAdapterTelemetry).tracer)
+		require.NotNil(t, dec.(*migrationAdapterTelemetry).metrics)
 	})
 
 	t.Run("delegates through and records all ops", func(t *testing.T) {
