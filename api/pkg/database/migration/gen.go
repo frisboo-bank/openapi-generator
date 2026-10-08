@@ -1,4 +1,3 @@
 package migration
 
-//go:generate goenums -f -c ./models/enums/direction/direction.go
-//go:generate goenums -f -c ./models/enums/migration_type/migration_type.go
+//go:generate goenums -f -c ./types/migrationtype/migration_type.go

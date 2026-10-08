@@ -1,4 +1,4 @@
-package migration_test
+package goose_test
 
 import (
 	"context"

@@ -1,8 +1,6 @@
 package migrationtype
 
-type (
-	migrationType int8
-)
+type migrationType int8
 
 const (
 	unknown migrationType = iota // invalid
