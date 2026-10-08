@@ -59,14 +59,13 @@ func CreateMigrationForTests(
 		return nil, fmt.Errorf("migration can only run in testing environment")
 	}
 
-	return migrationinternal.CreateMigration(
+	return migrationinternal.CreateMigrationForTesting(
 		name,
 		db,
 		&config.MigrationOptions{
 			MigrationsDir: migrationDir,
 			Type:       migrationtype.MigrationTypes.GOOSE,
 		},
-		env,
 		logger.CreateNoopLogger("test", environmentenum.Environments.TESTING),
 	)
 }
