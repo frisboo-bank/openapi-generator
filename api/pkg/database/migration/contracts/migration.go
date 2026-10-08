@@ -3,8 +3,8 @@ package contracts
 import (
 	"context"
 
-	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/models/enums/migration_type"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 )
 
 type (
@@ -20,6 +20,6 @@ type (
 		CurrentVersion(ctx context.Context) (int64, error)
 		Name() string
 		Type() migrationtype.MigrationType
-		Logger() loggerContracts.Logger
+		Logger() loggercontracts.Logger
 	}
 )
