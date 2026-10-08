@@ -65,10 +65,11 @@ database:
       logger: sql-client
   migration:
     main:
-      enabled: true
       type: goose
       migrationsDir: resources/db/migrations/main
       dbClient: main
+      enableTracing: true
+      tracer: main
 caches:
   main:
     enabled: true
@@ -84,14 +85,12 @@ mediator:
 telemetry:
   metrics:
     main:
-      enabled: true
       type: open_telemetry
       endpoint: 127.0.0.1:4318
       insecure: true
       logger: metrics
   tracer:
     main:
-      enabled: true
       type: open_telemetry
       endpoint: 127.0.0.1:4318
       insecure: true

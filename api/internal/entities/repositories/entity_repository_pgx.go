@@ -7,8 +7,8 @@ import (
 
 	"frisboo-bank/openapi-generator-service/internal/entities/contracts"
 	"frisboo-bank/openapi-generator-service/internal/entities/models"
-	sqlclientContracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	sqlclientcontracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/query"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
@@ -22,13 +22,13 @@ var maxPaginationLimit = 100
 var _ contracts.EntitySQLRepository = (*EntityRepositoryPgx)(nil)
 
 type EntityRepositoryPgx struct {
-	sqlClient sqlclientContracts.SQLXClientAdapter
-	logger    loggerContracts.Logger
+	sqlClient sqlclientcontracts.SQLXClient
+	logger    loggercontracts.Logger
 }
 
 func NewEntityRepositoryPgx(
-	sqlClient sqlclientContracts.SQLXClientAdapter,
-	logger loggerContracts.Logger,
+	sqlClient sqlclientcontracts.SQLXClient,
+	logger loggercontracts.Logger,
 ) contracts.EntitySQLRepository {
 	validation.AssertNotNil("sqlClient", sqlClient)
 	validation.AssertNotNil("logger", logger)
@@ -39,11 +39,11 @@ func NewEntityRepositoryPgx(
 	}
 }
 
-func (e *EntityRepositoryPgx) BeginTx(ctx context.Context) (sqlclientContracts.SQLXTransaction, error) {
+func (e *EntityRepositoryPgx) BeginTx(ctx context.Context) (sqlclientcontracts.SQLXTransaction, error) {
 	return e.sqlClient.BeginTransaction(ctx, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 }
 
-func (e *EntityRepositoryPgx) CreateEntityTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) CreateEntityTx(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
 	validation.AssertNotNil("entity", entity)
 
 	query := fmt.Sprintf(`
@@ -62,7 +62,7 @@ func (e *EntityRepositoryPgx) CreateEntityTx(ctx context.Context, tx sqlclientCo
 	return entity, nil
 }
 
-func (e *EntityRepositoryPgx) DeleteEntityByIDTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID) (int64, error) {
+func (e *EntityRepositoryPgx) DeleteEntityByIDTx(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entityID uuid.UUID) (int64, error) {
 	query := fmt.Sprintf(`DELETE FROM %s WHERE id = :id`, entityTableName)
 
 	result, err := tx.NamedExec(ctx, query, map[string]any{"id": entityID})
@@ -86,7 +86,7 @@ func (e *EntityRepositoryPgx) GetEntityBySlug(ctx context.Context, entitySlug st
 	return e.doGetEntityBySlug(ctx, nil, entitySlug, query)
 }
 
-func (e *EntityRepositoryPgx) GetEntityBySlugTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entitySlug string, query *query.Query) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) GetEntityBySlugTx(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entitySlug string, query *query.Query) (*models.Entity, error) {
 	return e.doGetEntityBySlug(ctx, tx, entitySlug, query)
 }
 
@@ -115,7 +115,7 @@ func (e *EntityRepositoryPgx) ListEntities(ctx context.Context, query *query.Que
 	return e.doListEntities(ctx, nil, query)
 }
 
-func (e *EntityRepositoryPgx) ListEntitiesTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, query *query.Query) ([]*models.Entity, *query.Pagination, error) {
+func (e *EntityRepositoryPgx) ListEntitiesTx(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, query *query.Query) ([]*models.Entity, *query.Pagination, error) {
 	return e.doListEntities(ctx, tx, query)
 }
 
@@ -140,7 +140,7 @@ func (e *EntityRepositoryPgx) UnhideEntity(ctx context.Context, entityID uuid.UU
 	return rowsAffected, nil
 }
 
-func (e *EntityRepositoryPgx) UpdateEntityTx(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) UpdateEntityTx(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entity *models.Entity) (*models.Entity, error) {
 	validation.AssertNotNil("entity", entity)
 	validation.AssertNotNil("entity.EntityID", entity.EntityID)
 
@@ -173,17 +173,17 @@ func (e *EntityRepositoryPgx) UpdateEntityTx(ctx context.Context, tx sqlclientCo
 	return entity, nil
 }
 
-func (e *EntityRepositoryPgx) doGetEntityByID(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entityID uuid.UUID, q *query.Query) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) doGetEntityByID(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entityID uuid.UUID, q *query.Query) (*models.Entity, error) {
 	validation.AssertNotEmpty("entityID", entityID.String())
 	validation.AssertNotNil("q", q)
 
 	return nil, nil
 }
 
-func (e *EntityRepositoryPgx) doGetEntityBySlug(ctx context.Context, tx sqlclientContracts.SQLXTransaction, entitySlug string, q *query.Query) (*models.Entity, error) {
+func (e *EntityRepositoryPgx) doGetEntityBySlug(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, entitySlug string, q *query.Query) (*models.Entity, error) {
 	panic("unimplemented")
 }
 
-func (e *EntityRepositoryPgx) doListEntities(ctx context.Context, tx sqlclientContracts.SQLXTransaction, q *query.Query) ([]*models.Entity, *query.Pagination, error) {
+func (e *EntityRepositoryPgx) doListEntities(ctx context.Context, tx sqlclientcontracts.SQLXTransaction, q *query.Query) ([]*models.Entity, *query.Pagination, error) {
 	panic("unimplemented")
 }

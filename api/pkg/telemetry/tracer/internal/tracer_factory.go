@@ -7,7 +7,6 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/shared"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/noop"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal/adapters/otel"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types/tracertype"
 )
@@ -22,14 +21,12 @@ func CreateTracer(
 		return nil, err
 	}
 
-	var adapter contracts.TracerAdapter
+	var adapter contracts.Tracer
 	var err error
 
 	switch cfg.Type {
 	case tracertype.TracerTypes.OPEN_TELEMETRY:
 		adapter, err = otel.NewOtelTracerAdapter(name, cfg, shared.Resource("openapi-generator-service"), logger)
-	case tracertype.TracerTypes.NOOP:
-		adapter, err = noop.NewNoopTracerAdapter(name, logger)
 	default:
 		err = fmt.Errorf("unsupported Tracer type: %v", cfg.Type)
 	}
@@ -37,6 +34,5 @@ func CreateTracer(
 	if err != nil {
 		return nil, err
 	}
-
-	return &tracer{adapter: adapter}, nil
+	return adapter, nil
 }

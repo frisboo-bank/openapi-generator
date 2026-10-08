@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"strconv"
 
-	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/config"
+	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -14,7 +14,7 @@ import (
 	vGoose "github.com/pressly/goose/v3"
 )
 
-var _ contracts.MigrationAdapter = (*gooseAdapter)(nil)
+var _ contracts.Migration = (*gooseAdapter)(nil)
 
 type gooseAdapter struct {
 	name          string
@@ -24,7 +24,12 @@ type gooseAdapter struct {
 	logger        loggerContracts.Logger
 }
 
-func NewGooseAdapter(name string, cfg *config.MigrationOptions, database *sql.DB, logger loggerContracts.Logger) (contracts.MigrationAdapter, error) {
+func NewGooseAdapter(
+	name string,
+	cfg *config.MigrationOptions,
+	database *sql.DB,
+	logger loggerContracts.Logger,
+) (contracts.Migration, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("database", database)

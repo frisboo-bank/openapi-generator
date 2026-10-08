@@ -1,23 +1,19 @@
-package enums
+package types
 
 import (
 	"fmt"
 	"reflect"
 	"strings"
 
-	encodingtype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/encoding_type"
-	loglevel "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/log_level"
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/encodingtype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loglevel"
 
 	"github.com/go-viper/mapstructure/v2"
 )
 
 func LoggerEnumsDecodeHook() mapstructure.DecodeHookFunc {
-	return func(
-		f reflect.Type,
-		t reflect.Type,
-		data any,
-	) (any, error) {
+	return func(f, t reflect.Type, data any) (any, error) {
 		switch t {
 		case reflect.TypeFor[encodingtype.EncodingType]():
 			return encodingtype.ParseEncodingType(data)

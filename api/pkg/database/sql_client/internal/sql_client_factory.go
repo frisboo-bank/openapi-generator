@@ -28,7 +28,7 @@ func CreateSQLClient(
 	validation.AssertNotNil("tracer", tracer)
 	validation.AssertNotNil("metrics", metrics)
 
-	var adapter contracts.SQLXClientAdapter
+	var adapter contracts.SQLXClient
 	var err error
 
 	switch cfg.Type {
@@ -44,6 +44,9 @@ func CreateSQLClient(
 		return nil, err
 	}
 
-	delegate := sqlx.WrapSQLXClientForTelemetry(name, &sqlXClient{adapter: adapter}, tracer, metrics)
-	return delegate, nil
+	if tracer == nil && metrics == nil {
+		return adapter, nil
+	}
+
+	return sqlx.WrapSQLXClientForTelemetry(name, adapter, tracer, metrics), nil
 }

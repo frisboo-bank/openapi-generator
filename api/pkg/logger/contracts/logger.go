@@ -3,17 +3,13 @@ package contracts
 import (
 	"time"
 
-	loggertype "frisboo-bank/openapi-generator-service/pkg/logger/models/enums/logger_type"
+	"frisboo-bank/openapi-generator-service/pkg/logger/types/loggertype"
 )
 
 type (
 	Fields map[string]any
 
 	Logger interface {
-		LoggerAdapter
-	}
-
-	LoggerAdapter interface {
 		Debug(args ...any)
 		Debugf(template string, args ...any)
 		Debugw(msg string, fields Fields)

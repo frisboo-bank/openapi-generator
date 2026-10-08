@@ -19,7 +19,7 @@ import (
 	trace "go.opentelemetry.io/otel/trace"
 )
 
-var _ contracts.TracerAdapter = (*otelTracerAdapter)(nil)
+var _ contracts.Tracer = (*otelTracerAdapter)(nil)
 
 type otelTracerAdapter struct {
 	name           string
@@ -28,7 +28,12 @@ type otelTracerAdapter struct {
 	tracer         trace.Tracer
 }
 
-func NewOtelTracerAdapter(name string, cfg *config.TracerOptions, resource *sdkresource.Resource, logger loggercontracts.Logger) (contracts.TracerAdapter, error) {
+func NewOtelTracerAdapter(
+	name string,
+	cfg *config.TracerOptions,
+	resource *sdkresource.Resource,
+	logger loggercontracts.Logger,
+) (contracts.Tracer, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("resource", resource)

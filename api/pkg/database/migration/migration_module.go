@@ -12,8 +12,9 @@ import (
 	migrationtype "frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
 	sqlclientcontracts "frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	"frisboo-bank/openapi-generator-service/pkg/logger"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
+	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -22,6 +23,8 @@ import (
 type MigrationDependencies struct {
 	dig.In
 	SQLClients map[string]sqlclientcontracts.SQLClientCore
+	Tracers    map[string]tracercontracts.Tracer
+	Metrics    map[string]metricscontracts.Metrics
 }
 
 var MigrationModule = module.NewMultiInstancesModule(
@@ -44,7 +47,24 @@ var MigrationModule = module.NewMultiInstancesModule(
 			if !ok {
 				return nil, fmt.Errorf("sql client %q does not expose its DB connection", name)
 			}
-			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, env, logger)
+
+			var tracerInstance tracercontracts.Tracer
+			if cfg.EnableTracing {
+				tracerInstance, ok = extra.Tracers[cfg.Tracer]
+				if !ok {
+					return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
+				}
+			}
+
+			var metricsInstance metricscontracts.Metrics
+			if cfg.EnableMetrics {
+				metricsInstance, ok = extra.Metrics[cfg.Metrics]
+				if !ok {
+					return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
+				}
+			}
+
+			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, env, logger, tracerInstance, metricsInstance)
 		},
 	},
 )
@@ -64,8 +84,8 @@ func CreateMigrationForTests(
 		db,
 		&config.MigrationOptions{
 			MigrationsDir: migrationDir,
-			Type:       migrationtype.MigrationTypes.GOOSE,
+			Type:          migrationtype.MigrationTypes.GOOSE,
 		},
-		logger.CreateNoopLogger("test", environmentenum.Environments.TESTING),
+		nil,
 	)
 }

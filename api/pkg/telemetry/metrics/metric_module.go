@@ -8,7 +8,6 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
 	metricsinternal "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/internal"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types"
-	"frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/types/metricstype"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -23,16 +22,14 @@ var MetricsModule = module.NewMultiInstancesModule(
 		Name:             "telemetry.metrics",
 		ConfigKey:        "telemetry.metrics",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.MetricsEnumsDecodeHook()},
-		ProviderFn: func(name string, cfg *config.MetricsOptions, _ environmentenum.Environment, logger loggercontracts.Logger, _ MetricsModuleDependencies) (contracts.Metrics, error) {
+		ProviderFn: func(
+			name string,
+			cfg *config.MetricsOptions,
+			_ environmentenum.Environment,
+			logger loggercontracts.Logger,
+			_ MetricsModuleDependencies,
+		) (contracts.Metrics, error) {
 			return metricsinternal.CreateMetrics(name, cfg, logger)
 		},
 	},
 )
-
-func CreateNoopMetrics(name string, logger loggercontracts.Logger) (contracts.Metrics, error) {
-	return metricsinternal.CreateMetrics(
-		name,
-		&config.MetricsOptions{Type: metricstype.MetricsTypes.NOOP},
-		logger,
-	)
-}

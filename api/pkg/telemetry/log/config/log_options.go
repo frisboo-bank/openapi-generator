@@ -1,15 +1,14 @@
-package models
+package config
 
 import (
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	logtype "frisboo-bank/openapi-generator-service/pkg/telemetry/log/models/enums/log_type"
+	"frisboo-bank/openapi-generator-service/pkg/telemetry/log/types/logtype"
 )
 
 var _ configContracts.Configurable = (*LogOptions)(nil)
 
 type LogOptions struct {
-	IsEnabled bool            `mapstructure:"enabled"`
-	Type      logtype.LogType `mapstructure:"type"`
+	Type logtype.LogType `mapstructure:"type"`
 
 	// OpenTelemetry
 	Endpoint string `mapstructure:"endpoint"`
@@ -19,7 +18,7 @@ type LogOptions struct {
 	Logger string `mapstructure:"logger"`
 }
 
-func (o *LogOptions) GetEnabled() bool  { return o.IsEnabled }
+func (o *LogOptions) GetEnabled() bool  { return true }
 func (o *LogOptions) GetLogger() string { return o.Logger }
 
 func (o *LogOptions) SetDefaults() {}

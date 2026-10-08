@@ -12,10 +12,6 @@ type (
 	Attributes map[string]string
 
 	Metrics interface {
-		MetricsAdapter
-	}
-
-	MetricsAdapter interface {
 		RecordDuration(name string, duraction time.Duration, attrs ...any)
 		Close(ctx context.Context) error
 		Name() string
