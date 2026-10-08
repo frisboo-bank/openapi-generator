@@ -31,11 +31,13 @@ install-tools: ## Install: Install all development tools
 .PHONY: generate
 generate: ## Generate: Generate code (enums, protobuf, mocks)
 	$(MAKE) -C $(API_DIR) generate
+	$(MAKE) -C $(API_DIR) proto-build
 	$(MAKE) -C $(API_DIR) mocks
 
 .PHONY: tidy
 tidy: ## Tidy: Format + tidy sources in both sub-projects
 	$(MAKE) -C $(API_DIR) tidy
+	$(MAKE) -C $(FRONTEND_DIR) tidy
 
 .PHONY: vet
 vet: ## Vet: Run go vet (alias of api/vet)
@@ -86,13 +88,13 @@ proto-build: ## Proto: Generate service protobuf/gRPC code
 proto-shared: ## Proto: Generate shared protobuf code
 	$(MAKE) -C $(API_DIR) proto-shared
 
-.PHONY: format-proto
-format-proto: ## Proto: Format protobuf files
-	$(MAKE) -C $(API_DIR) format-proto
+.PHONY: proto-format
+proto-format: ## Proto: Format protobuf files
+	$(MAKE) -C $(API_DIR) proto-format
 
-.PHONY: lint-proto
-lint-proto: ## Proto: Lint protobuf schemas
-	$(MAKE) -C $(API_DIR) lint-proto
+.PHONY: proto-lint
+proto-lint: ## Proto: Lint protobuf schemas
+	$(MAKE) -C $(API_DIR) proto-lint
 
 .PHONY: proto-vendor
 proto-vendor: ## Proto: Download third-party proto dependencies locally
