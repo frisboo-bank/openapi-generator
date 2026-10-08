@@ -67,7 +67,7 @@ database:
     main:
       enabled: true
       type: goose
-      migrationsDir: db/migrations/main
+      migrationsDir: resources/db/migrations/main
       dbClient: main
 caches:
   main:
