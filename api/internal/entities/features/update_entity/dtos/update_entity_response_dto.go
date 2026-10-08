@@ -7,7 +7,7 @@ type UpdateEntityResponseDto struct {
 	Name        string
 	Description string
 	VersionLock int64
-	HiddenAt    *time.Time
+	DeletedAt    *time.Time
 	CreatedAt   *time.Time
 	UpdatedAt   *time.Time
 }

@@ -11,7 +11,7 @@ func MapEntityToProto(entity *models.Entity) (*entityv1.Entity, error) {
 		Slug:        entity.Slug,
 		Name:        entity.Name,
 		VersionLock: entity.VersionLock,
-		HiddenAt:    utils.TimeToTimestamp(entity.HiddenAt),
+		DeletedAt:    utils.TimeToTimestamp(entity.DeletedAt),
 		CreatedAt:   utils.TimeToTimestamp(entity.CreatedAt),
 		UpdatedAt:   utils.TimeToTimestamp(entity.UpdatedAt),
 	}, nil

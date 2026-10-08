@@ -335,7 +335,7 @@
           "type": "string",
           "format": "int64"
         },
-        "hiddenAt": {
+        "deletedAt": {
           "type": "string",
           "format": "date-time"
         },

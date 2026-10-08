@@ -16,7 +16,7 @@ func MapGetEntityBySlugResponseToProto(
 				Name:        dto.Entity.Name,
 				Description: &dto.Entity.Description,
 				VersionLock: dto.Entity.VersionLock,
-				HiddenAt:    utils.TimeToTimestamp(dto.Entity.HiddenAt),
+				DeletedAt:    utils.TimeToTimestamp(dto.Entity.DeletedAt),
 				CreatedAt:   utils.TimeToTimestamp(dto.Entity.CreatedAt),
 				UpdatedAt:   utils.TimeToTimestamp(dto.Entity.UpdatedAt),
 			},

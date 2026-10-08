@@ -36,9 +36,9 @@ export declare type Entity = Message<"entity.v1.Entity"> & {
   versionLock: bigint;
 
   /**
-   * @generated from field: google.protobuf.Timestamp hidden_at = 5;
+   * @generated from field: google.protobuf.Timestamp deleted_at = 5;
    */
-  hiddenAt?: Timestamp | undefined;
+  deletedAt?: Timestamp | undefined;
 
   /**
    * @generated from field: google.protobuf.Timestamp created_at = 6;

@@ -28,7 +28,7 @@ type Entity struct {
 	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	Description   *string                `protobuf:"bytes,3,opt,name=description,proto3,oneof" json:"description,omitempty"`
 	VersionLock   int64                  `protobuf:"varint,4,opt,name=version_lock,json=versionLock,proto3" json:"version_lock,omitempty"`
-	HiddenAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=hidden_at,json=hiddenAt,proto3" json:"hidden_at,omitempty"`
+	DeletedAt      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -93,9 +93,9 @@ func (x *Entity) GetVersionLock() int64 {
 	return 0
 }
 
-func (x *Entity) GetHiddenAt() *timestamppb.Timestamp {
+func (x *Entity) GetDeletedAt() *timestamppb.Timestamp {
 	if x != nil {
-		return x.HiddenAt
+		return x.DeletedAt
 	}
 	return nil
 }
@@ -124,7 +124,7 @@ const file_entity_v1_entity_proto_rawDesc = "" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12%\n" +
 	"\vdescription\x18\x03 \x01(\tH\x00R\vdescription\x88\x01\x01\x12!\n" +
 	"\fversion_lock\x18\x04 \x01(\x03R\vversionLock\x127\n" +
-	"\thidden_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bhiddenAt\x129\n" +
+	"\tdeleted_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\bdeletedAt\x129\n" +
 	"\n" +
 	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -149,7 +149,7 @@ var file_entity_v1_entity_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil), // 1: google.protobuf.Timestamp
 }
 var file_entity_v1_entity_proto_depIdxs = []int32{
-	1, // 0: entity.v1.Entity.hidden_at:type_name -> google.protobuf.Timestamp
+	1, // 0: entity.v1.Entity.deleted_at:type_name -> google.protobuf.Timestamp
 	1, // 1: entity.v1.Entity.created_at:type_name -> google.protobuf.Timestamp
 	1, // 2: entity.v1.Entity.updated_at:type_name -> google.protobuf.Timestamp
 	3, // [3:3] is the sub-list for method output_type
