@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
@@ -17,6 +16,7 @@ import (
 
 type TracerModuleDependencies struct {
 	dig.In
+	Loggers module.DependenciesMap[loggercontracts.Logger]
 }
 
 var TracerModule = module.NewMultiInstancesModule(
@@ -25,13 +25,17 @@ var TracerModule = module.NewMultiInstancesModule(
 		ConfigKey:        "telemetry.tracer",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.TracerEnumsDecodeHook()},
 		ProviderFn: func(
+			ctx context.Context,
 			name string,
 			cfg *config.TracerOptions,
-			_ environmentenum.Environment,
-			logger loggercontracts.Logger,
-			_ TracerModuleDependencies,
+			dependencies TracerModuleDependencies,
 		) (contracts.Tracer, error) {
-			return tracerinternal.CreateTracer(name, cfg, context.Background(), logger)
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return tracerinternal.CreateTracer(ctx, name, cfg, loggerInstance)
 		},
 	},
 )

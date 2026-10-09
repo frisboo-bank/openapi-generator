@@ -13,25 +13,20 @@ import (
 )
 
 func CreateMetrics(
+	ctx context.Context,
 	name string,
 	cfg *config.MetricsOptions,
-	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.Metrics, error) {
-	cfg.SetDefaults()
-	if err := cfg.Validate(); err != nil {
-		return nil, err
-	}
-
 	var adapter contracts.Metrics
 	var err error
 
 	switch cfg.Type {
 	case metricstype.MetricsTypes.OPEN_TELEMETRY:
 		adapter, err = otel.NewOtelMetricsAdapter(
+			ctx,
 			name,
 			cfg,
-			ctx,
 			shared.Resource("openapi-generator-service"),
 			logger,
 		)

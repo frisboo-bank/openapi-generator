@@ -1,4 +1,4 @@
-package models
+package config
 
 import (
 	"fmt"
@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"time"
 
-	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums/rpc_server_type"
+	configcontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 )
 
-var _ configContracts.Configurable = (*RPCServerOptions)(nil)
+var _ configcontracts.Configurable = (*RPCServerOptions)(nil)
 
 type RPCServerOptions struct {
 	IsEnabled             bool                        `mapstructure:"enabled"`

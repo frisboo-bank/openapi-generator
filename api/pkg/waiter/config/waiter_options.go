@@ -1,12 +1,12 @@
-package models
+package config
 
 import (
 	"fmt"
 
-	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	configcontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 )
 
-var _ configContracts.Configurable = (*WaiterOptions)(nil)
+var _ configcontracts.Configurable = (*WaiterOptions)(nil)
 
 const (
 	defaultWaitTimeoutMs    = 30000

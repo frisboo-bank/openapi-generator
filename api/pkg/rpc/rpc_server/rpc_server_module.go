@@ -4,12 +4,13 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
+	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models"
-	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
+	rpcserverinternal "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/internal"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -17,26 +18,32 @@ import (
 
 type RPCServerDependencies struct {
 	dig.In
+	Loggers     module.DependenciesMap[loggercontracts.Logger]
+	Environment environmentenum.Environment
 }
 
 var RPCServerModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.RPCServerOptions, contracts.RPCServer, RPCServerDependencies]{
+	module.MultiInstancesModuleOptions[*config.RPCServerOptions, contracts.RPCServer, RPCServerDependencies]{
 		Name:      "rpc-server",
 		ConfigKey: "rpc-servers",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			rpcserverenums.RPCServerEnumsDecodeHook(),
+			types.RPCServerEnumsDecodeHook(),
 		},
 		ProviderFn: func(
+			ctx context.Context,
 			name string,
-			cfg *models.RPCServerOptions,
-			env environmentenum.Environment,
-			logger loggerContracts.Logger,
-			extra RPCServerDependencies,
+			cfg *config.RPCServerOptions,
+			dependencies RPCServerDependencies,
 		) (contracts.RPCServer, error) {
-			return CreateRPCServer(name, cfg, logger, env)
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return rpcserverinternal.CreateRPCServer(name, cfg, loggerInstance, dependencies.Environment)
 		},
-		HookFn: func(name string, instance contracts.RPCServer) containerContracts.HookResolveResult {
-			return containerContracts.HookResolveResult{
+		HookFn: func(ctx context.Context, name string, instance contracts.RPCServer) containercontracts.HookResolveResult {
+			return containercontracts.HookResolveResult{
 				Name: "rpc-server:" + name,
 				Wait: func(ctx context.Context) error {
 					return instance.Start(ctx)

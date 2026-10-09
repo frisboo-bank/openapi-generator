@@ -29,15 +29,15 @@ type otelTracerAdapter struct {
 }
 
 func NewOtelTracerAdapter(
+	ctx context.Context,
 	name string,
 	cfg *config.TracerOptions,
-	ctx context.Context,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
 

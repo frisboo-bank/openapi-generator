@@ -6,16 +6,16 @@ import (
 	"net"
 	"time"
 
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/registrar"
+	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/types/rpcservertype"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/internal/adapters/grpc/interceptors"
-	rpcservertype "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums/rpc_server_type"
 
 	grpcctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 
@@ -24,7 +24,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var _ contracts.RPCServerAdapter = (*grpcAdapter)(nil)
+var _ contracts.RPCServer = (*grpcAdapter)(nil)
 
 type grpcAdapter struct {
 	address               string
@@ -45,10 +45,10 @@ type grpcAdapter struct {
 
 func NewGRPCServer(
 	name string,
-	cfg *models.RPCServerOptions,
+	cfg *config.RPCServerOptions,
 	logger loggercontracts.Logger,
 	env environmentenum.Environment,
-) contracts.RPCServerAdapter {
+) contracts.RPCServer {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)
@@ -97,7 +97,6 @@ func (g *grpcAdapter) AddMiddlewares(middlewares ...any) {
 			g.streamInterceptors = append(g.streamInterceptors, v)
 		default:
 			panic(fmt.Errorf("invalid gRPC middleware type %T", middleware))
-
 		}
 	}
 }

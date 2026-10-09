@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"os"
 
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/routing"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/google/uuid"
@@ -23,14 +23,14 @@ type WorkspaceConfig struct {
 var _ routing.Endpoint = (*chromeDevtoolEndpoint)(nil)
 
 type chromeDevtoolEndpoint struct {
-	Env    environmentEnum.Environment
-	Logger loggerContracts.Logger
+	Env    environmentenum.Environment
+	Logger loggercontracts.Logger
 	Root   contracts.RouteGroup
 }
 
 func NewChromeDevtoolEndpoint(
-	env environmentEnum.Environment,
-	logger loggerContracts.Logger,
+	env environmentenum.Environment,
+	logger loggercontracts.Logger,
 	root contracts.RouteGroup,
 ) routing.Endpoint {
 	validation.AssertValidEnum("env", env)

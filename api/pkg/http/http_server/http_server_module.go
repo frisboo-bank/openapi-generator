@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"net/http"
 
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
-	httpserverenums "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	httpserverinternal "frisboo-bank/openapi-generator-service/pkg/http/http_server/internal"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/types"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -20,25 +21,28 @@ import (
 
 type HTTPServerDependencies struct {
 	dig.In
+	Loggers module.DependenciesMap[loggercontracts.Logger]
 }
 
 var HTTPServerModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.HTTPServerOptions, contracts.HTTPServer, HTTPServerDependencies]{
-		Name:      "http-server",
-		ConfigKey: "http-servers",
-		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			httpserverenums.HTTPServerEnumsDecodeHook(),
-		},
+	module.MultiInstancesModuleOptions[*config.HTTPServerOptions, contracts.HTTPServer, HTTPServerDependencies]{
+		Name:             "http-server",
+		ConfigKey:        "http-servers",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.HTTPServerEnumsDecodeHook()},
 		ProviderFn: func(
+			ctx context.Context,
 			name string,
-			cfg *models.HTTPServerOptions,
-			env environmentEnum.Environment,
-			logger loggerContracts.Logger,
-			extra HTTPServerDependencies,
+			cfg *config.HTTPServerOptions,
+			dependencies HTTPServerDependencies,
 		) (contracts.HTTPServer, error) {
-			return CreateHTTPServer(name, cfg, logger, env)
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return httpserverinternal.CreateHTTPServer(name, cfg, loggerInstance)
 		},
-		HookFn: func(name string, instance contracts.HTTPServer) containerContracts.HookResolveResult {
+		HookFn: func(ctx context.Context, name string, instance contracts.HTTPServer) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
 				Name: "http-server:" + name,
 				Wait: func(ctx context.Context) error {

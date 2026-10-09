@@ -35,15 +35,15 @@ type otelMetricsAdapter struct {
 }
 
 func NewOtelMetricsAdapter(
+	ctx context.Context,
 	name string,
 	cfg *config.MetricsOptions,
-	ctx context.Context,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.Metrics, error) {
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
 
