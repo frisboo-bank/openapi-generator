@@ -31,15 +31,15 @@ type otelTracerAdapter struct {
 func NewOtelTracerAdapter(
 	name string,
 	cfg *config.TracerOptions,
+	ctx context.Context,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
-
-	ctx := context.Background()
 
 	opts := []otlptracehttp.Option{otlptracehttp.WithEndpoint(cfg.Endpoint)}
 	if cfg.Insecure {
@@ -72,7 +72,12 @@ func (o *otelTracerAdapter) Start(ctx context.Context, event string) (context.Co
 	return ctx, &otelTracerSpan{span: span}
 }
 
-// Close implements [contracts.TracerAdapter].
+func (s *otelTracerSpan) End() { s.span.End() }
+
+func (s *otelTracerSpan) RecordError(err error) { s.span.RecordError(err) }
+
+func (s *otelTracerSpan) RecordPanic(err error) { s.span.RecordError(err) }
+
 func (o *otelTracerAdapter) Close(ctx context.Context) error {
 	return o.tracerProvider.Shutdown(ctx)
 }
@@ -87,6 +92,3 @@ func (o *otelTracerAdapter) Logger() loggercontracts.Logger { return o.logger }
 type otelTracerSpan struct {
 	span trace.Span
 }
-
-func (s *otelTracerSpan) End()                  { s.span.End() }
-func (s *otelTracerSpan) RecordError(err error) { s.span.RecordError(err) }

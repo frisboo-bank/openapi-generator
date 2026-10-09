@@ -1,6 +1,8 @@
 package tracer
 
 import (
+	"context"
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -29,7 +31,7 @@ var TracerModule = module.NewMultiInstancesModule(
 			logger loggercontracts.Logger,
 			_ TracerModuleDependencies,
 		) (contracts.Tracer, error) {
-			return tracerinternal.CreateTracer(name, cfg, logger)
+			return tracerinternal.CreateTracer(name, cfg, context.Background(), logger)
 		},
 	},
 )
