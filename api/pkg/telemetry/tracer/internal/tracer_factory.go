@@ -13,6 +13,7 @@ import (
 )
 
 func CreateTracer(
+	ctx context.Context,
 	name string,
 	cfg *config.TracerOptions,
 	ctx context.Context,
@@ -29,9 +30,9 @@ func CreateTracer(
 	switch cfg.Type {
 	case tracertype.TracerTypes.OPEN_TELEMETRY:
 		adapter, err = otel.NewOtelTracerAdapter(
+			ctx,
 			name,
 			cfg,
-			ctx,
 			shared.Resource("openapi-generator-service"),
 			logger,
 		)

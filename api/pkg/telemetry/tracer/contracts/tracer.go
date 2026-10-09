@@ -19,6 +19,6 @@ type (
 	TracerSpan interface {
 		End()
 		RecordError(err error)
-		RecordPanic(err error)
+		RecordPanic(v any)
 	}
 )

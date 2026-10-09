@@ -1,6 +1,8 @@
 package log
 
 import (
+	"context"
+
 	"fmt"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -11,6 +13,7 @@ import (
 )
 
 func CreateMetrics(
+	ctx context.Context,
 	name string,
 	cfg *config.LogOptions,
 	logger loggercontracts.Logger,

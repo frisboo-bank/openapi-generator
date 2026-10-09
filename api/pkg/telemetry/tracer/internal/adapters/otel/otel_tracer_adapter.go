@@ -10,6 +10,8 @@ import (
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
+	"fmt"
+
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
@@ -29,12 +31,13 @@ type otelTracerAdapter struct {
 }
 
 func NewOtelTracerAdapter(
+	ctx context.Context,
 	name string,
 	cfg *config.TracerOptions,
-	ctx context.Context,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("ctx", ctx)
@@ -76,7 +79,9 @@ func (s *otelTracerSpan) End() { s.span.End() }
 
 func (s *otelTracerSpan) RecordError(err error) { s.span.RecordError(err) }
 
-func (s *otelTracerSpan) RecordPanic(err error) { s.span.RecordError(err) }
+func (s *otelTracerSpan) RecordPanic(v any) {
+	s.span.RecordError(fmt.Errorf("panic: %v", v))
+}
 
 func (o *otelTracerAdapter) Close(ctx context.Context) error {
 	return o.tracerProvider.Shutdown(ctx)

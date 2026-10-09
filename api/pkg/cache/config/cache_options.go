@@ -1,15 +1,15 @@
-package models
+package config
 
 import (
 	"fmt"
 	"net"
 	"time"
 
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
-	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	configcontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 )
 
-var _ configContracts.Configurable = (*CacheOptions)(nil)
+var _ configcontracts.Configurable = (*CacheOptions)(nil)
 
 type CacheOptions struct {
 	IsEnabled    bool                `mapstructure:"enabled"`

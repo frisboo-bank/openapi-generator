@@ -27,6 +27,7 @@ var _ contracts.Metrics = (*otelMetricsAdapter)(nil)
 
 type otelMetricsAdapter struct {
 	name             string
+	ctx              context.Context
 	meterProvider    *sdkmetric.MeterProvider
 	meter            metric.Meter
 	histogram        sync.Once
@@ -35,15 +36,15 @@ type otelMetricsAdapter struct {
 }
 
 func NewOtelMetricsAdapter(
+	ctx context.Context,
 	name string,
 	cfg *config.MetricsOptions,
-	ctx context.Context,
 	resource *sdkresource.Resource,
 	logger loggercontracts.Logger,
 ) (contracts.Metrics, error) {
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
-	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
 
@@ -65,6 +66,7 @@ func NewOtelMetricsAdapter(
 	otel.SetMeterProvider(mp)
 	return &otelMetricsAdapter{
 		name:          name,
+		ctx:           ctx,
 		meterProvider: mp,
 		meter:         mp.Meter("openapi-generator-service"),
 		logger:        logger,
@@ -85,7 +87,7 @@ func (o *otelMetricsAdapter) RecordDuration(name string, duraction time.Duration
 	})
 
 	if o.float64Histogram != nil {
-		o.float64Histogram.Record(context.Background(), float64(duraction), measurement)
+		o.float64Histogram.Record(o.ctx, float64(duraction), measurement)
 	}
 }
 

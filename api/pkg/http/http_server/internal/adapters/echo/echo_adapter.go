@@ -4,12 +4,11 @@ import (
 	"context"
 	"strings"
 
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/adapters/echo/middlewares/logger"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/routing"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -18,29 +17,27 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 
-var _ contracts.HTTPServerAdapter = (*echoAdapter)(nil)
+var _ contracts.HTTPServer = (*echoAdapter)(nil)
 
 type echoAdapter struct {
+	name          string
 	address       string
 	bodyLimit     string
 	gzipLevel     int
 	ignoreLogUrls []string
 	logger        loggerContracts.Logger
-	name          string
 	routeBuilder  contracts.RouteBuilder
 	server        *echoVendor.Echo
 }
 
 func NewEchoAdapter(
 	name string,
-	cfg *models.HTTPServerOptions,
+	cfg *config.HTTPServerOptions,
 	logger loggerContracts.Logger,
-	env environmentEnum.Environment,
-) contracts.HTTPServerAdapter {
+) contracts.HTTPServer {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)
-	validation.AssertValidEnum("env", env)
 
 	srv := echoVendor.New()
 	srv.HideBanner = true
@@ -124,9 +121,9 @@ func (e *echoAdapter) skipper() func(c echoVendor.Context) bool {
 	}
 }
 
-func (e *echoAdapter) Name() string { return e.name }
+func (e *echoAdapter) RouteBuilder() contracts.RouteBuilder { return e.routeBuilder }
+func (e *echoAdapter) Logger() loggerContracts.Logger       { return e.logger }
+func (e *echoAdapter) Name() string                         { return e.name }
 func (e *echoAdapter) Type() httpservertype.HttpServerType {
 	return httpservertype.HttpServerTypes.ECHO
 }
-func (e *echoAdapter) RouteBuilder() contracts.RouteBuilder { return e.routeBuilder }
-func (e *echoAdapter) Logger() loggerContracts.Logger       { return e.logger }

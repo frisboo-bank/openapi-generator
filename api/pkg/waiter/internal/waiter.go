@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/utils"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/waiter/models"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -25,27 +25,21 @@ type waiter struct {
 	cleanupTimeout time.Duration
 	ctx            context.Context
 	hooks          map[string]contracts.WaiterHook
-	logger         loggerContracts.Logger
+	logger         loggercontracts.Logger
 	mu             sync.Mutex
 	waitOnce       sync.Once
 }
 
 func NewWaiter(
-	cfg *models.WaiterOptions,
-	logger loggerContracts.Logger,
-) (contracts.Waiter, error) {
-	return NewWaiterWithContext(cfg, logger, context.Background())
-}
-
-func NewWaiterWithContext(
-	cfg *models.WaiterOptions,
-	logger loggerContracts.Logger,
-	parentCtx context.Context,
+	ctx context.Context,
+	cfg *config.WaiterOptions,
+	logger loggercontracts.Logger,
 ) (contracts.Waiter, error) {
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("logger", logger)
 
-	ctx, cancel := context.WithCancel(parentCtx)
+	ctx, cancel := context.WithCancel(ctx)
 
 	w := &waiter{
 		cancel:         cancel,

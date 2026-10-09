@@ -1,96 +1,81 @@
 package module
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	configcontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/container"
-	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
-type MultiInstancesModuleOptions[
-	Config configContracts.Configurable,
-	Instance any,
-	Extra any,
-] struct {
+type MultiInstancesModuleOptions[Config configcontracts.Configurable, Instance, Dependencies any] struct {
 	Name             string
 	ConfigKey        string
 	ConfigDecodeHook []mapstructure.DecodeHookFunc
-	ProviderFn       func(name string, cfg Config, env environmentEnum.Environment, logger loggerContracts.Logger, extra Extra) (Instance, error)
-	HookFn           func(name string, instance Instance) containerContracts.HookResolveResult
+	ProviderFn       func(context.Context, string, Config, Dependencies) (Instance, error)
+	HookFn           func(context.Context, string, Instance) containercontracts.HookResolveResult
 }
 
 type MultiInstancesModuleResponse = func(
-	env environmentEnum.Environment,
-	configLoader configContracts.ConfigLoader,
-) containerContracts.Module
+	context.Context,
+	environmentenum.Environment,
+	configcontracts.ConfigLoader,
+) containercontracts.Module
 
-func NewMultiInstancesModule[Config configContracts.Configurable, Instance, Extra any](
-	opts MultiInstancesModuleOptions[Config, Instance, Extra],
+func NewMultiInstancesModule[Config configcontracts.Configurable, Instance, Dependencies any](
+	opts MultiInstancesModuleOptions[Config, Instance, Dependencies],
 ) MultiInstancesModuleResponse {
 	validation.AssertNotEmpty("name", opts.Name)
 	validation.AssertNotEmpty("configKey", opts.ConfigKey)
 	validation.AssertNotNil("ProviderFn", opts.ProviderFn)
 
 	return func(
-		env environmentEnum.Environment,
-		configLoader configContracts.ConfigLoader,
-	) containerContracts.Module {
+		ctx context.Context,
+		env environmentenum.Environment,
+		configLoader configcontracts.ConfigLoader,
+	) containercontracts.Module {
+		validation.AssertNotNil("ctx", ctx)
 		validation.AssertNotNil("env", env)
 		validation.AssertNotNil("configLoader", configLoader)
 
-		type ConfigsMapType = map[string]Config
-		type InstancesMapType = map[string]Instance
-
-		if configDecodeHook := opts.ConfigDecodeHook; len(configDecodeHook) > 0 {
-			configLoader.RegisterDecodeHookFunc(configDecodeHook...)
+		if len(opts.ConfigDecodeHook) > 0 {
+			configLoader.RegisterDecodeHookFunc(opts.ConfigDecodeHook...)
 		}
+
+		type ConfigsMapType = map[string]Config
+		type InstancesMapType = DependenciesMap[Instance]
 
 		var cfgMap ConfigsMapType
 		if err := configLoader.LoadKey(env, &cfgMap, opts.ConfigKey); err != nil {
 			log.Fatalf("Failed to build %q module with error: %v", opts.Name, err)
 		}
 
-		mod := container.NewModule(
-			opts.Name,
-			container.Provider(func() ConfigsMapType { return cfgMap }),
-		)
-
+		mod := container.NewModule(opts.Name, container.Provider(func() ConfigsMapType { return cfgMap }))
 		if len(cfgMap) == 0 {
 			return mod
 		}
 
 		mod.AddProvider(container.Provider(
-			func(loggers map[string]loggerContracts.Logger, extra Extra) (InstancesMapType, error) {
+			func(dependencies Dependencies) (InstancesMapType, error) {
 				instances := make(InstancesMapType)
 
 				for name, cfg := range cfgMap {
 					if !cfg.GetEnabled() {
 						continue
 					}
-
 					cfg.SetDefaults()
 					if err := cfg.Validate(); err != nil {
 						return nil, fmt.Errorf("validate config %q: %w", name, err)
 					}
 
-					loggerName := cfg.GetLogger()
-					if loggerName == "" {
-						loggerName = name
-					}
-					logger, ok := loggers[loggerName]
-					if !ok {
-						return nil, fmt.Errorf("logger %q not found for %q %q", loggerName, opts.Name, name)
-					}
-
-					instance, err := opts.ProviderFn(name, cfg, env, logger, extra)
+					instance, err := opts.ProviderFn(ctx, name, cfg, dependencies)
 					if err != nil {
 						return nil, fmt.Errorf("%s %q: %w", opts.Name, name, err)
 					}
@@ -106,30 +91,23 @@ func NewMultiInstancesModule[Config configContracts.Configurable, Instance, Extr
 			},
 		))
 
-		for name, cfg := range cfgMap {
-			if !cfg.GetEnabled() {
-				continue
-			}
-
-			mod.AddProvider(containerContracts.Provider{
+		for name := range cfgMap {
+			mod.AddProvider(containercontracts.Provider{
 				Fn:   func(instances InstancesMapType) Instance { return instances[name] },
 				Name: opts.Name + ":" + name,
 			})
 
 			if opts.HookFn != nil {
-				n := name
-				mod.AddHook(func(c *dig.Container) (containerContracts.HookResolveResult, error) {
+				mod.AddHook(func(c *dig.Container) (containercontracts.HookResolveResult, error) {
 					var all InstancesMapType
 					if err := c.Invoke(func(m InstancesMapType) { all = m }); err != nil {
-						return containerContracts.HookResolveResult{},
-							fmt.Errorf("%s %q hook: %w", opts.Name, n, err)
+						return containercontracts.HookResolveResult{}, fmt.Errorf("%s %q hook: %w", opts.Name, name, err)
 					}
-					instance, ok := all[n]
+					instance, ok := all[name]
 					if !ok {
-						return containerContracts.HookResolveResult{},
-							fmt.Errorf("%s %q hook: instance not found", opts.Name, n)
+						return containercontracts.HookResolveResult{}, fmt.Errorf("%s %q hook: instance not found", opts.Name, name)
 					}
-					return opts.HookFn(n, instance), nil
+					return opts.HookFn(ctx, name, instance), nil
 				})
 			}
 		}

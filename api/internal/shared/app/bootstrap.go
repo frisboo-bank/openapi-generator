@@ -36,9 +36,9 @@ func (b *Bootstrap) Run() error {
 	logger.Info("bootstrapping application", slog.String("env", string(b.env.String())))
 
 	builder := application.NewApplicationBuilder(b.configLoader, b.env)
-	builder.ProvideModule(generator.GeneratorServiceModule(b.configLoader, b.env))
+	builder.ProvideModule(generator.GeneratorServiceModule(context.Background(), b.configLoader, b.env))
 
-	app, err := builder.Build()
+	app, err := builder.Build(context.Background())
 	if err != nil {
 		return fmt.Errorf("application stopped with error: %w", err)
 	}
