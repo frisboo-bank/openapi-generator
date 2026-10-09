@@ -62,9 +62,9 @@ func createMigration(
 		return nil, err
 	}
 
-	if tracer == nil && metrics == nil {
-		return adapter, nil
+	if tracer != nil || metrics != nil {
+		adapter = telemetry.WrapMigrationForTelemetry(name, adapter, tracer, metrics)
 	}
 
-	return telemetry.WrapMigrationForTelemetry(name, adapter, tracer, metrics), nil
+	return adapter, nil
 }
