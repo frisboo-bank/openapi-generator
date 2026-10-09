@@ -7,7 +7,6 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/postgres/pgx"
 	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/adapters/sqlite/sqlite3x"
-	"frisboo-bank/openapi-generator-service/pkg/database/sql_client/internal/decorators/telemetry/sqlx"
 	sqlclienttype "frisboo-bank/openapi-generator-service/pkg/database/sql_client/types/sqlclienttype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	metricscontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/metrics/contracts"
@@ -25,8 +24,6 @@ func CreateSQLClient(
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)
-	validation.AssertNotNil("tracer", tracer)
-	validation.AssertNotNil("metrics", metrics)
 
 	var adapter contracts.SQLXClient
 	var err error
@@ -44,9 +41,5 @@ func CreateSQLClient(
 		return nil, err
 	}
 
-	if tracer == nil && metrics == nil {
-		return adapter, nil
-	}
-
-	return sqlx.WrapSQLXClientForTelemetry(name, adapter, tracer, metrics), nil
+	return adapter, nil
 }

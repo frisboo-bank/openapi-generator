@@ -39,22 +39,20 @@ var SQLClientModule = module.NewMultiInstancesModule(
 			extra SQLClientDependencies,
 		) (contracts.SQLClientCore, error) {
 			var tracerInstance tracercontracts.Tracer
-			var ok bool
-
-			if cfg.EnableTracing {
-				tracerInstance, ok = extra.Tracers[cfg.Tracer]
-				if !ok {
-					return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
-				}
-			}
+			// if cfg.EnableTracing {
+			// 	tracerInstance, ok = extra.Tracers[cfg.Tracer]
+			// 	if !ok {
+			// 		return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
+			// 	}
+			// }
 
 			var metricsInstance metricscontracts.Metrics
-			if cfg.EnableMetrics {
-				metricsInstance, ok = extra.Metrics[cfg.Metrics]
-				if !ok {
-					return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
-				}
-			}
+			// if cfg.EnableMetrics {
+			// 	metricsInstance, ok = extra.Metrics[cfg.Metrics]
+			// 	if !ok {
+			// 		return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
+			// 	}
+			// }
 
 			return sqlclientinternal.CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
 		},

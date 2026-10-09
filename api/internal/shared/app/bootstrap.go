@@ -31,7 +31,7 @@ func NewBootstrap(
 	}
 }
 
-func (b *Bootstrap) Run() error {
+func (b *Bootstrap) Run(ctx context.Context) error {
 	logger := slog.Default()
 	logger.Info("bootstrapping application", slog.String("env", string(b.env.String())))
 
@@ -48,7 +48,7 @@ func (b *Bootstrap) Run() error {
 
 	logger.Info("application starting")
 
-	if err := app.Start(); err != nil && !errors.Is(err, context.Canceled) {
+	if err := app.Start(ctx); err != nil && !errors.Is(err, context.Canceled) {
 		return fmt.Errorf("application stopped with error: %w", err)
 	}
 
