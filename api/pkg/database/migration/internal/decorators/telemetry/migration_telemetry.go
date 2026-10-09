@@ -10,6 +10,21 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
+// migrationStartKey is the context key for the shared operation start time.
+// The outermost wrapper captures time.Now() and stores it; inner wrappers
+// read it so all instruments measure from the same reference point.
+const migrationStartKey = "migration.start"
+
+func getMigrationStart(ctx context.Context) (time.Time, bool) {
+	t, ok := ctx.Value(migrationStartKey).(time.Time)
+	return t, ok
+}
+
+func withMigrationStart(ctx context.Context, start time.Time) context.Context {
+	return context.WithValue(ctx, migrationStartKey, start)
+}
+
+
 // migrationAdapterTracing decorates a MigrationAdapter with tracing spans.
 // Only call WrapMigrationAdapterForTracing when a non-nil tracer is available;
 // otherwise leave the adapter unwrapped. No noop fallback is needed.
@@ -41,6 +56,11 @@ func WrapMigrationAdapterForTracing(
 }
 
 func (m *migrationAdapterTracing) record(ctx context.Context, op string, fn func(context.Context) error) error {
+	start, ok := getMigrationStart(ctx)
+	if !ok {
+		start = time.Now()
+		ctx = withMigrationStart(ctx, start)
+	}
 	ctx, span := m.tracer.Start(ctx, "migration."+op)
 	defer span.End()
 
@@ -117,7 +137,11 @@ func WrapMigrationAdapterForMetrics(
 }
 
 func (m *migrationAdapterMetrics) record(ctx context.Context, op string, fn func(context.Context) error) error {
-	start := time.Now()
+	start, ok := getMigrationStart(ctx)
+	if !ok {
+		start = time.Now()
+		ctx = withMigrationStart(ctx, start)
+	}
 	err := fn(ctx)
 	m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", op, "error", err != nil)
 	return err

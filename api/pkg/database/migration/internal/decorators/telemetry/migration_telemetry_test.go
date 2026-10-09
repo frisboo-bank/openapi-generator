@@ -139,3 +139,54 @@ func TestWrapMigrationAdapterForMetrics(t *testing.T) {
 		require.Equal(t, migrationtype.MigrationTypes.GOOSE, dec.Type())
 	})
 }
+
+func TestStackedTracingAndMetrics(t *testing.T) {
+	// When both wrappers are applied, the start time is captured once by the
+	// outermost wrapper and consumed by the inner one, so both instruments
+	// measure from the same reference point.
+	fa := &fakeAdapter{cur: 7}
+	logger := logger.CreateNoopLogger("test", environmentenum.Environments.TESTING)
+	tr, err := tracer.CreateNoopTracer("m", logger)
+	require.NoError(t, err)
+	mt, err := metrics.CreateNoopMetrics("m", logger)
+	require.NoError(t, err)
+
+	// Tracing outermost — it captures the start time.
+	dec := WrapMigrationAdapterForTracing("m", fa, tr)
+	dec = WrapMigrationAdapterForMetrics("m", dec, mt)
+	require.NotNil(t, dec)
+
+	ctx := context.Background()
+	require.NoError(t, dec.Up(ctx, 0))
+	require.NoError(t, dec.Down(ctx, 1))
+	require.NoError(t, dec.Reset(ctx))
+	require.NoError(t, dec.Status(ctx))
+	v, err := dec.CurrentVersion(ctx)
+	require.NoError(t, err)
+	require.Equal(t, int64(7), v)
+	require.Equal(t, []string{"up", "down", "reset", "status", "current_version"}, fa.calls)
+}
+
+func TestStackedMetricsAndTracing(t *testing.T) {
+	// Metrics outermost — it captures the start time.
+	fa := &fakeAdapter{cur: 7}
+	logger := logger.CreateNoopLogger("test", environmentenum.Environments.TESTING)
+	tr, err := tracer.CreateNoopTracer("m", logger)
+	require.NoError(t, err)
+	mt, err := metrics.CreateNoopMetrics("m", logger)
+	require.NoError(t, err)
+
+	dec := WrapMigrationAdapterForMetrics("m", fa, mt)
+	dec = WrapMigrationAdapterForTracing("m", dec, tr)
+	require.NotNil(t, dec)
+
+	ctx := context.Background()
+	require.NoError(t, dec.Up(ctx, 0))
+	require.NoError(t, dec.Down(ctx, 1))
+	require.NoError(t, dec.Reset(ctx))
+	require.NoError(t, dec.Status(ctx))
+	v, err := dec.CurrentVersion(ctx)
+	require.NoError(t, err)
+	require.Equal(t, int64(7), v)
+	require.Equal(t, []string{"up", "down", "reset", "status", "current_version"}, fa.calls)
+}
