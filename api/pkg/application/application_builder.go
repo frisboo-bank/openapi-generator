@@ -1,6 +1,8 @@
 package application
 
 import (
+	"context"
+
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/application/contracts"
@@ -44,13 +46,13 @@ func NewApplicationBuilder(
 	}
 }
 
-func (a *applicationBuilder) Build() (contracts.Application, error) {
+func (a *applicationBuilder) Build(ctx context.Context) (contracts.Application, error) {
 	coreModule := container.NewModule(
 		"core",
 		environment.EnvironmentModule(a.environment, a.configLoader),
 		config.ConfigModule(a.configLoader),
 		logger.LoggerModule(a.environment, a.configLoader),
-		waiter.WaiterModule(a.environment, a.configLoader),
+		waiter.WaiterModule(ctx, a.environment, a.configLoader),
 
 		container.Provider(func(
 			loggers map[string]loggerContracts.Logger,

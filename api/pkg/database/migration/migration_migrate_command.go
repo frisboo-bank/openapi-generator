@@ -121,16 +121,16 @@ func executeMigration(
 ) error {
 	mod := container.NewModule(
 		"migration-runner",
-		sqlclient.SQLClientModule(env, configLoader),
-		metrics.MetricsModule(env, configLoader),
-		tracer.TracerModule(env, configLoader),
-		MigrationModule(env, configLoader),
+		sqlclient.SQLClientModule(context.Background(), env, configLoader),
+		metrics.MetricsModule(context.Background(), env, configLoader),
+		tracer.TracerModule(context.Background(), env, configLoader),
+		MigrationModule(context.Background(), env, configLoader),
 	)
 
 	appBuilder := application.NewApplicationBuilder(configLoader, env)
 	appBuilder.ProvideModule(mod)
 
-	app, err := appBuilder.Build()
+	app, err := appBuilder.Build(context.Background())
 	if err != nil {
 		return fmt.Errorf("migration failed with error: %w", err)
 	}

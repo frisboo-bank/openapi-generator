@@ -37,7 +37,7 @@ var LogModule = module.NewMultiInstancesModule(
 				return nil, err
 			}
 
-			return loginternal.CreateMetrics(name, cfg, loggerInstance)
+			return loginternal.CreateMetrics(ctx, name, cfg, loggerInstance)
 		},
 	},
 )

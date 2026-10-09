@@ -29,8 +29,9 @@ func NewGeneratorApplicationBuilder(
 
 func (b *GeneratorApplicationBuilder) Build(ctx context.Context) (contracts.Application, error) {
 	b.ProvideModule(generator.GeneratorServiceModule(
+		ctx,
 		b.ConfigLoader(),
 		b.Environment(),
 	))
-	return b.ApplicationBuilder.Build()
+	return b.ApplicationBuilder.Build(ctx)
 }
