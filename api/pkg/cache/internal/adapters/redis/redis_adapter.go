@@ -5,27 +5,32 @@ import (
 	"fmt"
 	"time"
 
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	vendorRedis "github.com/redis/go-redis/v9"
 )
 
-var _ contracts.CacheAdapter = (*redisAdapter)(nil)
+var _ contracts.Cache = (*redisAdapter)(nil)
 
 type redisAdapter struct {
+	name   string
 	cache  *vendorRedis.Client
 	logger loggerContracts.Logger
 }
 
 func NewRedisAdapter(
-	cfg *models.CacheOptions,
+	name string,
+	cfg *config.CacheOptions,
 	logger loggerContracts.Logger,
-	env environmentEnum.Environment,
-) contracts.CacheAdapter {
+) contracts.Cache {
+	validation.AssertNotEmpty("name", name)
+	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("logger", logger)
+
 	srv := vendorRedis.NewClient(&vendorRedis.Options{
 		Addr:         cfg.Address(),
 		Password:     cfg.Password,
@@ -39,12 +44,13 @@ func NewRedisAdapter(
 	})
 
 	return &redisAdapter{
+		name:   name,
 		cache:  srv,
 		logger: logger,
 	}
 }
 
-func (r *redisAdapter) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
+func (r *redisAdapter) Set(ctx context.Context, key, value string, expiration time.Duration) error {
 	if err := r.cache.Set(ctx, key, value, expiration).Err(); err != nil {
 		return fmt.Errorf("redis set %q: %w", key, err)
 	}
@@ -87,5 +93,6 @@ func (r *redisAdapter) Close() error {
 	return nil
 }
 
-func (r *redisAdapter) Type() cachetype.CacheType      { return cachetype.CacheTypes.REDIS }
 func (r *redisAdapter) Logger() loggerContracts.Logger { return r.logger }
+func (r *redisAdapter) Name() string                   { return r.name }
+func (r *redisAdapter) Type() cachetype.CacheType      { return cachetype.CacheTypes.REDIS }

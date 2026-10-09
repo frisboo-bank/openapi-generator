@@ -4,40 +4,41 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cacheenums "frisboo-bank/openapi-generator-service/pkg/cache/models/enums"
+	cacheinternal "frisboo-bank/openapi-generator-service/pkg/cache/internal"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
 )
 
-const CachesModule = "caches"
-
 type CacheDependencies struct {
 	dig.In
+	Loggers module.DependenciesMap[loggercontracts.Logger]
 }
 
 var CacheModule = module.NewMultiInstancesModule(
-	module.MultiInstancesModuleOptions[*models.CacheOptions, contracts.Cache, CacheDependencies]{
-		Name:      "cache",
-		ConfigKey: "caches",
-		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			cacheenums.CacheEnumsDecodeHook(),
-		},
+	module.MultiInstancesModuleOptions[*config.CacheOptions, contracts.Cache, CacheDependencies]{
+		Name:             "cache",
+		ConfigKey:        "caches",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.CacheEnumsDecodeHook()},
 		ProviderFn: func(
+			ctx context.Context,
 			name string,
-			cfg *models.CacheOptions,
-			env environmentEnum.Environment,
-			logger loggerContracts.Logger,
-			extra CacheDependencies,
+			cfg *config.CacheOptions,
+			dependencies CacheDependencies,
 		) (contracts.Cache, error) {
-			return CreateCache(name, cfg, logger, env)
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return cacheinternal.CreateCache(name, cfg, loggerInstance)
 		},
-		HookFn: func(name string, instance contracts.Cache) containerContracts.HookResolveResult {
+		HookFn: func(ctx context.Context, name string, instance contracts.Cache) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
 				Name: "cache:" + name,
 				Wait: func(ctx context.Context) error {

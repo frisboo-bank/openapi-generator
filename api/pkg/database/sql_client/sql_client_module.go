@@ -13,7 +13,6 @@ import (
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -22,8 +21,9 @@ import (
 
 type SQLClientDependencies struct {
 	dig.In
-	Tracers map[string]tracercontracts.Tracer
-	Metrics map[string]metricscontracts.Metrics
+	Loggers module.DependenciesMap[loggercontracts.Logger]
+	Tracers module.DependenciesMap[tracercontracts.Tracer]
+	Metrics module.DependenciesMap[metricscontracts.Metrics]
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
@@ -32,33 +32,41 @@ var SQLClientModule = module.NewMultiInstancesModule(
 		ConfigKey:        "database.sql-clients",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.SQLClientEnumsDecodeHook()},
 		ProviderFn: func(
+			ctx context.Context,
 			name string,
 			cfg *config.SQLClientOptions,
-			env environmentenum.Environment,
-			logger loggercontracts.Logger,
-			extra SQLClientDependencies,
+			dependencies SQLClientDependencies,
 		) (contracts.SQLClientCore, error) {
-			var tracerInstance tracercontracts.Tracer
-			var ok bool
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
 
+			var tracerInstance tracercontracts.Tracer
 			if cfg.EnableTracing {
-				tracerInstance, ok = extra.Tracers[cfg.Tracer]
-				if !ok {
-					return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
+				tracerInstance, err = dependencies.Tracers.Get(cfg.Tracer)
+				if err != nil {
+					return nil, err
 				}
 			}
 
 			var metricsInstance metricscontracts.Metrics
 			if cfg.EnableMetrics {
-				metricsInstance, ok = extra.Metrics[cfg.Metrics]
-				if !ok {
-					return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
+				metricsInstance, err = dependencies.Metrics.Get(cfg.Metrics)
+				if err != nil {
+					return nil, err
 				}
 			}
 
-			return sqlclientinternal.CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
+			return sqlclientinternal.CreateSQLClient(
+				name,
+				cfg,
+				loggerInstance,
+				tracerInstance,
+				metricsInstance,
+			)
 		},
-		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
+		HookFn: func(ctx context.Context, name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{
 				Name: "database.sql-client:" + name,
 				Wait: func(ctx context.Context) error {

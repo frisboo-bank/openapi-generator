@@ -5,6 +5,8 @@ import (
 	entitiesconfigurations "frisboo-bank/openapi-generator-service/internal/entities/configurations"
 	"frisboo-bank/openapi-generator-service/pkg/cache"
 	"frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	"context"
+
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	sqlclient "frisboo-bank/openapi-generator-service/pkg/database/sql_client"
@@ -18,6 +20,7 @@ import (
 )
 
 func GeneratorServiceModule(
+	ctx context.Context,
 	configLoader contracts.ConfigLoader,
 	env environmentenum.Environment,
 ) containercontracts.Module {
@@ -26,13 +29,13 @@ func GeneratorServiceModule(
 
 	return container.NewModule(
 		"generator-service",
-		httpserver.HTTPServerModule(env, configLoader),
-		rpcserver.RPCServerModule(env, configLoader),
-		sqlclient.SQLClientModule(env, configLoader),
-		cache.CacheModule(env, configLoader),
+		httpserver.HTTPServerModule(ctx, env, configLoader),
+		rpcserver.RPCServerModule(ctx, env, configLoader),
+		sqlclient.SQLClientModule(ctx, env, configLoader),
+		cache.CacheModule(ctx, env, configLoader),
 		mediator.MediatorModule(env, configLoader),
-		metrics.MetricsModule(env, configLoader),
-		tracer.TracerModule(env, configLoader),
+		metrics.MetricsModule(ctx, env, configLoader),
+		tracer.TracerModule(ctx, env, configLoader),
 
 		entities.EntitiesModule(),
 		entitiesconfigurations.EntitiesConfigurationsModule(),

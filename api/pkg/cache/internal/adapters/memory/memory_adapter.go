@@ -5,39 +5,45 @@ import (
 	"fmt"
 	"time"
 
+	"frisboo-bank/openapi-generator-service/pkg/cache/config"
 	"frisboo-bank/openapi-generator-service/pkg/cache/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/cache/models"
-	cachetype "frisboo-bank/openapi-generator-service/pkg/cache/models/enums/cache_type"
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/cache/types/cachetype"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/validation"
 
 	"github.com/Yiling-J/theine-go"
 )
 
-var _ contracts.CacheAdapter = (*memoryAdapter)(nil)
+var _ contracts.Cache = (*memoryAdapter)(nil)
 
 type memoryAdapter struct {
+	name   string
 	cache  *theine.Cache[string, string]
-	logger loggerContracts.Logger
+	logger loggercontracts.Logger
 }
 
 func NewMemoryAdapter(
-	cfg *models.CacheOptions,
-	logger loggerContracts.Logger,
-	env environmentEnum.Environment,
-) (contracts.CacheAdapter, error) {
+	name string,
+	cfg *config.CacheOptions,
+	logger loggercontracts.Logger,
+) (contracts.Cache, error) {
+	validation.AssertNotEmpty("name", name)
+	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("logger", logger)
+
 	cache, err := theine.NewBuilder[string, string](cfg.MaxEntries).Build()
 	if err != nil {
 		return nil, err
 	}
 
 	return &memoryAdapter{
+		name:   name,
 		cache:  cache,
 		logger: logger,
 	}, nil
 }
 
-func (m *memoryAdapter) Set(ctx context.Context, key string, value string, expiration time.Duration) error {
+func (m *memoryAdapter) Set(ctx context.Context, key, value string, expiration time.Duration) error {
 	if ok := m.cache.SetWithTTL(key, value, 1, expiration); !ok {
 		return fmt.Errorf("cache size exceeded")
 	}
@@ -78,5 +84,6 @@ func (m *memoryAdapter) Close() error {
 	return nil
 }
 
+func (m *memoryAdapter) Logger() loggercontracts.Logger { return m.logger }
+func (m *memoryAdapter) Name() string                   { return m.name }
 func (m *memoryAdapter) Type() cachetype.CacheType      { return cachetype.CacheTypes.MEMORY }
-func (m *memoryAdapter) Logger() loggerContracts.Logger { return m.logger }

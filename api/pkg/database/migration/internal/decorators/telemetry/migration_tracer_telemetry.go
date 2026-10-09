@@ -2,8 +2,6 @@ package telemetry
 
 import (
 	"context"
-	"fmt"
-	"runtime/debug"
 
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/database/migration/types/migrationtype"
@@ -80,7 +78,7 @@ func (m *migrationTracer) record(ctx context.Context, op string, fn func(context
 		}
 
 		if r := recover(); r != nil {
-			span.RecordPanic(fmt.Errorf("panic: %v\n%s", r, debug.Stack()))
+			span.RecordPanic(r)
 			panic(r)
 		}
 	}()
