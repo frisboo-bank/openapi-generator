@@ -10,170 +10,133 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 )
 
-// migrationStartKey is the context key for the shared operation start time.
-// The outermost wrapper captures time.Now() and stores it; inner wrappers
-// read it so all instruments measure from the same reference point.
-const migrationStartKey = "migration.start"
+// migrationAdapterTelemetry decorates a MigrationAdapter with tracing and
+// metrics. A nil tracer or metrics is tolerated — the operation simply
+// skips that instrument. Each instrument's logic lives in its own method
+// (decorateMigrationForTracing / decorateMigrationForMetrics), so adding
+// or changing one instrument never touches the other.
+var _ contracts.MigrationAdapter = (*migrationAdapterTelemetry)(nil)
 
-func getMigrationStart(ctx context.Context) (time.Time, bool) {
-	t, ok := ctx.Value(migrationStartKey).(time.Time)
-	return t, ok
-}
-
-func withMigrationStart(ctx context.Context, start time.Time) context.Context {
-	return context.WithValue(ctx, migrationStartKey, start)
-}
-
-
-// migrationAdapterTracing decorates a MigrationAdapter with tracing spans.
-// Only call WrapMigrationAdapterForTracing when a non-nil tracer is available;
-// otherwise leave the adapter unwrapped. No noop fallback is needed.
-var _ contracts.MigrationAdapter = (*migrationAdapterTracing)(nil)
-
-type migrationAdapterTracing struct {
-	contracts.MigrationAdapter
-	name   string
-	tracer tracercontracts.Tracer
-}
-
-// WrapMigrationAdapterForTracing wraps a MigrationAdapter so that every
-// operation emits a tracing span. The tracer must be non-nil; callers that
-// have no tracer simply don't call this wrapper.
-func WrapMigrationAdapterForTracing(
-	name string,
-	delegate contracts.MigrationAdapter,
-	tracer tracercontracts.Tracer,
-) contracts.MigrationAdapter {
-	validation.AssertNotEmpty("name", name)
-	validation.AssertNotNil("delegate", delegate)
-	validation.AssertNotNil("tracer", tracer)
-
-	return &migrationAdapterTracing{
-		MigrationAdapter: delegate,
-		name:             name,
-		tracer:           tracer,
-	}
-}
-
-func (m *migrationAdapterTracing) record(ctx context.Context, op string, fn func(context.Context) error) error {
-	start, ok := getMigrationStart(ctx)
-	if !ok {
-		start = time.Now()
-		ctx = withMigrationStart(ctx, start)
-	}
-	ctx, span := m.tracer.Start(ctx, "migration."+op)
-	defer span.End()
-
-	err := fn(ctx)
-	if err != nil {
-		span.RecordError(err)
-	}
-	return err
-}
-
-func (m *migrationAdapterTracing) Up(ctx context.Context, version uint) error {
-	return m.record(ctx, "up", func(ctx context.Context) error {
-		return m.MigrationAdapter.Up(ctx, version)
-	})
-}
-
-func (m *migrationAdapterTracing) Down(ctx context.Context, version uint) error {
-	return m.record(ctx, "down", func(ctx context.Context) error {
-		return m.MigrationAdapter.Down(ctx, version)
-	})
-}
-
-func (m *migrationAdapterTracing) Reset(ctx context.Context) error {
-	return m.record(ctx, "reset", func(ctx context.Context) error {
-		return m.MigrationAdapter.Reset(ctx)
-	})
-}
-
-func (m *migrationAdapterTracing) Status(ctx context.Context) error {
-	return m.record(ctx, "status", func(ctx context.Context) error {
-		return m.MigrationAdapter.Status(ctx)
-	})
-}
-
-func (m *migrationAdapterTracing) CurrentVersion(ctx context.Context) (int64, error) {
-	ctx, span := m.tracer.Start(ctx, "migration.current_version")
-	defer span.End()
-
-	version, err := m.MigrationAdapter.CurrentVersion(ctx)
-	if err != nil {
-		span.RecordError(err)
-	}
-	return version, err
-}
-
-// migrationAdapterMetrics decorates a MigrationAdapter with duration metrics.
-// Only call WrapMigrationAdapterForMetrics when a non-nil metrics is available;
-// otherwise leave the adapter unwrapped. No noop fallback is needed.
-var _ contracts.MigrationAdapter = (*migrationAdapterMetrics)(nil)
-
-type migrationAdapterMetrics struct {
+type migrationAdapterTelemetry struct {
 	contracts.MigrationAdapter
 	name    string
+	tracer  tracercontracts.Tracer
 	metrics metricscontracts.Metrics
 }
 
-// WrapMigrationAdapterForMetrics wraps a MigrationAdapter so that every
-// operation records a duration metric. The metrics must be non-nil; callers
-// that have no metrics simply don't call this wrapper.
-func WrapMigrationAdapterForMetrics(
+// WrapMigrationAdapterForTelemetry wraps a MigrationAdapter so that every
+// operation emits a tracing span and a duration metric. Either instrument
+// may be nil — the operation degrades to the bare adapter for that
+// instrument. The start time is captured once per operation and shared
+// between the span and the metric, so their durations always agree.
+func WrapMigrationAdapterForTelemetry(
 	name string,
 	delegate contracts.MigrationAdapter,
+	tracer tracercontracts.Tracer,
 	metrics metricscontracts.Metrics,
 ) contracts.MigrationAdapter {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("delegate", delegate)
-	validation.AssertNotNil("metrics", metrics)
 
-	return &migrationAdapterMetrics{
+	return &migrationAdapterTelemetry{
 		MigrationAdapter: delegate,
 		name:             name,
+		tracer:           tracer,
 		metrics:          metrics,
 	}
 }
 
-func (m *migrationAdapterMetrics) record(ctx context.Context, op string, fn func(context.Context) error) error {
-	start, ok := getMigrationStart(ctx)
-	if !ok {
-		start = time.Now()
-		ctx = withMigrationStart(ctx, start)
+// decorateMigrationForTracing wraps fn so that calling it emits a tracing
+// span named "migration.<op>". When tracer is nil, fn is returned unchanged.
+func (m *migrationAdapterTelemetry) decorateMigrationForTracing(op string, fn func(context.Context) error) func(context.Context) error {
+	if m.tracer == nil {
+		return fn
 	}
-	err := fn(ctx)
-	m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", op, "error", err != nil)
-	return err
+	return func(ctx context.Context) error {
+		ctx, span := m.tracer.Start(ctx, "migration."+op)
+		defer span.End()
+		err := fn(ctx)
+		if err != nil {
+			span.RecordError(err)
+		}
+		return err
+	}
 }
 
-func (m *migrationAdapterMetrics) Up(ctx context.Context, version uint) error {
+// decorateMigrationForMetrics wraps fn so that calling it records a duration
+// metric named "migration.operation" tagged with the operation name. The
+// start time is supplied by the caller so it can be shared with the tracing
+// span — both instruments measure from the same reference point. When
+// metrics is nil, fn is returned unchanged.
+func (m *migrationAdapterTelemetry) decorateMigrationForMetrics(op string, fn func(context.Context) error, start time.Time) func(context.Context) error {
+	if m.metrics == nil {
+		return fn
+	}
+	return func(ctx context.Context) error {
+		err := fn(ctx)
+		m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", op, "error", err != nil)
+		return err
+	}
+}
+
+func (m *migrationAdapterTelemetry) record(ctx context.Context, op string, fn func(context.Context) error) error {
+	start := time.Now()
+	// Tracing is the inner wrapper (starts the span, calls fn, ends the span).
+	// Metrics is the outer wrapper (captures nothing — it uses the shared
+	// start), so both instruments measure from the same reference point.
+	decorated := m.decorateMigrationForMetrics(op, m.decorateMigrationForTracing(op, fn), start)
+	return decorated(ctx)
+}
+
+func (m *migrationAdapterTelemetry) Up(ctx context.Context, version uint) error {
 	return m.record(ctx, "up", func(ctx context.Context) error {
 		return m.MigrationAdapter.Up(ctx, version)
 	})
 }
 
-func (m *migrationAdapterMetrics) Down(ctx context.Context, version uint) error {
+func (m *migrationAdapterTelemetry) Down(ctx context.Context, version uint) error {
 	return m.record(ctx, "down", func(ctx context.Context) error {
 		return m.MigrationAdapter.Down(ctx, version)
 	})
 }
 
-func (m *migrationAdapterMetrics) Reset(ctx context.Context) error {
+func (m *migrationAdapterTelemetry) Reset(ctx context.Context) error {
 	return m.record(ctx, "reset", func(ctx context.Context) error {
 		return m.MigrationAdapter.Reset(ctx)
 	})
 }
 
-func (m *migrationAdapterMetrics) Status(ctx context.Context) error {
+func (m *migrationAdapterTelemetry) Status(ctx context.Context) error {
 	return m.record(ctx, "status", func(ctx context.Context) error {
 		return m.MigrationAdapter.Status(ctx)
 	})
 }
 
-func (m *migrationAdapterMetrics) CurrentVersion(ctx context.Context) (int64, error) {
+func (m *migrationAdapterTelemetry) CurrentVersion(ctx context.Context) (int64, error) {
 	start := time.Now()
-	version, err := m.MigrationAdapter.CurrentVersion(ctx)
-	m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", "current_version", "error", err != nil)
-	return version, err
+
+	// Can't use record() because the return type differs, but the same
+	// composition pattern: tracing inner, metrics outer, shared start.
+	wrapped := m.MigrationAdapter.CurrentVersion
+	if m.tracer != nil {
+		prev := wrapped
+		wrapped = func(ctx context.Context) (int64, error) {
+			ctx, span := m.tracer.Start(ctx, "migration.current_version")
+			defer span.End()
+			v, err := prev(ctx)
+			if err != nil {
+				span.RecordError(err)
+			}
+			return v, err
+		}
+	}
+	if m.metrics != nil {
+		prev := wrapped
+		wrapped = func(ctx context.Context) (int64, error) {
+			v, err := prev(ctx)
+			m.metrics.RecordDuration("migration.operation", time.Since(start), "client", m.name, "op", "current_version", "error", err != nil)
+			return v, err
+		}
+	}
+	return wrapped(ctx)
 }
