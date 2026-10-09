@@ -1,6 +1,8 @@
 package metrics
 
 import (
+	"context"
+
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -29,7 +31,7 @@ var MetricsModule = module.NewMultiInstancesModule(
 			logger loggercontracts.Logger,
 			_ MetricsModuleDependencies,
 		) (contracts.Metrics, error) {
-			return metricsinternal.CreateMetrics(name, cfg, logger)
+			return metricsinternal.CreateMetrics(name, cfg, context.Background(), logger)
 		},
 	},
 )
