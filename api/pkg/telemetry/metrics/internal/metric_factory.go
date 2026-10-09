@@ -16,6 +16,7 @@ func CreateMetrics(
 	ctx context.Context,
 	name string,
 	cfg *config.MetricsOptions,
+	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.Metrics, error) {
 	var adapter contracts.Metrics

@@ -16,6 +16,7 @@ func CreateTracer(
 	ctx context.Context,
 	name string,
 	cfg *config.TracerOptions,
+	ctx context.Context,
 	logger loggercontracts.Logger,
 ) (contracts.Tracer, error) {
 	cfg.SetDefaults()

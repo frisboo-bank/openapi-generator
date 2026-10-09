@@ -40,6 +40,7 @@ func NewOtelTracerAdapter(
 	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
+	validation.AssertNotNil("ctx", ctx)
 	validation.AssertNotNil("resource", resource)
 	validation.AssertNotNil("logger", logger)
 
