@@ -66,8 +66,14 @@ func createMigration(
 
 	// Decorate the adapter with tracing and metrics before the facade wraps
 	// it, so the public contracts.Migration surface stays unchanged.
-	if tracer != nil && metrics != nil {
-		adapter = migrationtelemetry.WrapMigrationAdapterForTelemetry(name, adapter, tracer, metrics)
+	// Each wrapper is applied only when its instrument is available — no
+	// noop fallback is needed; callers that have no tracer or metrics simply
+	// skip that wrapper.
+	if tracer != nil {
+		adapter = migrationtelemetry.WrapMigrationAdapterForTracing(name, adapter, tracer)
+	}
+	if metrics != nil {
+		adapter = migrationtelemetry.WrapMigrationAdapterForMetrics(name, adapter, metrics)
 	}
 
 	return &migration{
