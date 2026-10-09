@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 
 	"frisboo-bank/openapi-generator-service/pkg/application/contracts"
@@ -60,12 +61,8 @@ func (a *application) ResolveFunc(function any) {
 	}
 }
 
-func (a *application) Run() error {
-	return nil
-}
-
-func (a *application) Start() error {
-	return a.waiter.Wait()
+func (a *application) Start(ctx context.Context) error {
+	return a.waiter.Wait(ctx)
 }
 
 func (a *application) Stop() {

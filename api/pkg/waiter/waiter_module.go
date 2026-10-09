@@ -9,15 +9,16 @@ import (
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/waiter/models"
+	waiterinternal "frisboo-bank/openapi-generator-service/pkg/waiter/internal"
 )
 
 func WaiterModule(
 	env environmentEnum.Environment,
 	configLoader configContracts.ConfigLoader,
 ) containerContracts.Module {
-	var cfg *models.WaiterOptions
+	var cfg *config.WaiterOptions
 	if err := configLoader.LoadKey(env, &cfg, "waiter"); err != nil {
 		log.Fatalf("Failed to build waiter module with error: %v", err)
 	}
@@ -29,7 +30,7 @@ func WaiterModule(
 
 	mod := container.NewModule(
 		"waiter",
-		container.Provider(func() *models.WaiterOptions {
+		container.Provider(func() *config.WaiterOptions {
 			return cfg
 		}),
 	)
@@ -42,7 +43,8 @@ func WaiterModule(
 		if !ok {
 			return nil, fmt.Errorf("logger %q not found", loggerName)
 		}
-		return NewWaiter(cfg, logger)
+
+		return waiterinternal.NewWaiter(cfg, logger)
 	}))
 
 	return mod

@@ -1,8 +1,6 @@
 package contracts
 
-import (
-	"context"
-)
+import "context"
 
 type (
 	WaitFunc    func(ctx context.Context) error
@@ -17,7 +15,7 @@ type (
 	Waiter interface {
 		AddHooks(hooks ...WaiterHook) error
 		AddHook(hook WaiterHook) error
-		Wait() error
+		Wait(ctx context.Context) error
 		Cancel()
 	}
 )

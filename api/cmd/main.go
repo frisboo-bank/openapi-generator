@@ -31,9 +31,14 @@ func main() {
 		},
 		Commands: []cliContracts.Command{
 			application.NewApplicationRunCommand(application.ApplicationRunCommandOptions{
-				Bootstrap: func(configLoader configContracts.ConfigLoader, env environmentEnum.Environment, cmd *cobra.Command, args []string) error {
+				Bootstrap: func(
+					configLoader configContracts.ConfigLoader,
+					env environmentEnum.Environment,
+					cmd *cobra.Command,
+					args []string,
+				) error {
 					bootstrap := app.NewBootstrap(configLoader, env)
-					return bootstrap.Run()
+					return bootstrap.Run(cmd.Context())
 				},
 			}),
 			migration.NewMigrationMigrateCommand(&migration.MigrationMigrateCommandOptions{}),

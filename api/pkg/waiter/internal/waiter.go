@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/utils"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/waiter/models"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -21,36 +21,25 @@ import (
 var _ contracts.Waiter = (*waiter)(nil)
 
 type waiter struct {
-	cancel         context.CancelFunc
+	cancelCh       chan struct{}
+	cancelOnce     sync.Once
 	cleanupTimeout time.Duration
-	ctx            context.Context
 	hooks          map[string]contracts.WaiterHook
-	logger         loggerContracts.Logger
+	logger         loggercontracts.Logger
 	mu             sync.Mutex
 	waitOnce       sync.Once
 }
 
 func NewWaiter(
-	cfg *models.WaiterOptions,
-	logger loggerContracts.Logger,
-) (contracts.Waiter, error) {
-	return NewWaiterWithContext(cfg, logger, context.Background())
-}
-
-func NewWaiterWithContext(
-	cfg *models.WaiterOptions,
-	logger loggerContracts.Logger,
-	parentCtx context.Context,
+	cfg *config.WaiterOptions,
+	logger loggercontracts.Logger,
 ) (contracts.Waiter, error) {
 	validation.AssertNotNil("cfg", cfg)
 	validation.AssertNotNil("logger", logger)
 
-	ctx, cancel := context.WithCancel(parentCtx)
-
 	w := &waiter{
-		cancel:         cancel,
+		cancelCh:       make(chan struct{}),
 		cleanupTimeout: time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond,
-		ctx:            ctx,
 		hooks:          make(map[string]contracts.WaiterHook),
 		logger:         logger,
 	}
@@ -61,13 +50,13 @@ func NewWaiterWithContext(
 			os.Interrupt,
 			syscall.SIGINT,
 			syscall.SIGTERM,
-			syscall.SIGQUIT)
+			syscall.SIGQUIT,
+		)
 
-		// The parent context is still active. When a signal arrives, cancel it.
 		go func() {
 			<-sigCh
 			logger.Info("shutdown signal received")
-			cancel()
+			w.Cancel()
 			signal.Stop(sigCh)
 			close(sigCh)
 		}()
@@ -108,15 +97,26 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 	return nil
 }
 
-func (w *waiter) Wait() error {
+func (w *waiter) Wait(ctx context.Context) error {
 	var err error
 	w.waitOnce.Do(func() {
-		err = w.run()
+		err = w.run(ctx)
 	})
 	return err
 }
 
-func (w *waiter) run() error {
+func (w *waiter) run(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	go func() {
+		select {
+		case <-ctx.Done():
+		case <-w.cancelCh:
+			cancel()
+		}
+	}()
+
 	w.mu.Lock()
 	hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
 	for k, v := range w.hooks {
@@ -124,10 +124,8 @@ func (w *waiter) run() error {
 	}
 	w.mu.Unlock()
 
-	defer w.cancel()
-
-	waitErr := w.runWait(hooks)
-	cleanupErr := w.runCleanup(hooks)
+	waitErr := w.runWait(ctx, hooks)
+	cleanupErr := w.runCleanup(ctx, hooks)
 
 	if cleanupErr != nil {
 		w.logger.Errorf("hook cleanup failed with error: %v", cleanupErr)
@@ -136,12 +134,11 @@ func (w *waiter) run() error {
 	return waitErr
 }
 
-func (w *waiter) runWait(hooks map[string]contracts.WaiterHook) error {
+func (w *waiter) runWait(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
 	group := errgroup.Group{}
 
 	for name, hook := range hooks {
-		fn := hook.Wait
-		if fn == nil {
+		if hook.Wait == nil {
 			continue
 		}
 
@@ -151,14 +148,14 @@ func (w *waiter) runWait(hooks map[string]contracts.WaiterHook) error {
 		w.logger.Infof("start waiting for hook: %q", hookName)
 
 		group.Go(func() error {
-			return waitFn(w.ctx)
+			return waitFn(ctx)
 		})
 	}
 
 	return group.Wait()
 }
 
-func (w *waiter) runCleanup(hooks map[string]contracts.WaiterHook) error {
+func (w *waiter) runCleanup(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
 	group := errgroup.Group{}
 
 	for name, hook := range hooks {
@@ -172,7 +169,7 @@ func (w *waiter) runCleanup(hooks map[string]contracts.WaiterHook) error {
 		w.logger.Infof("start cleaning for hook: %q", hookName)
 
 		group.Go(func() error {
-			return utils.WithTimeout(w.ctx, cleanupFn, w.cleanupTimeout)
+			return utils.WithTimeout(ctx, cleanupFn, w.cleanupTimeout)
 		})
 	}
 
@@ -180,5 +177,7 @@ func (w *waiter) runCleanup(hooks map[string]contracts.WaiterHook) error {
 }
 
 func (w *waiter) Cancel() {
-	w.cancel()
+	w.cancelOnce.Do(func() {
+		close(w.cancelCh)
+	})
 }
