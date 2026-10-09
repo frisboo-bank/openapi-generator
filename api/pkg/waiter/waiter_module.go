@@ -20,8 +20,8 @@ type WaiterModuleDependencies struct {
 
 var WaiterModule = module.NewSingleInstanceModule(
 	module.SingleInstanceModuleOptions[*config.WaiterOptions, contracts.Waiter, WaiterModuleDependencies]{
-		Name:      "telemetry.metrics",
-		ConfigKey: "telemetry.metrics",
+		Name:      "waiter",
+		ConfigKey: "waiter",
 		ProviderFn: func(
 			ctx context.Context,
 			cfg *config.WaiterOptions,
