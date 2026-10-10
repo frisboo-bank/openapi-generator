@@ -99,15 +99,15 @@ func (m *module) Apply(container *dig.Container) error {
 		}
 	}
 
-	for _, i := range m.invokers {
-		if err := container.Invoke(i.Fn); err != nil {
-			return fmt.Errorf("module %q: invoke: %w", m.name, err)
-		}
-	}
-
 	for _, mod := range m.modules {
 		if err := mod.Apply(container); err != nil {
 			return err
+		}
+	}
+
+	for _, i := range m.invokers {
+		if err := container.Invoke(i.Fn); err != nil {
+			return fmt.Errorf("module %q: invoke: %w", m.name, err)
 		}
 	}
 
