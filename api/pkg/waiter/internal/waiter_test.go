@@ -5,6 +5,7 @@ import (
 	"errors"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	loggermocks "frisboo-bank/openapi-generator-service/mocks/pkg/logger"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
@@ -28,6 +29,7 @@ func setup(t *testing.T, cfg *config.WaiterOptions) contracts.Waiter {
 
 	logger.EXPECT().Info(gomock.Any()).AnyTimes()
 	logger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Errorf(gomock.Any(), gomock.Any()).AnyTimes()
 
 	w, err := NewWaiter(cfg, logger)
 	require.NoError(t, err)
@@ -45,10 +47,10 @@ func TestWaiter_Success(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 	assert.Equal(t, int32(1), calls.Load())
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 	assert.Equal(t, int32(1), calls.Load(), "hook should not run again on subsequent calls")
 }
 
@@ -63,8 +65,8 @@ func TestWaiter_Error(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	err1 := w.Wait(context.Background())
-	err2 := w.Wait(context.Background())
+	err1 := w.Start(context.Background())
+	err2 := w.Start(context.Background())
 
 	assert.ErrorIs(t, err1, sentinel)
 	assert.ErrorIs(t, err2, sentinel)
@@ -74,7 +76,7 @@ func TestWaiter_Error(t *testing.T) {
 func TestWait_NoHooks(t *testing.T) {
 	w := setup(t, nil)
 
-	err := w.Wait(context.Background())
+	err := w.Start(context.Background())
 	assert.NoError(t, err)
 }
 
@@ -97,7 +99,7 @@ func TestWait_RunsWaitAndCleanup(t *testing.T) {
 	)
 	require.NoError(t, err)
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 
 	assert.Equal(t, int32(1), wait1.Load(), "hook1 Wait should run once")
 	assert.Equal(t, int32(1), cleanup1.Load(), "hook1 Cleanup should run once")
@@ -143,4 +145,140 @@ func TestAddHooks_StopsOnError(t *testing.T) {
 
 	err = w.AddHook(contracts.WaiterHook{Name: "good", Wait: func(context.Context) error { return nil }})
 	assert.EqualError(t, err, `waiter: hook "good" already registered`)
+}
+
+
+
+
+func TestCancel_GracefulShutdownRunsCleanupWithLiveCtx(t *testing.T) {
+	w := setup(t, nil)
+
+	waitStarted := make(chan struct{})
+
+	var waitCalls atomic.Int32
+	var cleanupCalls atomic.Int32
+	var cleanupCtxLive atomic.Bool
+
+	require.NoError(t, w.AddHook(contracts.WaiterHook{
+		Name: "hook1",
+		Wait: func(ctx context.Context) error {
+			waitCalls.Add(1)
+			close(waitStarted)
+
+			<-ctx.Done()
+			return ctx.Err()
+		},
+		Cleanup: func(ctx context.Context) error {
+			cleanupCalls.Add(1)
+			cleanupCtxLive.Store(ctx.Err() == nil)
+			return nil
+		},
+	}))
+
+	waitErrCh := make(chan error, 1)
+	go func() {
+		waitErrCh <- w.Start(context.Background())
+	}()
+
+	<-waitStarted
+
+	gracefulCtx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	require.NoError(t, w.Stop(gracefulCtx))
+
+	assert.Equal(t, int32(1), waitCalls.Load(), "wait should run once")
+	assert.Equal(t, int32(1), cleanupCalls.Load(), "cleanup should run once")
+	assert.True(t, cleanupCtxLive.Load(), "cleanup should receive a live context during graceful shutdown")
+
+	select {
+	case err := <-waitErrCh:
+		require.ErrorIs(t, err, context.Canceled)
+	case <-time.After(time.Second):
+		t.Fatal("Wait did not return after graceful shutdown")
+	}
+}
+
+func TestCancel_ForceShutdownWhenGracefulShutdownDoesNotFinish(t *testing.T) {
+	w := setup(t, nil)
+
+	waitStarted := make(chan struct{})
+	cleanupStarted := make(chan struct{})
+	cleanupDone := make(chan struct{})
+	cleanupRelease := make(chan struct{})
+
+	var waitCalls atomic.Int32
+	var cleanupCalls atomic.Int32
+
+	require.NoError(t, w.AddHook(contracts.WaiterHook{
+		Name: "hook1",
+		Wait: func(ctx context.Context) error {
+			waitCalls.Add(1)
+			close(waitStarted)
+
+			<-ctx.Done()
+			return ctx.Err()
+		},
+		Cleanup: func(ctx context.Context) error {
+			cleanupCalls.Add(1)
+			close(cleanupStarted)
+			defer close(cleanupDone)
+
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			case <-cleanupRelease:
+				return nil
+			}
+		},
+	}))
+
+	waitErrCh := make(chan error, 1)
+	go func() {
+		waitErrCh <- w.Start(context.Background())
+	}()
+
+	<-waitStarted
+
+	forceCtx, force := context.WithCancel(context.Background())
+
+	cancelErrCh := make(chan error, 1)
+	go func() {
+		cancelErrCh <- w.Stop(forceCtx)
+	}()
+
+	// Graceful shutdown has started, and cleanup is now running.
+	select {
+	case <-cleanupStarted:
+	case <-time.After(time.Second):
+		t.Fatal("cleanup did not start during graceful shutdown")
+	}
+
+	// Consumer decides graceful shutdown is taking too long and forces it.
+	force()
+
+	select {
+	case err := <-cancelErrCh:
+		require.ErrorIs(t, err, ErrForcedShutdown)
+		require.ErrorIs(t, err, context.Canceled)
+	case <-time.After(time.Second):
+		t.Fatal("Cancel did not return after force")
+	}
+
+	select {
+	case err := <-waitErrCh:
+		require.ErrorIs(t, err, ErrForcedShutdown)
+	case <-time.After(time.Second):
+		t.Fatal("Wait did not return after forced shutdown")
+	}
+
+	// Cleanup should observe the forced cancellation.
+	select {
+	case <-cleanupDone:
+	case <-time.After(time.Second):
+		t.Fatal("cleanup did not return after forced shutdown")
+	}
+
+	assert.Equal(t, int32(1), waitCalls.Load(), "wait should run once")
+	assert.Equal(t, int32(1), cleanupCalls.Load(), "cleanup should start once")
 }

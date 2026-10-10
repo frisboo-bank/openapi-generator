@@ -12,5 +12,9 @@ type Application interface {
 	Logger() loggerContracts.Logger
 	ResolveFunc(function any)
 	Start(ctx context.Context) error
-	Stop()
+
+	// Stop requests graceful shutdown and blocks until it completes.
+	// Pass a context with a deadline to force shutdown if cleanup does not
+	// finish in time.
+	Stop(ctx context.Context) error
 }

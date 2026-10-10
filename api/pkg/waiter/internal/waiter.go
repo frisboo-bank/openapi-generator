@@ -2,15 +2,16 @@ package waiter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
-	"frisboo-bank/openapi-generator-service/pkg/utils"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
@@ -18,17 +19,31 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+var (
+	// ErrForcedShutdown is returned by Wait and Cancel when the consumer
+	// forced shutdown because graceful shutdown did not complete in time.
+	ErrForcedShutdown = errors.New("waiter: forced shutdown")
+)
+
 var _ contracts.Waiter = (*waiter)(nil)
 
 type waiter struct {
-	cancelCh       chan struct{}
-	cancelOnce     sync.Once
-	cleanupTimeout time.Duration
-	hooks          map[string]contracts.WaiterHook
-	logger         loggercontracts.Logger
-	mu             sync.Mutex
-	waitErr        error
-	waitOnce       sync.Once
+	cancelCh   chan struct{}
+	forceCh    chan struct{}
+	finishedCh chan struct{}
+
+	cancelOnce sync.Once
+	forceOnce  sync.Once
+	startOnce  sync.Once
+
+	forced atomic.Bool
+
+	hooks  map[string]contracts.WaiterHook
+	logger loggercontracts.Logger
+
+	mu            sync.Mutex
+	cleanupCancel context.CancelFunc
+	waitErr       error
 }
 
 func NewWaiter(
@@ -39,10 +54,11 @@ func NewWaiter(
 	validation.AssertNotNil("logger", logger)
 
 	w := &waiter{
-		cancelCh:       make(chan struct{}),
-		cleanupTimeout: time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond,
-		hooks:          make(map[string]contracts.WaiterHook),
-		logger:         logger,
+		cancelCh: make(chan struct{}),
+		forceCh:  make(chan struct{}),
+		finishedCh: make(chan struct{}),
+		hooks:    make(map[string]contracts.WaiterHook),
+		logger:   logger,
 	}
 
 	if cfg.CancelOnShutdownSignal {
@@ -54,10 +70,17 @@ func NewWaiter(
 			syscall.SIGQUIT,
 		)
 
+		// The signal path supplies the grace deadline. A cleanup hook that
+		// honours ctx (e.g. http.Server.Shutdown) drains until the deadline,
+		// after which the waiter is forced.
+		grace := time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond
+
 		go func() {
 			<-sigCh
 			logger.Info("shutdown signal received")
-			w.Cancel()
+			graceCtx, graceCancel := context.WithTimeout(context.Background(), grace)
+			_ = w.Stop(graceCtx)
+			graceCancel()
 			signal.Stop(sigCh)
 			close(sigCh)
 		}()
@@ -95,14 +118,96 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 	return nil
 }
 
-func (w *waiter) Wait(ctx context.Context) error {
-	w.waitOnce.Do(func() {
-		w.waitErr = w.run(ctx)
+func (w *waiter) Start(ctx context.Context) error {
+	w.start(ctx)
+
+	select {
+	case <-w.forceCh:
+		return ErrForcedShutdown
+	default:
+	}
+
+	select {
+	case <-w.forceCh:
+		return ErrForcedShutdown
+	case <-w.finishedCh:
+		if w.forced.Load() {
+			return ErrForcedShutdown
+		}
+		return w.waitErr
+	}
+}
+
+func (w *waiter) start(ctx context.Context) {
+	w.startOnce.Do(func() {
+		w.mu.Lock()
+		hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
+		for name, hook := range w.hooks {
+			hooks[name] = hook
+		}
+		w.mu.Unlock()
+
+		go func() {
+			w.waitErr = w.run(ctx, hooks)
+			close(w.finishedCh)
+		}()
 	})
+}
+
+// Stop requests shutdown and blocks until it completes gracefully or ctx is
+// done. If ctx finishes first the waiter is forced: cleanup contexts are
+// cancelled, Start returns ErrForcedShutdown, and Stop returns an error
+// wrapping ErrForcedShutdown.
+func (w *waiter) Stop(ctx context.Context) error {
+	w.cancelOnce.Do(func() {
+		close(w.cancelCh)
+	})
+
+	// If nobody called Wait yet, Cancel can start the shutdown lifecycle.
+	w.start(context.Background())
+
+	// If already finished, prefer graceful result.
+	select {
+	case <-w.finishedCh:
+		return w.shutdownError()
+	default:
+	}
+
+	select {
+	case <-w.finishedCh:
+		return w.shutdownError()
+	case <-ctx.Done():
+		w.force()
+		return fmt.Errorf("%w: %w", ErrForcedShutdown, ctx.Err())
+	}
+}
+
+func (w *waiter) shutdownError() error {
+	if errors.Is(w.waitErr, context.Canceled) ||
+		errors.Is(w.waitErr, context.DeadlineExceeded) {
+		return nil
+	}
+
 	return w.waitErr
 }
 
-func (w *waiter) run(ctx context.Context) error {
+func (w *waiter) force() {
+	w.forceOnce.Do(func() {
+		w.forced.Store(true)
+		close(w.forceCh)
+
+		w.mu.Lock()
+		if w.cleanupCancel != nil {
+			w.cleanupCancel()
+		}
+		w.mu.Unlock()
+	})
+}
+
+func (w *waiter) run(
+	ctx context.Context,
+	hooks map[string]contracts.WaiterHook,
+) error {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -111,19 +216,44 @@ func (w *waiter) run(ctx context.Context) error {
 		case <-ctx.Done():
 		case <-w.cancelCh:
 			cancel()
+		case <-w.forceCh:
+			cancel()
 		}
 	}()
 
+	// Cleanup runs against a fresh context so it is not pre-cancelled by the
+	// wait phase. It is cancellable by force() so cooperative cleanup hooks can
+	// abort during forced shutdown. The deadline is supplied by the consumer
+	// via the ctx passed to Cancel; there is no per-hook timeout.
+	cleanupCtx, cleanupCancel := context.WithCancel(context.Background())
+
 	w.mu.Lock()
-	hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
-	for k, v := range w.hooks {
-		hooks[k] = v
-	}
+	w.cleanupCancel = cleanupCancel
 	w.mu.Unlock()
 
-	waitErr := w.runWait(ctx, hooks)
-	cleanupErr := w.runCleanup(ctx, hooks)
+	// If force happened before the cleanup context was registered, cancel it.
+	if w.forced.Load() {
+		cleanupCancel()
+	}
 
+	defer func() {
+		cleanupCancel()
+
+		w.mu.Lock()
+		w.cleanupCancel = nil
+		w.mu.Unlock()
+	}()
+
+	waitErr := w.runWait(ctx, hooks)
+
+	// If forced before cleanup started, abandon cleanup.
+	select {
+	case <-w.forceCh:
+		return waitErr
+	default:
+	}
+
+	cleanupErr := w.runCleanup(cleanupCtx, hooks)
 	if cleanupErr != nil {
 		w.logger.Errorf("hook cleanup failed with error: %v", cleanupErr)
 	}
@@ -166,15 +296,9 @@ func (w *waiter) runCleanup(ctx context.Context, hooks map[string]contracts.Wait
 		w.logger.Infof("start cleaning for hook: %q", hookName)
 
 		group.Go(func() error {
-			return utils.WithTimeout(ctx, cleanupFn, w.cleanupTimeout)
+			return cleanupFn(ctx)
 		})
 	}
 
 	return group.Wait()
-}
-
-func (w *waiter) Cancel() {
-	w.cancelOnce.Do(func() {
-		close(w.cancelCh)
-	})
 }

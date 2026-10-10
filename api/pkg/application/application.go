@@ -62,11 +62,11 @@ func (a *application) ResolveFunc(function any) {
 }
 
 func (a *application) Start(ctx context.Context) error {
-	return a.waiter.Wait(ctx)
+	return a.waiter.Start(ctx)
 }
 
-func (a *application) Stop() {
-	a.waiter.Cancel()
+func (a *application) Stop(ctx context.Context) error {
+	return a.waiter.Stop(ctx)
 }
 
 func (a *application) Logger() loggerContracts.Logger {
