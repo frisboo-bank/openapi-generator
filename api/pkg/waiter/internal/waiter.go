@@ -27,6 +27,7 @@ type waiter struct {
 	hooks          map[string]contracts.WaiterHook
 	logger         loggercontracts.Logger
 	mu             sync.Mutex
+	waitErr        error
 	waitOnce       sync.Once
 }
 
@@ -66,9 +67,6 @@ func NewWaiter(
 }
 
 func (w *waiter) AddHooks(hooks ...contracts.WaiterHook) error {
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
 	for _, h := range hooks {
 		if err := w.AddHook(h); err != nil {
 			return err
@@ -98,11 +96,10 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 }
 
 func (w *waiter) Wait(ctx context.Context) error {
-	var err error
 	w.waitOnce.Do(func() {
-		err = w.run(ctx)
+		w.waitErr = w.run(ctx)
 	})
-	return err
+	return w.waitErr
 }
 
 func (w *waiter) run(ctx context.Context) error {
