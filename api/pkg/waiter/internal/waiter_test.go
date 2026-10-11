@@ -114,7 +114,7 @@ func TestAddHook_Validation(t *testing.T) {
 	assert.EqualError(t, err, "waiter: hook name is required")
 
 	err = w.AddHook(contracts.WaiterHook{Name: "empty"})
-	assert.EqualError(t, err, `waiter: hook "empty" has no Wait or Cleanup function`)
+	assert.EqualError(t, err, `waiter: hook "empty" has no Start or Stop function`)
 
 	hook := contracts.WaiterHook{
 		Name:    "hook1",
@@ -141,7 +141,7 @@ func TestAddHooks_StopsOnError(t *testing.T) {
 		contracts.WaiterHook{Name: "good", Start:   func(context.Context) error { return nil }},
 		contracts.WaiterHook{Name: "bad"},
 	)
-	assert.EqualError(t, err, `waiter: hook "bad" has no Wait or Cleanup function`)
+	assert.EqualError(t, err, `waiter: hook "bad" has no Start or Stop function`)
 
 	err = w.AddHook(contracts.WaiterHook{Name: "good", Start:   func(context.Context) error { return nil }})
 	assert.EqualError(t, err, `waiter: hook "good" already registered`)

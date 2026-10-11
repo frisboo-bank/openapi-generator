@@ -65,7 +65,6 @@ func NewWaiter(
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh,
 			os.Interrupt,
-			syscall.SIGINT,
 			syscall.SIGTERM,
 			syscall.SIGQUIT,
 		)
@@ -77,7 +76,17 @@ func NewWaiter(
 
 		go func() {
 			<-sigCh
-			logger.Info("shutdown signal received")
+			logger.Info("shutdown signal received, starting graceful shutdown")
+
+			// A second signal bypasses the graceful path entirely: the consumer
+			// may have started a Stop with a long deadline, and waiting on it
+			// would block the process forever. Exit immediately.
+			go func() {
+				<-sigCh
+				logger.Error("second shutdown signal received, forcing exit")
+				os.Exit(1)
+			}()
+
 			graceCtx, graceCancel := context.WithTimeout(context.Background(), grace)
 			_ = w.Stop(graceCtx)
 			graceCancel()
@@ -107,7 +116,7 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 	}
 
 	if hook.Start == nil && hook.Stop == nil {
-		return fmt.Errorf("waiter: hook %q has no Wait or Cleanup function", hook.Name)
+		return fmt.Errorf("waiter: hook %q has no Start or Stop function", hook.Name)
 	}
 
 	if _, exists := w.hooks[hook.Name]; exists {
@@ -262,7 +271,9 @@ func (w *waiter) run(
 }
 
 func (w *waiter) runWait(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
-	group := errgroup.Group{}
+	// WithContext ties the hooks together: if any hook returns an error the
+	// derived context is cancelled, signalling the remaining hooks to abort.
+	group, ctx := errgroup.WithContext(ctx)
 
 	for name, hook := range hooks {
 		if hook.Start == nil {
@@ -283,7 +294,9 @@ func (w *waiter) runWait(ctx context.Context, hooks map[string]contracts.WaiterH
 }
 
 func (w *waiter) runCleanup(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
-	group := errgroup.Group{}
+	// WithContext ties the hooks together: if any hook returns an error the
+	// derived context is cancelled, signalling the remaining hooks to abort.
+	group, ctx := errgroup.WithContext(ctx)
 
 	for name, hook := range hooks {
 		if hook.Stop == nil {
