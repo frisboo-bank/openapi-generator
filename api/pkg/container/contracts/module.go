@@ -11,8 +11,8 @@ import (
 type (
 	HookResolveResult struct {
 		Name    string
-		Wait    func(ctx context.Context) error
-		Cleanup func(ctx context.Context) error
+		Start   func(ctx context.Context) error
+		Stop    func(ctx context.Context) error
 	}
 
 	Provider struct {

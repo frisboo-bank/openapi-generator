@@ -43,7 +43,7 @@ func TestWaiter_Success(t *testing.T) {
 	var calls atomic.Int32
 	err := w.AddHook(contracts.WaiterHook{
 		Name: "hook1",
-		Wait: func(ctx context.Context) error { calls.Add(1); return nil },
+		Start:   func(ctx context.Context) error { calls.Add(1); return nil },
 	})
 	require.NoError(t, err)
 
@@ -61,7 +61,7 @@ func TestWaiter_Error(t *testing.T) {
 	sentinel := errors.New("boom")
 	err := w.AddHook(contracts.WaiterHook{
 		Name: "hook1",
-		Wait: func(ctx context.Context) error { calls.Add(1); return sentinel },
+		Start:   func(ctx context.Context) error { calls.Add(1); return sentinel },
 	})
 	require.NoError(t, err)
 
@@ -88,13 +88,13 @@ func TestWait_RunsWaitAndCleanup(t *testing.T) {
 	err := w.AddHooks(
 		contracts.WaiterHook{
 			Name:    "hook1",
-			Wait:    func(ctx context.Context) error { wait1.Add(1); return nil },
-			Cleanup: func(ctx context.Context) error { cleanup1.Add(1); return nil },
+			Start:   func(ctx context.Context) error { wait1.Add(1); return nil },
+			Stop:    func(ctx context.Context) error { cleanup1.Add(1); return nil },
 		},
 		contracts.WaiterHook{
 			Name:    "hook2",
-			Wait:    func(ctx context.Context) error { wait2.Add(1); return nil },
-			Cleanup: func(ctx context.Context) error { cleanup2.Add(1); return nil },
+			Start:   func(ctx context.Context) error { wait2.Add(1); return nil },
+			Stop:    func(ctx context.Context) error { cleanup2.Add(1); return nil },
 		},
 	)
 	require.NoError(t, err)
@@ -118,8 +118,8 @@ func TestAddHook_Validation(t *testing.T) {
 
 	hook := contracts.WaiterHook{
 		Name:    "hook1",
-		Wait:    func(ctx context.Context) error { return nil },
-		Cleanup: func(ctx context.Context) error { return nil },
+		Start:   func(ctx context.Context) error { return nil },
+		Stop:    func(ctx context.Context) error { return nil },
 	}
 	err = w.AddHook(hook)
 	assert.NoError(t, err)
@@ -127,10 +127,10 @@ func TestAddHook_Validation(t *testing.T) {
 	err = w.AddHook(hook)
 	assert.EqualError(t, err, `waiter: hook "hook1" already registered`)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "w", Wait: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "w", Start:   func(context.Context) error { return nil }})
 	require.NoError(t, err)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "c", Cleanup: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "c", Stop:    func(context.Context) error { return nil }})
 	require.NoError(t, err)
 }
 
@@ -138,12 +138,12 @@ func TestAddHooks_StopsOnError(t *testing.T) {
 	w := setup(t, nil)
 
 	err := w.AddHooks(
-		contracts.WaiterHook{Name: "good", Wait: func(context.Context) error { return nil }},
+		contracts.WaiterHook{Name: "good", Start:   func(context.Context) error { return nil }},
 		contracts.WaiterHook{Name: "bad"},
 	)
 	assert.EqualError(t, err, `waiter: hook "bad" has no Wait or Cleanup function`)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "good", Wait: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "good", Start:   func(context.Context) error { return nil }})
 	assert.EqualError(t, err, `waiter: hook "good" already registered`)
 }
 
@@ -161,14 +161,14 @@ func TestCancel_GracefulShutdownRunsCleanupWithLiveCtx(t *testing.T) {
 
 	require.NoError(t, w.AddHook(contracts.WaiterHook{
 		Name: "hook1",
-		Wait: func(ctx context.Context) error {
+		Start:   func(ctx context.Context) error {
 			waitCalls.Add(1)
 			close(waitStarted)
 
 			<-ctx.Done()
 			return ctx.Err()
 		},
-		Cleanup: func(ctx context.Context) error {
+		Stop:    func(ctx context.Context) error {
 			cleanupCalls.Add(1)
 			cleanupCtxLive.Store(ctx.Err() == nil)
 			return nil
@@ -212,14 +212,14 @@ func TestCancel_ForceShutdownWhenGracefulShutdownDoesNotFinish(t *testing.T) {
 
 	require.NoError(t, w.AddHook(contracts.WaiterHook{
 		Name: "hook1",
-		Wait: func(ctx context.Context) error {
+		Start:   func(ctx context.Context) error {
 			waitCalls.Add(1)
 			close(waitStarted)
 
 			<-ctx.Done()
 			return ctx.Err()
 		},
-		Cleanup: func(ctx context.Context) error {
+		Stop:    func(ctx context.Context) error {
 			cleanupCalls.Add(1)
 			close(cleanupStarted)
 			defer close(cleanupDone)

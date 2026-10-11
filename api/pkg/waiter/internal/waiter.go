@@ -106,7 +106,7 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 		return fmt.Errorf("waiter: hook name is required")
 	}
 
-	if hook.Wait == nil && hook.Cleanup == nil {
+	if hook.Start == nil && hook.Stop == nil {
 		return fmt.Errorf("waiter: hook %q has no Wait or Cleanup function", hook.Name)
 	}
 
@@ -265,12 +265,12 @@ func (w *waiter) runWait(ctx context.Context, hooks map[string]contracts.WaiterH
 	group := errgroup.Group{}
 
 	for name, hook := range hooks {
-		if hook.Wait == nil {
+		if hook.Start == nil {
 			continue
 		}
 
 		hookName := name
-		waitFn := hook.Wait
+		waitFn := hook.Start
 
 		w.logger.Infof("start waiting for hook: %q", hookName)
 
@@ -286,12 +286,12 @@ func (w *waiter) runCleanup(ctx context.Context, hooks map[string]contracts.Wait
 	group := errgroup.Group{}
 
 	for name, hook := range hooks {
-		if hook.Cleanup == nil {
+		if hook.Stop == nil {
 			continue
 		}
 
 		hookName := name
-		cleanupFn := hook.Cleanup
+		cleanupFn := hook.Stop
 
 		w.logger.Infof("start cleaning for hook: %q", hookName)
 

@@ -127,8 +127,8 @@ func (m *module) ApplyHooks(container *dig.Container, waiter waiterContracts.Wai
 
 		hook := waiterContracts.WaiterHook{
 			Name:    result.Name,
-			Wait:    result.Wait,
-			Cleanup: result.Cleanup,
+			Start:   result.Start,
+			Stop:    result.Stop,
 		}
 		if err := waiter.AddHook(hook); err != nil {
 			return fmt.Errorf("module %q: hook: %w", m.name, err)

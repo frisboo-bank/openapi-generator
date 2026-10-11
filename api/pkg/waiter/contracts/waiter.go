@@ -10,13 +10,13 @@ import (
 var ErrForcedShutdown = errors.New("waiter: forced shutdown")
 
 type (
-	WaitFunc    func(ctx context.Context) error
-	CleanupFunc func(ctx context.Context) error
+	StartFunc   func(ctx context.Context) error
+	StopFunc    func(ctx context.Context) error
 
 	WaiterHook struct {
 		Name    string
-		Wait    WaitFunc
-		Cleanup CleanupFunc
+		Start   StartFunc
+		Stop    StopFunc
 	}
 
 	Waiter interface {
