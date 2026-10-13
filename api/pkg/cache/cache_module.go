@@ -40,7 +40,7 @@ var CacheModule = module.NewMultiInstancesModule(
 		HookFn: func(name string, instance contracts.Cache) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
 				Name: "cache:" + name,
-				Wait: func(ctx context.Context) error {
+				Start: func(ctx context.Context) error {
 					go func() {
 						if err := instance.Ping(ctx); err != nil {
 							instance.Logger().Fatalf("cache-client %q failed to access backend with error: %v", instance.Name(), err)
@@ -51,7 +51,7 @@ var CacheModule = module.NewMultiInstancesModule(
 
 					return nil
 				},
-				Cleanup: func(ctx context.Context) error {
+				Stop: func(ctx context.Context) error {
 					if err := instance.Close(); err != nil {
 						instance.Logger().Errorf("cache-client %q close failed with error: %v", name, err)
 						return err

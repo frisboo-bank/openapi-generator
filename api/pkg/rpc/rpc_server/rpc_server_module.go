@@ -38,10 +38,10 @@ var RPCServerModule = module.NewMultiInstancesModule(
 		HookFn: func(name string, instance contracts.RPCServer) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
 				Name: "rpc-server:" + name,
-				Wait: func(ctx context.Context) error {
+				Start: func(ctx context.Context) error {
 					return instance.Start(ctx)
 				},
-				Cleanup: func(ctx context.Context) error {
+				Stop: func(ctx context.Context) error {
 					if err := instance.Stop(ctx); err != nil {
 						instance.Logger().Errorf("rpc-server %q shutdown failed: %v", name, err)
 						return err
