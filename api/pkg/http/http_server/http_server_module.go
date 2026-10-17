@@ -41,7 +41,7 @@ var HTTPServerModule = module.NewMultiInstancesModule(
 		HookFn: func(name string, instance contracts.HTTPServer) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{
 				Name: "http-server:" + name,
-				Wait: func(ctx context.Context) error {
+				Start: func(ctx context.Context) error {
 					errCh := make(chan error, 1)
 
 					go func() { errCh <- instance.Start(ctx) }()
@@ -56,7 +56,7 @@ var HTTPServerModule = module.NewMultiInstancesModule(
 						return ctx.Err()
 					}
 				},
-				Cleanup: func(ctx context.Context) error {
+				Stop: func(ctx context.Context) error {
 					if err := instance.Stop(ctx); err != nil {
 						if !errors.Is(err, http.ErrServerClosed) {
 							instance.Logger().Errorf("http-server %q shutdown failed: %v", name, err)
