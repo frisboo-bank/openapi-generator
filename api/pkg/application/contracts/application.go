@@ -12,5 +12,5 @@ type Application interface {
 	Logger() loggerContracts.Logger
 	ResolveFunc(function any)
 	Start(ctx context.Context) error
-	Stop()
+	Stop(ctx context.Context) error
 }
