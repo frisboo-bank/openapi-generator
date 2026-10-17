@@ -99,15 +99,15 @@ func (m *module) Apply(container *dig.Container) error {
 		}
 	}
 
-	for _, i := range m.invokers {
-		if err := container.Invoke(i.Fn); err != nil {
-			return fmt.Errorf("module %q: invoke: %w", m.name, err)
-		}
-	}
-
 	for _, mod := range m.modules {
 		if err := mod.Apply(container); err != nil {
 			return err
+		}
+	}
+
+	for _, i := range m.invokers {
+		if err := container.Invoke(i.Fn); err != nil {
+			return fmt.Errorf("module %q: invoke: %w", m.name, err)
 		}
 	}
 
@@ -126,9 +126,9 @@ func (m *module) ApplyHooks(container *dig.Container, waiter waiterContracts.Wai
 		}
 
 		hook := waiterContracts.WaiterHook{
-			Name:    result.Name,
-			Wait:    result.Wait,
-			Cleanup: result.Cleanup,
+			Name:  result.Name,
+			Start: result.Start,
+			Stop:  result.Stop,
 		}
 		if err := waiter.AddHook(hook); err != nil {
 			return fmt.Errorf("module %q: hook: %w", m.name, err)
