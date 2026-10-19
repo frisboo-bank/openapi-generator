@@ -4,15 +4,17 @@ import (
 	"context"
 
 	waiterContracts "frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/types/hookstatus"
 
 	"go.uber.org/dig"
 )
 
 type (
 	HookResolveResult struct {
-		Name  string
-		Start func(ctx context.Context) error
-		Stop  func(ctx context.Context) error
+		Name   string
+		Start  func(ctx context.Context) error
+		Stop   func(ctx context.Context) error
+		Status func() hookstatus.HookStatus
 	}
 
 	Provider struct {
