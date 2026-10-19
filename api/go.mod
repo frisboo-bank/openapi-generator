@@ -3,6 +3,7 @@ module frisboo-bank/openapi-generator-service
 go 1.26.3
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/golang/mock v1.6.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.30.0
 	github.com/pterm/pterm v0.12.83

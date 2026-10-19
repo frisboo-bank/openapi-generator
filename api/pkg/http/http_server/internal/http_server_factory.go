@@ -1,11 +1,11 @@
 package httpserver
 
 import (
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	"frisboo-bank/openapi-generator-service/pkg/http/http_server/config"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/internal/adapters/echo"
-	"frisboo-bank/openapi-generator-service/pkg/http/http_server/models"
-	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/models/enums/http_server_type"
+	httpservertype "frisboo-bank/openapi-generator-service/pkg/http/http_server/types/httpservertype"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/syserrors"
 	"frisboo-bank/openapi-generator-service/pkg/validation"
@@ -13,9 +13,9 @@ import (
 
 func CreateHTTPServer(
 	name string,
-	cfg *models.HTTPServerOptions,
+	cfg *config.HTTPServerOptions,
 	logger loggercontracts.Logger,
-	env environmentEnum.Environment,
+	env environmentenum.Environment,
 ) (contracts.HTTPServer, error) {
 	validation.AssertNotEmpty("name", name)
 	validation.AssertNotNil("cfg", cfg)
@@ -29,7 +29,7 @@ func CreateHTTPServer(
 
 	switch cfg.Type {
 	case httpservertype.HttpServerTypes.ECHO:
-		return &httpServer{echo.NewEchoAdapter(name, cfg, logger, env)}, nil
+		return echo.NewEchoAdapter(name, cfg, logger, env), nil
 	default:
 		return nil, syserrors.Newf("no http server of type %q exists", cfg.Type)
 	}

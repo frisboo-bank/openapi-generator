@@ -15,6 +15,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/validation"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/config"
 	"frisboo-bank/openapi-generator-service/pkg/waiter/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/waiter/types/hookstatus"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -28,22 +29,13 @@ var (
 var _ contracts.Waiter = (*waiter)(nil)
 
 type waiter struct {
-	cancelCh   chan struct{}
-	forceCh    chan struct{}
-	finishedCh chan struct{}
-
-	cancelOnce sync.Once
-	forceOnce  sync.Once
-	startOnce  sync.Once
-
-	forced atomic.Bool
+	stopCh   chan struct{}
+	stopOnce sync.Once
 
 	hooks  map[string]contracts.WaiterHook
 	logger loggercontracts.Logger
 
-	mu            sync.Mutex
-	cleanupCancel context.CancelFunc
-	waitErr       error
+	mu sync.Mutex
 }
 
 func NewWaiter(
@@ -54,20 +46,16 @@ func NewWaiter(
 	validation.AssertNotNil("logger", logger)
 
 	w := &waiter{
-		cancelCh: make(chan struct{}),
-		forceCh:  make(chan struct{}),
-		finishedCh: make(chan struct{}),
-		hooks:    make(map[string]contracts.WaiterHook),
-		logger:   logger,
+		stopCh: make(chan struct{}),
+		hooks:  make(map[string]contracts.WaiterHook),
+		logger: logger,
 	}
 
 	if cfg.CancelOnShutdownSignal {
 		sigCh := make(chan os.Signal, 1)
-		signal.Notify(sigCh,
-			os.Interrupt,
-			syscall.SIGTERM,
-			syscall.SIGQUIT,
-		)
+		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+
+		grace := time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond
 
 		// The signal path supplies the grace deadline. A cleanup hook that
 		// honours ctx (e.g. http.Server.Shutdown) drains until the deadline,
@@ -78,20 +66,25 @@ func NewWaiter(
 			<-sigCh
 			logger.Info("shutdown signal received, starting graceful shutdown")
 
-			// A second signal bypasses the graceful path entirely: the consumer
-			// may have started a Stop with a long deadline, and waiting on it
-			// would block the process forever. Exit immediately.
+			done := make(chan struct{})
 			go func() {
-				<-sigCh
-				logger.Error("second shutdown signal received, forcing exit")
-				os.Exit(1)
+				select {
+				case <-sigCh:
+					logger.Info("shutdown signal received again, forcing exit")
+					os.Exit(1)
+				case <-done:
+					return
+				}
 			}()
 
 			graceCtx, graceCancel := context.WithTimeout(context.Background(), grace)
-			_ = w.Stop(graceCtx)
+			if err := w.Stop(graceCtx); err != nil {
+				logger.Errorf("graceful shutdown failed: %v", err)
+			}
 			graceCancel()
+
 			signal.Stop(sigCh)
-			close(sigCh)
+			close(done)
 		}()
 	}
 
@@ -108,12 +101,11 @@ func (w *waiter) AddHooks(hooks ...contracts.WaiterHook) error {
 }
 
 func (w *waiter) AddHook(hook contracts.WaiterHook) error {
+	validation.AssertNotNil("hook", hook)
+	validation.AssertNotEmpty("hook.Name", hook.Name)
+
 	w.mu.Lock()
 	defer w.mu.Unlock()
-
-	if hook.Name == "" {
-		return fmt.Errorf("waiter: hook name is required")
-	}
 
 	if hook.Start == nil && hook.Stop == nil {
 		return fmt.Errorf("waiter: hook %q has no Start or Stop function", hook.Name)
@@ -128,105 +120,15 @@ func (w *waiter) AddHook(hook contracts.WaiterHook) error {
 }
 
 func (w *waiter) Start(ctx context.Context) error {
-	w.start(ctx)
-
-	select {
-	case <-w.forceCh:
-		return ErrForcedShutdown
-	default:
-	}
-
-	select {
-	case <-w.forceCh:
-		return ErrForcedShutdown
-	case <-w.finishedCh:
-		if w.forced.Load() {
-			return ErrForcedShutdown
-		}
-		return w.waitErr
-	}
-}
-
-func (w *waiter) start(ctx context.Context) {
-	w.startOnce.Do(func() {
-		w.mu.Lock()
-		hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
-		for name, hook := range w.hooks {
-			hooks[name] = hook
-		}
-		w.mu.Unlock()
-
-		go func() {
-			w.waitErr = w.run(ctx, hooks)
-			close(w.finishedCh)
-		}()
-	})
-}
-
-// Stop requests shutdown and blocks until it completes gracefully or ctx is
-// done. If ctx finishes first the waiter is forced: cleanup contexts are
-// cancelled, Start returns ErrForcedShutdown, and Stop returns an error
-// wrapping ErrForcedShutdown.
-func (w *waiter) Stop(ctx context.Context) error {
-	w.cancelOnce.Do(func() {
-		close(w.cancelCh)
-	})
-
-	// If nobody called Wait yet, Cancel can start the shutdown lifecycle.
-	w.start(context.Background())
-
-	// If already finished, prefer graceful result.
-	select {
-	case <-w.finishedCh:
-		return w.shutdownError()
-	default:
-	}
-
-	select {
-	case <-w.finishedCh:
-		return w.shutdownError()
-	case <-ctx.Done():
-		w.force()
-		return fmt.Errorf("%w: %w", ErrForcedShutdown, ctx.Err())
-	}
-}
-
-func (w *waiter) shutdownError() error {
-	if errors.Is(w.waitErr, context.Canceled) ||
-		errors.Is(w.waitErr, context.DeadlineExceeded) {
-		return nil
-	}
-
-	return w.waitErr
-}
-
-func (w *waiter) force() {
-	w.forceOnce.Do(func() {
-		w.forced.Store(true)
-		close(w.forceCh)
-
-		w.mu.Lock()
-		if w.cleanupCancel != nil {
-			w.cleanupCancel()
-		}
-		w.mu.Unlock()
-	})
-}
-
-func (w *waiter) run(
-	ctx context.Context,
-	hooks map[string]contracts.WaiterHook,
-) error {
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	waitCtx, waitCancel := context.WithCancel(ctx)
+	defer waitCancel()
 
 	go func() {
 		select {
-		case <-ctx.Done():
-		case <-w.cancelCh:
-			cancel()
-		case <-w.forceCh:
-			cancel()
+		case <-w.stopCh:
+			waitCancel()
+		case <-waitCtx.Done():
+			return
 		}
 	}()
 
@@ -237,81 +139,82 @@ func (w *waiter) run(
 	cleanupCtx, cleanupCancel := context.WithCancel(context.Background())
 
 	w.mu.Lock()
-	w.cleanupCancel = cleanupCancel
+	hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
+	for name, hook := range w.hooks {
+		hooks[name] = hook
+	}
 	w.mu.Unlock()
 
-	// If force happened before the cleanup context was registered, cancel it.
-	if w.forced.Load() {
-		cleanupCancel()
-	}
-
-	defer func() {
-		cleanupCancel()
-
-		w.mu.Lock()
-		w.cleanupCancel = nil
-		w.mu.Unlock()
-	}()
-
-	waitErr := w.runWait(ctx, hooks)
-
-	// If forced before cleanup started, abandon cleanup.
-	select {
-	case <-w.forceCh:
-		return waitErr
-	default:
-	}
-
-	cleanupErr := w.runCleanup(cleanupCtx, hooks)
-	if cleanupErr != nil {
-		w.logger.Errorf("hook cleanup failed with error: %v", cleanupErr)
-	}
-
-	return waitErr
-}
-
-func (w *waiter) runWait(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
-	// WithContext ties the hooks together: if any hook returns an error the
-	// derived context is cancelled, signalling the remaining hooks to abort.
-	group, ctx := errgroup.WithContext(ctx)
+	group, groupCtx := errgroup.WithContext(waitCtx)
 
 	for name, hook := range hooks {
 		if hook.Start == nil {
 			continue
 		}
 
-		hookName := name
-		waitFn := hook.Start
-
-		w.logger.Infof("start waiting for hook: %q", hookName)
+		w.logger.Infof("starting hook: %q", name)
 
 		group.Go(func() error {
-			return waitFn(ctx)
+			if err := hook.Start(groupCtx); err != nil {
+				w.logger.Errorf("hook %q start failed: %v", name, err)
+				return err
+			}
+			return nil
 		})
 	}
 
 	return group.Wait()
 }
 
-func (w *waiter) runCleanup(ctx context.Context, hooks map[string]contracts.WaiterHook) error {
-	// WithContext ties the hooks together: if any hook returns an error the
-	// derived context is cancelled, signalling the remaining hooks to abort.
-	group, ctx := errgroup.WithContext(ctx)
+func (w *waiter) Stop(ctx context.Context) error {
+	w.stopOnce.Do(func() {
+		close(w.stopCh)
+	})
+
+	w.mu.Lock()
+	hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
+	for name, hook := range w.hooks {
+		hooks[name] = hook
+	}
+	w.mu.Unlock()
+
+	group, groupCtx := errgroup.WithContext(ctx)
 
 	for name, hook := range hooks {
 		if hook.Stop == nil {
 			continue
 		}
 
-		hookName := name
-		cleanupFn := hook.Stop
+		if !hook.IsRunning() {
+			w.logger.Infof("hook %q is not running, skipping stop", name)
+			continue
+		}
 
-		w.logger.Infof("start cleaning for hook: %q", hookName)
+		w.logger.Infof("stopping hook: %q", name)
 
 		group.Go(func() error {
-			return cleanupFn(ctx)
+			if err := hook.Stop(groupCtx); err != nil {
+				w.logger.Errorf("hook %q stop failed: %v", name, err)
+				return err
+			}
+			return nil
 		})
 	}
 
 	return group.Wait()
+}
+
+func (w *waiter) Status() map[string]hookstatus.HookStatus {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	statuses := make(map[string]hookstatus.HookStatus)
+
+	for name, hook := range w.hooks {
+		if hook.Status != nil {
+			statuses[name] = hook.Status()
+		}
+	}
+
+	return statuses
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	environmentEnum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
+	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/http/http_server/routing"
 	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
@@ -23,13 +23,13 @@ type WorkspaceConfig struct {
 var _ routing.Endpoint = (*chromeDevtoolEndpoint)(nil)
 
 type chromeDevtoolEndpoint struct {
-	Env    environmentEnum.Environment
+	Env    environmentenum.Environment
 	Logger loggerContracts.Logger
 	Root   contracts.RouteGroup
 }
 
 func NewChromeDevtoolEndpoint(
-	env environmentEnum.Environment,
+	env environmentenum.Environment,
 	logger loggerContracts.Logger,
 	root contracts.RouteGroup,
 ) routing.Endpoint {
