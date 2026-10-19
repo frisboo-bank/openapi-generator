@@ -4,12 +4,12 @@ import (
 	"context"
 
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
-	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/config"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 	tracerinternal "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/internal"
 	"frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/types"
+
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.uber.org/dig"
@@ -17,6 +17,7 @@ import (
 
 type TracerModuleDependencies struct {
 	dig.In
+	Loggers module.DependenciesMap[loggercontracts.Logger]
 }
 
 var TracerModule = module.NewMultiInstancesModule(
@@ -24,14 +25,13 @@ var TracerModule = module.NewMultiInstancesModule(
 		Name:             "telemetry.tracer",
 		ConfigKey:        "telemetry.tracer",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.TracerEnumsDecodeHook()},
-		ProviderFn: func(
-			name string,
-			cfg *config.TracerOptions,
-			_ environmentenum.Environment,
-			logger loggercontracts.Logger,
-			_ TracerModuleDependencies,
-		) (contracts.Tracer, error) {
-			return tracerinternal.CreateTracer(name, cfg, context.Background(), logger)
+		ProviderFn: func(name string, cfg *config.TracerOptions, dependencies TracerModuleDependencies) (contracts.Tracer, error) {
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return tracerinternal.CreateTracer(name, cfg, context.Background(), loggerInstance)
 		},
 	},
 )

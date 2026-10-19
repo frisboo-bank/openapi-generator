@@ -6,7 +6,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
-	loggerContracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
+	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models"
 	rpcserverenums "frisboo-bank/openapi-generator-service/pkg/rpc/rpc_server/models/enums"
@@ -17,23 +17,22 @@ import (
 
 type RPCServerDependencies struct {
 	dig.In
+	Env     environmentenum.Environment
+	Loggers module.DependenciesMap[loggercontracts.Logger]
 }
 
 var RPCServerModule = module.NewMultiInstancesModule(
 	module.MultiInstancesModuleOptions[*models.RPCServerOptions, contracts.RPCServer, RPCServerDependencies]{
-		Name:      "rpc-server",
-		ConfigKey: "rpc-servers",
-		ConfigDecodeHook: []mapstructure.DecodeHookFunc{
-			rpcserverenums.RPCServerEnumsDecodeHook(),
-		},
-		ProviderFn: func(
-			name string,
-			cfg *models.RPCServerOptions,
-			env environmentenum.Environment,
-			logger loggerContracts.Logger,
-			extra RPCServerDependencies,
-		) (contracts.RPCServer, error) {
-			return CreateRPCServer(name, cfg, logger, env)
+		Name:             "rpc-server",
+		ConfigKey:        "rpc-servers",
+		ConfigDecodeHook: []mapstructure.DecodeHookFunc{rpcserverenums.RPCServerEnumsDecodeHook()},
+		ProviderFn: func(name string, cfg *models.RPCServerOptions, dependencies RPCServerDependencies) (contracts.RPCServer, error) {
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			return CreateRPCServer(name, cfg, loggerInstance, dependencies.Env)
 		},
 		HookFn: func(name string, instance contracts.RPCServer) containerContracts.HookResolveResult {
 			return containerContracts.HookResolveResult{

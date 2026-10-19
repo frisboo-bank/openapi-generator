@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	configloadercontracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
+	"frisboo-bank/openapi-generator-service/pkg/builder/module"
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
@@ -51,7 +52,7 @@ func LoggerModule(
 	}
 
 	mod.AddProvider(container.Provider(
-		func() map[string]contracts.Logger { return loggersMap },
+		func() module.DependenciesMap[contracts.Logger] { return loggersMap },
 	))
 
 	return mod
