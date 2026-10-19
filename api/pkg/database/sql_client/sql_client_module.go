@@ -13,7 +13,6 @@ import (
 	tracercontracts "frisboo-bank/openapi-generator-service/pkg/telemetry/tracer/contracts"
 
 	containercontracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
-	environmentenum "frisboo-bank/openapi-generator-service/pkg/environment/models/enums/environment"
 	loggercontracts "frisboo-bank/openapi-generator-service/pkg/logger/contracts"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -22,8 +21,9 @@ import (
 
 type SQLClientDependencies struct {
 	dig.In
-	Tracers map[string]tracercontracts.Tracer
-	Metrics map[string]metricscontracts.Metrics
+	Loggers module.DependenciesMap[loggercontracts.Logger]
+	Tracers module.DependenciesMap[tracercontracts.Tracer]
+	Metrics module.DependenciesMap[metricscontracts.Metrics]
 }
 
 var SQLClientModule = module.NewMultiInstancesModule(
@@ -31,30 +31,29 @@ var SQLClientModule = module.NewMultiInstancesModule(
 		Name:             "database.sql-client",
 		ConfigKey:        "database.sql-clients",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.SQLClientEnumsDecodeHook()},
-		ProviderFn: func(
-			name string,
-			cfg *config.SQLClientOptions,
-			env environmentenum.Environment,
-			logger loggercontracts.Logger,
-			extra SQLClientDependencies,
-		) (contracts.SQLClientCore, error) {
+		ProviderFn: func(name string, cfg *config.SQLClientOptions, dependencies SQLClientDependencies) (contracts.SQLClientCore, error) {
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
 			var tracerInstance tracercontracts.Tracer
-			// if cfg.EnableTracing {
-			// 	tracerInstance, ok = extra.Tracers[cfg.Tracer]
-			// 	if !ok {
-			// 		return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
-			// 	}
-			// }
+			if cfg.EnableTracing {
+				tracerInstance, err = dependencies.Tracers.Get(cfg.Tracer)
+				if err != nil {
+					return nil, err
+				}
+			}
 
 			var metricsInstance metricscontracts.Metrics
-			// if cfg.EnableMetrics {
-			// 	metricsInstance, ok = extra.Metrics[cfg.Metrics]
-			// 	if !ok {
-			// 		return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
-			// 	}
-			// }
+			if cfg.EnableMetrics {
+				metricsInstance, err = dependencies.Metrics.Get(cfg.Metrics)
+				if err != nil {
+					return nil, err
+				}
+			}
 
-			return sqlclientinternal.CreateSQLClient(name, cfg, logger, tracerInstance, metricsInstance)
+			return sqlclientinternal.CreateSQLClient(name, cfg, loggerInstance, tracerInstance, metricsInstance)
 		},
 		HookFn: func(name string, instance contracts.SQLClientCore) containercontracts.HookResolveResult {
 			return containercontracts.HookResolveResult{
