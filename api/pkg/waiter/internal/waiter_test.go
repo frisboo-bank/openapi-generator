@@ -28,6 +28,7 @@ func setup(t *testing.T, cfg *config.WaiterOptions) contracts.Waiter {
 
 	logger.EXPECT().Info(gomock.Any()).AnyTimes()
 	logger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
+	logger.EXPECT().Errorf(gomock.Any(), gomock.Any()).AnyTimes()
 
 	w, err := NewWaiter(cfg, logger)
 	require.NoError(t, err)
@@ -40,15 +41,15 @@ func TestWaiter_Success(t *testing.T) {
 
 	var calls atomic.Int32
 	err := w.AddHook(contracts.WaiterHook{
-		Name: "hook1",
-		Wait: func(ctx context.Context) error { calls.Add(1); return nil },
+		Name:  "hook1",
+		Start: func(ctx context.Context) error { calls.Add(1); return nil },
 	})
 	require.NoError(t, err)
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 	assert.Equal(t, int32(1), calls.Load())
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 	assert.Equal(t, int32(1), calls.Load(), "hook should not run again on subsequent calls")
 }
 
@@ -58,13 +59,13 @@ func TestWaiter_Error(t *testing.T) {
 	var calls atomic.Int32
 	sentinel := errors.New("boom")
 	err := w.AddHook(contracts.WaiterHook{
-		Name: "hook1",
-		Wait: func(ctx context.Context) error { calls.Add(1); return sentinel },
+		Name:  "hook1",
+		Start: func(ctx context.Context) error { calls.Add(1); return sentinel },
 	})
 	require.NoError(t, err)
 
-	err1 := w.Wait(context.Background())
-	err2 := w.Wait(context.Background())
+	err1 := w.Start(context.Background())
+	err2 := w.Start(context.Background())
 
 	assert.ErrorIs(t, err1, sentinel)
 	assert.ErrorIs(t, err2, sentinel)
@@ -74,7 +75,7 @@ func TestWaiter_Error(t *testing.T) {
 func TestWait_NoHooks(t *testing.T) {
 	w := setup(t, nil)
 
-	err := w.Wait(context.Background())
+	err := w.Start(context.Background())
 	assert.NoError(t, err)
 }
 
@@ -85,24 +86,24 @@ func TestWait_RunsWaitAndCleanup(t *testing.T) {
 
 	err := w.AddHooks(
 		contracts.WaiterHook{
-			Name:    "hook1",
-			Wait:    func(ctx context.Context) error { wait1.Add(1); return nil },
-			Cleanup: func(ctx context.Context) error { cleanup1.Add(1); return nil },
+			Name:  "hook1",
+			Start: func(ctx context.Context) error { wait1.Add(1); return nil },
+			Stop:  func(ctx context.Context) error { cleanup1.Add(1); return nil },
 		},
 		contracts.WaiterHook{
-			Name:    "hook2",
-			Wait:    func(ctx context.Context) error { wait2.Add(1); return nil },
-			Cleanup: func(ctx context.Context) error { cleanup2.Add(1); return nil },
+			Name:  "hook2",
+			Start: func(ctx context.Context) error { wait2.Add(1); return nil },
+			Stop:  func(ctx context.Context) error { cleanup2.Add(1); return nil },
 		},
 	)
 	require.NoError(t, err)
 
-	require.NoError(t, w.Wait(context.Background()))
+	require.NoError(t, w.Start(context.Background()))
 
-	assert.Equal(t, int32(1), wait1.Load(), "hook1 Wait should run once")
-	assert.Equal(t, int32(1), cleanup1.Load(), "hook1 Cleanup should run once")
-	assert.Equal(t, int32(1), wait2.Load(), "hook2 Wait should run once")
-	assert.Equal(t, int32(1), cleanup2.Load(), "hook2 Cleanup should run once")
+	assert.Equal(t, int32(1), wait1.Load(), "hook1 Start should run once")
+	assert.Equal(t, int32(1), cleanup1.Load(), "hook1 Stop should run once")
+	assert.Equal(t, int32(1), wait2.Load(), "hook2 Start should run once")
+	assert.Equal(t, int32(1), cleanup2.Load(), "hook2 Stop should run once")
 }
 
 func TestAddHook_Validation(t *testing.T) {
@@ -112,12 +113,12 @@ func TestAddHook_Validation(t *testing.T) {
 	assert.EqualError(t, err, "waiter: hook name is required")
 
 	err = w.AddHook(contracts.WaiterHook{Name: "empty"})
-	assert.EqualError(t, err, `waiter: hook "empty" has no Wait or Cleanup function`)
+	assert.EqualError(t, err, `waiter: hook "empty" has no Start or Stop function`)
 
 	hook := contracts.WaiterHook{
-		Name:    "hook1",
-		Wait:    func(ctx context.Context) error { return nil },
-		Cleanup: func(ctx context.Context) error { return nil },
+		Name:  "hook1",
+		Start: func(ctx context.Context) error { return nil },
+		Stop:  func(ctx context.Context) error { return nil },
 	}
 	err = w.AddHook(hook)
 	assert.NoError(t, err)
@@ -125,10 +126,10 @@ func TestAddHook_Validation(t *testing.T) {
 	err = w.AddHook(hook)
 	assert.EqualError(t, err, `waiter: hook "hook1" already registered`)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "w", Wait: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "w", Start: func(context.Context) error { return nil }})
 	require.NoError(t, err)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "c", Cleanup: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "c", Stop: func(context.Context) error { return nil }})
 	require.NoError(t, err)
 }
 
@@ -136,11 +137,11 @@ func TestAddHooks_StopsOnError(t *testing.T) {
 	w := setup(t, nil)
 
 	err := w.AddHooks(
-		contracts.WaiterHook{Name: "good", Wait: func(context.Context) error { return nil }},
+		contracts.WaiterHook{Name: "good", Start: func(context.Context) error { return nil }},
 		contracts.WaiterHook{Name: "bad"},
 	)
-	assert.EqualError(t, err, `waiter: hook "bad" has no Wait or Cleanup function`)
+	assert.EqualError(t, err, `waiter: hook "bad" has no Start or Stop function`)
 
-	err = w.AddHook(contracts.WaiterHook{Name: "good", Wait: func(context.Context) error { return nil }})
+	err = w.AddHook(contracts.WaiterHook{Name: "good", Start: func(context.Context) error { return nil }})
 	assert.EqualError(t, err, `waiter: hook "good" already registered`)
 }
