@@ -12,6 +12,7 @@ endif
 GO   ?= go
 CGO  ?= 0
 PNPM ?= pnpm
+AIR  ?= $(shell $(GO) env GOPATH)/bin/air
 
 MODULE   := $(shell $(GO) list -m 2>/dev/null || echo "unknown")
 NAME     := $(notdir $(MODULE))
@@ -48,6 +49,18 @@ generate: $(GOENUMS)  ## Generate: Generate enum sources (installs pinned goenum
 .PHONY: run
 run: generate  ## Run: Run the application (development)
 	CGO_ENABLED=$(CGO) $(GO) run $(BUILDFLAGS) $(CMD_DIR) run --environment=development
+
+dev: generate  ## Dev: Run the application with air live-reload
+	CGO_ENABLED=$(CGO) $(AIR) \
+		-root . -tmp_dir tmp \
+		-build.cmd "go build -o ./tmp/main ./cmd" \
+		-build.bin ./tmp/main \
+		-build.args_bin "run --environment=development" \
+		-build.delay 1000ms -build.rerun_delay 500ms \
+		-build.kill_delay 0s -build.log build-errors.log \
+		-build.exclude_dir assets,tmp,vendor,testdata \
+		-build.exclude_regex _test.go \
+		-build.include_ext go,tpl,tmpl,html
 
 .PHONY: build
 build: generate  ## Build: Build the application binary
