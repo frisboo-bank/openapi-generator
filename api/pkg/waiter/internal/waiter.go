@@ -2,10 +2,12 @@ package waiter
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
 	"sync"
+	"sync/atomic"
 	"syscall"
 	"time"
 
@@ -16,6 +18,12 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/waiter/types/hookstatus"
 
 	"golang.org/x/sync/errgroup"
+)
+
+var (
+	// ErrForcedShutdown is returned by Wait and Cancel when the consumer
+	// forced shutdown because graceful shutdown did not complete in time.
+	ErrForcedShutdown = errors.New("waiter: forced shutdown")
 )
 
 var _ contracts.Waiter = (*waiter)(nil)
@@ -47,6 +55,11 @@ func NewWaiter(
 		sigCh := make(chan os.Signal, 1)
 		signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 
+		grace := time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond
+
+		// The signal path supplies the grace deadline. A cleanup hook that
+		// honours ctx (e.g. http.Server.Shutdown) drains until the deadline,
+		// after which the waiter is forced.
 		grace := time.Duration(cfg.CleanupTimeoutMs) * time.Millisecond
 
 		go func() {
@@ -118,6 +131,12 @@ func (w *waiter) Start(ctx context.Context) error {
 			return
 		}
 	}()
+
+	// Cleanup runs against a fresh context so it is not pre-cancelled by the
+	// wait phase. It is cancellable by force() so cooperative cleanup hooks can
+	// abort during forced shutdown. The deadline is supplied by the consumer
+	// via the ctx passed to Cancel; there is no per-hook timeout.
+	cleanupCtx, cleanupCancel := context.WithCancel(context.Background())
 
 	w.mu.Lock()
 	hooks := make(map[string]contracts.WaiterHook, len(w.hooks))
