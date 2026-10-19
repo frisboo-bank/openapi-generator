@@ -22,9 +22,11 @@ import (
 
 type MigrationDependencies struct {
 	dig.In
-	SQLClients map[string]sqlclientcontracts.SQLClientCore
-	Tracers    map[string]tracercontracts.Tracer
-	Metrics    map[string]metricscontracts.Metrics
+	Environment environmentenum.Environment
+	Loggers     module.DependenciesMap[loggercontracts.Logger]
+	SQLClients  module.DependenciesMap[sqlclientcontracts.SQLClientCore]
+	Tracers     module.DependenciesMap[tracercontracts.Tracer]
+	Metrics     module.DependenciesMap[metricscontracts.Metrics]
 }
 
 var MigrationModule = module.NewMultiInstancesModule(
@@ -32,39 +34,39 @@ var MigrationModule = module.NewMultiInstancesModule(
 		Name:             "database.migration",
 		ConfigKey:        "database.migration",
 		ConfigDecodeHook: []mapstructure.DecodeHookFunc{types.MigrationEnumsDecodeHook()},
-		ProviderFn: func(
-			name string,
-			cfg *config.MigrationOptions,
-			env environmentenum.Environment,
-			logger loggercontracts.Logger,
-			extra MigrationDependencies,
+		ProviderFn: func(name string, cfg *config.MigrationOptions, dependencies MigrationDependencies,
 		) (contracts.Migration, error) {
-			sqlClient, ok := extra.SQLClients[cfg.DBClient]
-			if !ok {
-				return nil, fmt.Errorf("sql client %q not found for migration %q", cfg.DBClient, name)
+			loggerInstance, err := dependencies.Loggers.Get(cfg.Logger)
+			if err != nil {
+				return nil, err
+			}
+
+			sqlClient, err := dependencies.SQLClients.Get(cfg.DBClient)
+			if err != nil {
+				return nil, err
 			}
 			dbClient, ok := sqlClient.(sqlclientcontracts.WithDBGetter)
 			if !ok {
-				return nil, fmt.Errorf("sql client %q does not expose its DB connection", name)
+				return nil, fmt.Errorf("sql client %q does not expose its DB connection", cfg.DBClient)
 			}
 
 			var tracerInstance tracercontracts.Tracer
 			if cfg.EnableTracing {
-				tracerInstance, ok = extra.Tracers[cfg.Tracer]
-				if !ok {
-					return nil, fmt.Errorf("tracer %q not found for migration %q", cfg.Tracer, name)
+				tracerInstance, err = dependencies.Tracers.Get(cfg.Tracer)
+				if err != nil {
+					return nil, err
 				}
 			}
 
 			var metricsInstance metricscontracts.Metrics
 			if cfg.EnableMetrics {
-				metricsInstance, ok = extra.Metrics[cfg.Metrics]
-				if !ok {
-					return nil, fmt.Errorf("metrics %q not found for migration %q", cfg.Metrics, name)
+				metricsInstance, err = dependencies.Metrics.Get(cfg.Metrics)
+				if err != nil {
+					return nil, err
 				}
 			}
 
-			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, env, logger, tracerInstance, metricsInstance)
+			return migrationinternal.CreateMigration(name, dbClient.DB(), cfg, dependencies.Environment, loggerInstance, tracerInstance, metricsInstance)
 		},
 	},
 )
