@@ -6,7 +6,7 @@ import (
 	"frisboo-bank/openapi-generator-service/pkg/application/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/config"
 	configContracts "frisboo-bank/openapi-generator-service/pkg/config/contracts"
-	configModels "frisboo-bank/openapi-generator-service/pkg/config/models"
+	configModels "frisboo-bank/openapi-generator-service/pkg/config/config"
 	"frisboo-bank/openapi-generator-service/pkg/container"
 	containerContracts "frisboo-bank/openapi-generator-service/pkg/container/contracts"
 	"frisboo-bank/openapi-generator-service/pkg/environment"
